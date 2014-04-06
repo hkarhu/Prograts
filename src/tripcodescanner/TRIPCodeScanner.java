@@ -13,15 +13,14 @@ import ae.routines.S;
 public class TRIPCodeScanner {
 	
 //	private byte[] imageData;
-	private int imageWidth;
-	private int imageHeight;
+
 //	private boolean debug;
 	
 //	private JFrame frame;
 //	private BufferedImage bi;
 
 	
-	public void scan(byte[] imageData, int imageWidth, int imageHeight, boolean debug) {
+	public static void scan(byte[] imageData, int imageWidth, int imageHeight, boolean debug) {
 //		char c = 255;
 //		byte b = (byte) 255;
 //		
@@ -32,8 +31,7 @@ public class TRIPCodeScanner {
 //		System.out.println(c2);
 //		if (1==1) return;
 //		this.imageData = imageData;
-		this.imageWidth = imageWidth;
-		this.imageHeight = imageHeight;
+		
 //		this.debug = debug;
 		
 		
@@ -61,7 +59,7 @@ public class TRIPCodeScanner {
 		
 		writePGM(
 				imageData,
-				"00_original.pgm");
+				"00_original.pgm",imageWidth,imageHeight);
 		
 		
 		imageDataPack.setThresholdImage(
@@ -69,18 +67,18 @@ public class TRIPCodeScanner {
 				);
 		writePGM(
 				imageDataPack.getThresholdImage(),
-				"01_adaptiveThreshold.pgm");
+				"01_adaptiveThreshold.pgm",imageWidth, imageHeight);
 		
 		
 		AlgoEdgeDetection.edgeDetection(imageDataPack);
 		writePGM(
 				imageDataPack.getEdgeDetectedImage(),
-				"02_edgeDetecton.pgm");
+				"02_edgeDetecton.pgm",imageWidth,imageHeight);
 		
 		ArrayList<ArrayList<Edgel>> edges = AlgoEdgeFollow.edgeFollowing(imageDataPack);
 		writePGM(
 				imageDataPack.getEdgeTrackedImage(),
-				"03_edgeFollowed.pgm");
+				"03_edgeFollowed.pgm",imageWidth, imageHeight);
 		
 		int numEdges = edges.size();
         ArrayList<EllipseParams> paramEdgesEllipses = new ArrayList<EllipseParams>(numEdges);
@@ -125,7 +123,7 @@ public class TRIPCodeScanner {
 //	}
 	
 	
-	public void writePGM( byte[] imageData, String filename ) {
+	public static void writePGM( byte[] imageData, String filename, int imageWidth, int imageHeight) {
 		
 		try {
 			PPMWriter.writePGM(
@@ -143,22 +141,4 @@ public class TRIPCodeScanner {
 		
 	} // method
 	
-	public static void writePGM( byte[] imageData, String filename, int imageWidth, int imageHeight ) {
-		
-		try {
-			PPMWriter.writePGM(
-					new ByteArrayInputStream(imageData),
-					imageWidth, imageHeight,
-					new FileOutputStream(new File(filename))
-					);
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (PPMWriterException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-	} // method
-
 }

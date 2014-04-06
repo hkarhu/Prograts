@@ -3,6 +3,8 @@ import ae.routines.S;
 
 public class DecipherTRIPcode {
 	
+	private final static int BITS = 16;
+	
 	public static void debug_ptatpoint(double x, double y) {
 		byte clr = debugImg[(int) ((x)*debugImageWidth+y)];
 		if ( clr < 0 ) clr = 127;
@@ -88,12 +90,12 @@ public class DecipherTRIPcode {
                 beta = 0.0;
 
 //                while ( (sectorCounter < 39) && (!sectorFound)) {
-                while ( (sectorCounter < 48) && (!sectorFound)) { // 48 bits
+                while ( (sectorCounter < BITS) && (!sectorFound)) { // 48 bits
                     // New line equation with +15 degrees rotation
                     // Rotate (x_coord1, y_coord1) point 15 degrees (beta)
                     //cout << endl << "Sector Counter: " << sectorCounter;
 //                    beta += Math.PI / 20.0;
-                	beta += Math.PI / 24; // 48 bits
+                	beta += Math.PI / BITS / 2; // 48 bits
                     xUnitCircleRotated = xUnitCircle * Math.cos(beta) -
                                          yUnitCircle * Math.sin(beta);
                     yUnitCircleRotated = xUnitCircle * Math.sin(beta) +
@@ -158,7 +160,7 @@ public class DecipherTRIPcode {
         // Rotate clockwise till we identify the border of the RIGHT-MOST Point of the sector
         double offset;
 //        offset = gamma = -Math.PI / 18.0; // 10.0 degrees
-        offset = gamma = -Math.PI / 24; // 48 bits
+        offset = gamma = -Math.PI / BITS / 2; // 48 bits
         int iterations = 0;
         double angle;
         do {
@@ -366,8 +368,7 @@ public class DecipherTRIPcode {
                 }
             }
             return code;
-        }
-        else {
+        } else {
             System.out.println("***ERROR: more than two errors were found while dechiphering the code: " + code);
             return null;
         }
