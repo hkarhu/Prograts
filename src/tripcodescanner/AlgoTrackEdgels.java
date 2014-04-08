@@ -5,11 +5,9 @@ import java.util.ArrayList;
 
 public class AlgoTrackEdgels {
 	
-	public static void trackEdgels(ImageDataPack imageDataPack, ArrayList<Edgel> edgels, int initEdgelX, int initEdgelY) {
+	public static void trackEdgels(byte[] edgeDetectedNMSImage, ArrayList<Edgel> edgels, int initEdgelX, int initEdgelY) {
 		
-		final byte[] edgeDetectedNMSImage = imageDataPack.getEdgeDetectedNMSImage();
-		final byte[] edgeDetectedImage = imageDataPack.getEdgeDetectedImage();
-		final int imageWidth = imageDataPack.getWidth();
+		final int imageWidth = 64;
 //		final int imageHeight = imageDataPack.getHeight();
 		
 		int prevX = initEdgelX;
@@ -25,6 +23,8 @@ public class AlgoTrackEdgels {
             testX = prevX;
             testY = prevY + 1;
             posPixel = testX * imageWidth + testY;
+            
+            if(posPixel >= 0 && posPixel < imageWidth)
             if ((edgeDetectedNMSImage[posPixel]&255) != 0) {
                 edgels.add(new Edgel(testX, testY));
                 // this pixel has already been included in an edge so wipe it out
@@ -37,6 +37,7 @@ public class AlgoTrackEdgels {
             testX = prevX + 1;
             testY = prevY + 1;
             posPixel = testX * imageWidth + testY;
+            if(posPixel >= 0 && posPixel < imageWidth)
             if ((edgeDetectedNMSImage[posPixel]&255) != 0) {
                 edgels.add(new Edgel(testX, testY));
                 // this pixel has already been included in an edge so wipe it out
@@ -49,6 +50,7 @@ public class AlgoTrackEdgels {
             testX = prevX + 1;
             testY = prevY;
             posPixel = testX * imageWidth + testY;
+            if(posPixel >= 0 && posPixel < imageWidth)
             if ((edgeDetectedNMSImage[posPixel]&255) != 0) {
                 edgels.add(new Edgel(testX, testY));
                 // this pixel has already been included in an edge so wipe it out
@@ -61,6 +63,7 @@ public class AlgoTrackEdgels {
             testX = prevX + 1;
             testY = prevY - 1;
             posPixel = testX * imageWidth + testY;
+            if(posPixel >= 0 && posPixel < imageWidth)
             if ((edgeDetectedNMSImage[posPixel]&255) != 0) {
                 edgels.add(new Edgel(testX, testY));
                 // this pixel has already been included in an edge so wipe it out
@@ -73,7 +76,8 @@ public class AlgoTrackEdgels {
             testX = prevX;
             testY = prevY - 1;
             posPixel = testX * imageWidth + testY;
-            if ((edgeDetectedImage[posPixel]&255) != 0) {
+            if(posPixel >= 0 && posPixel < imageWidth)
+            if ((edgeDetectedNMSImage[posPixel]&255) != 0) {
                 edgels.add(new Edgel(testX, testY));
                 // this pixel has already been included in an edge so wipe it out
                 edgeDetectedNMSImage[posPixel] = AlgorithmConstants.BLACK;
@@ -85,6 +89,7 @@ public class AlgoTrackEdgels {
             testX = prevX - 1;
             testY = prevY - 1;
             posPixel = testX * imageWidth + testY;
+            if(posPixel >= 0 && posPixel < imageWidth)
             if ((edgeDetectedNMSImage[posPixel]&255) != 0) {
                 edgels.add(new Edgel(testX, testY));
                 // this pixel has already been included in an edge so wipe it out
@@ -97,6 +102,7 @@ public class AlgoTrackEdgels {
             testX = prevX - 1;
             testY = prevY;
             posPixel = testX * imageWidth + testY;
+            if(posPixel >= 0 && posPixel < imageWidth)
             if ((edgeDetectedNMSImage[posPixel]&255) != 0) {
                 edgels.add(new Edgel(testX, testY));
                 // this pixel has already been included in an edge so wipe it out
@@ -109,6 +115,7 @@ public class AlgoTrackEdgels {
             testX = prevX - 1;
             testY = prevY + 1;
             posPixel = testX * imageWidth + testY;
+            if(posPixel >= 0 && posPixel < imageWidth)
             if ((edgeDetectedNMSImage[posPixel]&255) != 0) {
                 edgels.add(new Edgel(testX, testY));
                 // this pixel has already been included in an edge so wipe it out

@@ -5,16 +5,24 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Stroke;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.geom.Arc2D;
 import java.awt.image.BufferedImage;
 
 import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 
 public class GenerateARCards extends JFrame {
 	
 	public static void main(String[] args) {
-		new GenerateARCards();
+	    SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                new GenerateARCards();
+            }
+	    });
 	}
 
 	private final int TRIPCODE_SIZE = 250;
@@ -23,31 +31,35 @@ public class GenerateARCards extends JFrame {
 	private final int CARD_BOUNDS = 10;
 	private final int CARD_CORNER_RADIUS = 60;
 	
-	private BufferedImage cardImage;
+	private final BufferedImage cardImage;
+	
+	private final TRIPCodeGenerator tripGen;
 	
 	public GenerateARCards() {
+	    
+	    tripGen = new TRIPCodeGenerator();
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		this.setPreferredSize(new Dimension(CARD_WIDTH+32, CARD_HEIGHT+64));
 		this.pack();
 		this.setVisible(true);
 		
 		cardImage = new BufferedImage(CARD_WIDTH, CARD_HEIGHT,BufferedImage.TYPE_3BYTE_BGR);
-		int code = 0;
 		
-		while(true){
-			code += 1;
-			Graphics2D cardGraphics = (Graphics2D)cardImage.getGraphics();
-			drawARCard(cardGraphics, code);
-			repaint();
-			System.out.println("code " + code);
-			try {
-				Thread.sleep(200);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		
+        Timer t = new Timer(200, new ActionListener() {
+            Graphics2D cardGraphics = cardImage.createGraphics();
+            int code = 0;
+            
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                code += 1;
+                drawARCard(cardGraphics, code);
+                GenerateARCards.this.repaint();
+                System.out.println("code " + code);
+            }
+        });
+        
+        t.setRepeats(true);
+        t.start();
 	}
 	
 	private void drawARCard(Graphics2D g, int cardCode){
@@ -71,12 +83,14 @@ public class GenerateARCards extends JFrame {
 		g.draw(ring);
 		
 		g.drawString("CID:" + cardCode, CARD_CORNER_RADIUS/2, CARD_HEIGHT - CARD_CORNER_RADIUS/2);
-		TRIPCodeGenerator.drawTRIPcode((int)(CARD_WIDTH/2 - TRIPCODE_SIZE - TRIPCODE_SIZE*0.076f), CARD_BOUNDS*3, TRIPCODE_SIZE, TRIPCodeGenerator.encodeToTRIPcode(cardCode, 4), g);
+		tripGen.drawTRIPcode(g,
+		        (int)(CARD_WIDTH/2 - TRIPCODE_SIZE - TRIPCODE_SIZE*0.076f), CARD_BOUNDS*3, TRIPCODE_SIZE, TRIPCodeGenerator.encodeTRIPCode(cardCode)
+		        );
 		
 		
 		//g.setColor(Color.white);
-		g.setStroke(new BasicStroke(40));
-		g.drawLine(CARD_WIDTH/2, (int)(CARD_HEIGHT/2-TRIPCODE_SIZE/2 - TRIPCODE_SIZE*0.076f), (int)(TRIPCODE_SIZE*2.2f), (int)(CARD_HEIGHT/2-TRIPCODE_SIZE/2 - TRIPCODE_SIZE*0.076f)-40);
+//		g.setStroke(new BasicStroke(40));
+//		g.drawLine(CARD_WIDTH/2, (int)(CARD_HEIGHT/2-TRIPCODE_SIZE/2 - TRIPCODE_SIZE*0.076f), (int)(TRIPCODE_SIZE*2.2f), (int)(CARD_HEIGHT/2-TRIPCODE_SIZE/2 - TRIPCODE_SIZE*0.076f)-40);
 		
 	}
 	

@@ -1,5 +1,6 @@
 import java.util.concurrent.ConcurrentLinkedDeque;
 
+import org.omg.PortableServer.THREAD_POLICY_ID;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
@@ -19,7 +20,7 @@ public class OpenCVThread {
 	private VideoCapture inputVideo;
 	private volatile boolean running = true;
 	private final Thread workerThread;
-
+	
 	private OpenCVThread() {
 		matrixQueue = new ConcurrentLinkedDeque<>();
 		circleQueue = new ConcurrentLinkedDeque<>();
@@ -64,7 +65,9 @@ public class OpenCVThread {
 				
 				//Imgproc.threshold(hc, hc, 90, 255, Imgproc.THRESH_BINARY);
 				Imgproc.blur(gc, hc, new Size(3,3));
-				Imgproc.adaptiveThreshold(hc, hc, 254, Imgproc.THRESH_BINARY, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, 7, 11);
+				hc.convertTo(hc, -1, 2.2f, -50);
+				Imgproc.threshold(hc, hc, 130, 255, Imgproc.THRESH_BINARY);
+				//Imgproc.adaptiveThreshold(gc, hc, 254, Imgproc.THRESH_BINARY, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, 7, 9);
 				
 				//Imgproc.dilate(hc, hc, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(3,3)));
 				//Imgproc.dilate(hc, hc, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(3,3)));
@@ -75,7 +78,8 @@ public class OpenCVThread {
 				//Imgproc.findContours(hc, contours, hierarchy, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE);
 
 				//Imgproc.Canny(gc, hc, 80, 40);
-				Imgproc.HoughCircles(hc, circles, Imgproc.CV_HOUGH_GRADIENT, 1, m.height()/6, 80, 25, 5, 35);
+				
+				Imgproc.HoughCircles(hc, circles, Imgproc.CV_HOUGH_GRADIENT, 1, m.height()/16, 80, 18, 5, 30);
 
 				//Core.drawContours(m, contours, 4, new Scalar(40, 233, 45,0 ));
 
@@ -119,6 +123,14 @@ public class OpenCVThread {
 
 	public void stop(){
 		running = false;
+		System.out.println("Stopping OpenCV threads...");
+		try {
+			workerThread.join();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println("OK!");
 	}
 
 	public Mat getRGBFrame(){

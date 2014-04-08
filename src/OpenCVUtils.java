@@ -10,7 +10,7 @@ public class OpenCVUtils {
 	/**  
 	 * Converts/writes a Mat into a BufferedImage.  
 	 *  
-	 * @param matrix Mat of type CV_8UC3 or CV_8UC1  
+	 * @param matrix Mat of type CV_8UC3 or CV_8UC1
 	 * @return BufferedImage of type TYPE_3BYTE_BGR or TYPE_BYTE_GRAY  
 	 */  
 	public static BufferedImage matToBufferedImage(Mat matrix) {  
@@ -19,13 +19,13 @@ public class OpenCVUtils {
 		int elemSize = (int)matrix.elemSize();  
 		byte[] data = new byte[cols * rows * elemSize];  
 		int type;  
-		matrix.get(0, 0, data);  
+		matrix.get(0, 0, data);
 		switch (matrix.channels()) {  
 		case 1:  
 			type = BufferedImage.TYPE_BYTE_GRAY;
 			break;  
 		case 3:  
-			type = BufferedImage.TYPE_3BYTE_BGR;  
+			type = BufferedImage.TYPE_INT_BGR;  
 			// bgr to rgb  
 			byte b;  
 			for(int i=0; i<data.length; i=i+3) {  

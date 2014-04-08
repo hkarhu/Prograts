@@ -1,39 +1,46 @@
 package tripcodescanner;
 import java.util.ArrayList;
 
+import org.opencv.core.Mat;
+
 
 public class AlgoEdgeFollow {
 	
-	public static ArrayList<ArrayList<Edgel>> edgeFollowing(ImageDataPack imageDataPack) {
+	public static ArrayList<ArrayList<Edgel>> edgeFollowing(Mat edgeDetectedImage, int sampleSize) {
 		
-		final byte[] edgeTrackedImage = new byte[imageDataPack.getThresholdImage().length];
-		final byte[] im = imageDataPack.getEdgeDetectedImage();
-		final byte[] edgeDetectedNMSImage = imageDataPack.getEdgeDetectedNMSImage();
-		final int imageWidth = imageDataPack.getWidth();
-		final int imageHeight = imageDataPack.getHeight();
-
+		final byte[] edgeTrackedImage = new byte[sampleSize*sampleSize];
+		final byte[] edgeDetectedNMSImage = new byte[sampleSize*sampleSize];
+		
+		Mat edNMSI = edgeDetectedImage.clone();
+		
+		for(int i=0; i<(sampleSize*sampleSize);i++){
+			edgeDetectedNMSImage[i] = (byte) edgeDetectedImage.get(i/sampleSize, i%sampleSize)[0];
+			if(edgeDetectedNMSImage[i] == -1){
+				//System.out.print(" ");
+				edgeDetectedNMSImage[i] = AlgorithmConstants.WHITE;
+			} else {
+				//System.out.print("X");
+				edgeDetectedNMSImage[i] = AlgorithmConstants.BLACK;
+			}
+			//if(i%sampleSize == 0) System.out.println("");
+			edgeTrackedImage[i] = AlgorithmConstants.BLACK;
+		}
+		
 		ArrayList<ArrayList<Edgel>> edgesList = new ArrayList<ArrayList<Edgel>>();
-        int limitRows = imageHeight - 2;
-        int limitCols = imageWidth - 2;
-
-        for (int i = 0; i < imageHeight; i++) {
-            int iRow = i * imageWidth;
-            for (int j = 0; j < imageWidth; j++) {
-                edgeTrackedImage[iRow + j] = AlgorithmConstants.BLACK;
-            }
-        }
+        int limitRows = sampleSize - 2;
+        int limitCols = sampleSize - 2;
 
         for (int i = 2; i < limitRows; i++) {
-            int iRow = i * imageWidth;
+            int iRow = i * sampleSize;
             for (int j = 2; j < limitCols; j++) {
-                if ((im[iRow + j]&255) > AlgorithmConstants.HIGH_THRESHOLD) {
+                if (edgeDetectedImage.get(i, j)[0] == AlgorithmConstants.BLACK){
                     // begin edge follow 8-connected! non-branching and ordered
                     ArrayList<Edgel> currentEdge = new ArrayList<Edgel>();
                     // Insert the first edgel point
                     currentEdge.add(new Edgel(i, j));
                     // wipe out the initial pixel
                     edgeDetectedNMSImage[iRow + j] = AlgorithmConstants.BLACK;
-                    AlgoTrackEdgels.trackEdgels(imageDataPack, currentEdge, i, j);
+                    AlgoTrackEdgels.trackEdgels(edgeDetectedNMSImage, currentEdge, i, j);
                     // Reverse Edgel List and follow in the other direction
                     ArrayList<Edgel> reversedEdge = new ArrayList<Edgel>(currentEdge.size());
                     for (int k = currentEdge.size() - 1; k >= 0; k--) {
@@ -41,7 +48,7 @@ public class AlgoEdgeFollow {
                     }
                     currentEdge = reversedEdge;
                     // Last edgel in edgels is now the first that was inserted with values (i,j)
-                    AlgoTrackEdgels.trackEdgels(imageDataPack, currentEdge, i, j);
+                    AlgoTrackEdgels.trackEdgels(edgeDetectedNMSImage, currentEdge, i, j);
                     // Once we arrive here we have in edgels all the edgels that form a new dge.
                     // Check if the edge has more than 10 points
                     int numEdgels = currentEdge.size();
@@ -67,12 +74,11 @@ public class AlgoEdgeFollow {
                                 for (int iEdgel = 0; iEdgel < numEdgels; iEdgel++)
                                     edgeTrackedImage[ ( (Edgel)
                                         currentEdge.get(iEdgel)).getCoordX() *
-                                        imageWidth +
+                                        sampleSize +
                                         ( (Edgel) currentEdge.get(iEdgel)).
                                         getCoordY()] = AlgorithmConstants.WHITE;
                             }
-                        }
-                        else {
+                        } else {
                             // In here we are dealing we edges of sizes in the range (11-30)
                             if (distanceExtremeEdgels == 0 ||
                                 (numEdgels / distanceExtremeEdgels) > 5) {
@@ -80,7 +86,7 @@ public class AlgoEdgeFollow {
                                 for (int iEdgel = 0; iEdgel < numEdgels; iEdgel++)
                                     edgeTrackedImage[ ( (Edgel)
                                         currentEdge.get(iEdgel)).getCoordX() *
-                                        imageWidth +
+                                        sampleSize +
                                         ( (Edgel) currentEdge.get(iEdgel)).
                                         getCoordY()] = AlgorithmConstants.WHITE;
                             }
@@ -89,7 +95,7 @@ public class AlgoEdgeFollow {
                 }
             }
         }
-		imageDataPack.setEdgeTrackedImage(edgeTrackedImage);
+		//imageDataPack.setEdgeTrackedImage(edgeTrackedImage);
 
         return edgesList;
 		

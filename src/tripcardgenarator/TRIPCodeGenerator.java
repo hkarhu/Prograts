@@ -3,182 +3,188 @@ package tripcardgenarator;
 import java.awt.BasicStroke;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
-import java.awt.geom.Ellipse2D;
-import java.util.ArrayList;
 
 public class TRIPCodeGenerator {
-	
-	public static void drawTRIPcode(double xOffset, double yOffset, double radius, TRIPCodesContainer tripCodesWrapper, Graphics2D g) {
 
-		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+    private double wholeRadius;
+    private Graphics2D g;
+    private double ringWidth;
 
-		final double sectorWidth = radius * 0.15d;
-		final double sectorGap = sectorWidth * 0.58d;
-		
-		final AffineTransform oldTransform = g.getTransform();
-		g.translate(xOffset+radius+(sectorWidth/2), yOffset+radius+(sectorWidth/2));
-		
-		g.setStroke(new BasicStroke((float) sectorWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
-		
-		/*
-		 * draw outer ring
-		 */
+    public void drawTRIPcode(
+            Graphics2D g2d,
+            double xOffset, double yOffset, double radius,
+            byte[][] ringsAndCodes
+    ) {
+        this.g = g2d;
+        this.wholeRadius = radius;
+        this.ringWidth = wholeRadius * .15d;
+        
+        final byte[] ring1Code = ringsAndCodes[0];
+        final byte[] ring2Code = ringsAndCodes[1];
 
-		Arc2D.Double ring = new Arc2D.Double();
-		ring.setArcByCenter(0, 0, radius, 0, 360, Arc2D.CHORD);
-		g.draw(ring);
-		
-		/*
-		 * draw bits
-		 */
-		
-		final int totalBits = tripCodesWrapper.getRingCode1().length();
-		final double oneBitAngle = (360d/totalBits);
-		
-		drawBitsAsConcatenatedArcs(
-				tripCodesWrapper.getRingCode2(), g, 1,
-				oneBitAngle, totalBits,
-				radius, sectorWidth, sectorGap);
-		
-		drawBitsAsConcatenatedArcs(
-				tripCodesWrapper.getRingCode1(), g, 2,
-				oneBitAngle, totalBits,
-				radius, sectorWidth, sectorGap);
+        // tell canvas to to draw antialiased shapes
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-		
-		/*
-		 * draw inner ring
-		 */
-		
-		ring.setArcByCenter(0, 0, radius-sectorWidth*3-sectorGap*3, 0, 360, Arc2D.CHORD);
-		g.draw(ring);
-		
-		/*
-		 * draw innermost ellipse
-		 */
-		
-		Ellipse2D.Double ellipse = new Ellipse2D.Double();
-		ellipse.setFrameFromCenter(0, 0, sectorWidth/2, sectorWidth/2);
-		g.fill(ellipse);
-		
+        // move so 0,0 is center of ring
+        final AffineTransform oldTransform = g.getTransform();
+        g.translate(xOffset + wholeRadius + (ringWidth / 2), yOffset + wholeRadius + (ringWidth / 2));
 
-		g.setTransform(oldTransform);
-		
-	}  // method
-	
-	
-	private static void drawBitsAsConcatenatedArcs(String ringCode, Graphics2D g, int sectorNum, double oneBitAngle, int totalBits, double radius, double sectorWidth, double sectorGap) {
-		
-		final ArrayList<Arc2D.Double> bitsArcList = new ArrayList<Arc2D.Double>();
-		double bitsAngleStart = 0;
-		double bitsAngleExtent = 0;
-		
-		for ( int i=0; i<totalBits; i++ ) {
-			if (ringCode.charAt(i) == '1') {
-				/*
-				 * continue concatenated bits angle by one bit angle
-				 */
-				bitsAngleExtent += oneBitAngle;
-			}
-			else {
-				/*
-				 * add concatenated bits -arc to list,
-				 * add start angle by concatenated angle and reset extent
-				 */
-				if ( bitsAngleExtent != 0 ) {
-					Arc2D.Double bitsArc = new Arc2D.Double();
-					bitsArc.setArcByCenter(0, 0, radius-(sectorWidth*sectorNum)-(sectorGap*sectorNum), bitsAngleStart, bitsAngleExtent, Arc2D.OPEN);
+        // set shape outline width
+        g.setStroke(new BasicStroke((float) ringWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
 
-					bitsAngleStart += bitsAngleExtent;
-					bitsAngleExtent = 0;
-					bitsArcList.add(bitsArc);
-				}
-				
-				bitsAngleStart += oneBitAngle;
-				bitsAngleExtent = 0;
-			}
-		} // for
-		
-		/*
-		 * draw concatenated bit arcs
-		 */
-		for (Arc2D.Double bitsAngleArc : bitsArcList) {
-			g.draw(bitsAngleArc);
-//			System.out.println("from "+bitsAngleArc.start+" extent "+bitsAngleArc.extent);
-		}
-		
-	} // method
+        Arc2D.Double ring = new Arc2D.Double();
 
+        // draw outer ring
+        ring.setArcByCenter(0, 0, wholeRadius, 0, 360, Arc2D.CHORD);
+        g.draw(ring);
 
-	public static TRIPCodesContainer encodeToTRIPcode( long num, long minBitsOnSector ) {
-		
-		if (num > 10460353202l) return null;
-		
-		int numOnes = 0;
-		int numTwos = 0;
-	    StringBuilder ternaryCode = new StringBuilder();
-//	    int ternaryDigits = 0;
-	    StringBuilder ringCode1 = new StringBuilder();;
-	    StringBuilder ringCode2= new StringBuilder();;
-	    
-	    while (num > 0) {
-	    	int rest = (int) (num % 3);
-	    	ternaryCode.insert(0, rest);
-	    	
-	    	if (rest == 1) {
-	    		numOnes++;
-	    		ringCode1.insert(0, "1");
-	    		ringCode2.insert(0, "0");
-	    	} else if (rest == 2) {
-	    		numTwos++;
-	    		ringCode1.insert(0, "0");
-	    		ringCode2.insert(0, "1");
-	    	} else {
-	    		ringCode1.insert(0, "0");
-	    		ringCode2.insert(0, "0");
-	    	}
-	    	
-	    	num /= 3;
-//	    	ternaryDigits++;
-	    }
-	    
-	    final String formatCode = "%"+(minBitsOnSector-3)+"s"; 
-	    ternaryCode = new StringBuilder( String.format(formatCode, ternaryCode).replace(' ', '0') );
-	    ringCode1 = new StringBuilder( String.format(formatCode, ringCode1).replace(' ', '0') );
-	    ringCode2 = new StringBuilder( String.format(formatCode, ringCode2).replace(' ', '0') );
-//	    ternaryDigits = 21;
-	    
-	    if (numTwos%2 != 0) {
-	        ternaryCode.insert(0, "2");
-	    	ringCode2.insert(0, "1");
-	    } else {
-	    	ternaryCode.insert(0, "0");
-	    	ringCode2.insert(0, "0");
-	    }
-    	ringCode1.insert(0, "0");
-	    
-    	if (numOnes%2 != 0) {
-    		ternaryCode.insert(0, "1");
-    		ringCode1.insert(0, "1");
-	    } else {
-	    	ternaryCode.insert(0, "0");
-	    	ringCode1.insert(0, "0");
-	    }
-    	ringCode2.insert(0, "0");
+        // draw inner ring
+        ring.setArcByCenter(0, 0, wholeRadius * .30f, 0, 360, Arc2D.CHORD);
+        g.draw(ring);
+
+        // draw ring 1 sectors
+        drawBits(
+                ring1Code,
+                wholeRadius - (ringWidth * 1) - ((ringWidth * 1 * .6d))
+                );
+
+        // draw ring 2 sectors
+        drawBits(
+                ring2Code,
+                wholeRadius - (ringWidth * 2) - ((ringWidth * 2 * .6d))
+                );
+
+        // restore old 0,0
+        g.setTransform(oldTransform);
+
+    }
+
+    private void drawBits(byte[] sectorCode, double atRadius) {
+        final double oneBitDegLength = (360d / sectorCode.length) * .9d;
+        final double offset = 360 - oneBitDegLength * sectorCode.length;
+
+        Arc2D.Double sectorArc = new Arc2D.Double();
+        
+        /*
+        g.setColor(new Color(
+                (int) (Math.random() * 255),
+                (int) (Math.random() * 255),
+                (int) (Math.random() * 255)
+                ));
+        */
+
+        for (int i = 0; i < sectorCode.length; i++) {
+            if (sectorCode[i] == 0) continue;
+            sectorArc.setArcByCenter(
+                    0, 0,
+                    atRadius,
+                    oneBitDegLength * i + (offset / 2),
+                    oneBitDegLength,
+                    Arc2D.OPEN);
+            g.draw(sectorArc);
+        }
+
+        sectorArc.setArcByCenter(
+                0, 0,
+                wholeRadius * .6f,
+                offset/2,
+                -offset,
+                Arc2D.OPEN);
+        
+        Stroke oldStroke = g.getStroke();
+        g.setStroke(new BasicStroke((float) ringWidth*5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
+        g.draw(sectorArc);
+        g.setStroke(oldStroke);
+    }
+
+    public static byte[][] encodeTRIPCode(int num) {
+        
+        // here be ternary code generation
+        
+        /*
+         * must: n.length == 2
+         * must: [n][0].length == [n][1].length
+         * must: [n][m] == 0 OR 1
+         */
+        
+    	boolean codeOk = true;
+    	int generatedCode[] = new int[6];
     	
-    	ringCode1.insert(0, "1");
-    	ringCode2.insert(0, "1");
-	    ternaryCode.insert(0, "1");
-	    
-//	    System.out.println(
-//	    		ternaryCode+"\n" +
-//	    		ringCode1+"\n" +
-//	    		ringCode2
-//	    		);
-	    
-	    return new TRIPCodesContainer(ternaryCode, ringCode1, ringCode2, ternaryCode.length());
-	} // method
+    	for(int i=0; i < 6; i++){
+    		generatedCode[i] = 0;
+    	}
+    	
+    	int code = 0;
+    	
+    	while(true){
+    		
+    		codeOk = true;
+    		
+    		generatedCode[0]++;
+    		
+    		if(generatedCode[0] >= 3){
+    			generatedCode[0] = 0;
+    			generatedCode[1]++;
+    		}
+    		if(generatedCode[1] >= 3){
+    			generatedCode[1] = 0;
+    			generatedCode[2]++;
+    		}
+    		if(generatedCode[2] >= 3){
+    			generatedCode[2] = 0;
+    			generatedCode[3]++;
+    		}
+    		if(generatedCode[3] >= 3){
+    			generatedCode[3] = 0;
+    			generatedCode[4]++;
+    		}
+    		if(generatedCode[4] >= 3){
+    			generatedCode[4] = 0;
+    			generatedCode[5]++;
+    		}
+    		if(generatedCode[5] >= 3){
+    			break;
+    		}
+    		
+    		int ld = -1;
+			for(int d : generatedCode){
+				if(d == ld){
+					codeOk = false;
+					break;
+				}
+				ld = d;
+			}
+			
+			if(!codeOk) continue;
+    		
+			if(code >= num) break;
+			code++;
+			
+    	}
+    	
+    	byte out[][] = new byte[2][7];
+    	
+    	for(int i=0; i < 6; i++){
+    		if(generatedCode[i] == 0){
+    			out[0][i] = 0;
+    			out[1][i] = 0;
+    		} else if(generatedCode[i] == 1){
+    			out[0][i] = 1;
+    			out[1][i] = 0;    			
+    		} else if(generatedCode[i] == 2){
+    			out[0][i] = 0;
+    			out[1][i] = 1;
+    		}
+    	}
+    	
+		out[0][6] = 0;
+		out[1][6] = 0;
+    	
+        // example, dummy code
+        return out;
+    }
 
-} // class
+}

@@ -6,7 +6,6 @@ import java.awt.image.BufferedImage;
 
 public class ImageDataPack {
 	
-	private byte[] thresholdImage;
 	private byte[] edgeDetectedImage;
 	private byte[] edgeDetectedNMSImage;
 	private byte[] edgeTrackedImage;
@@ -14,11 +13,9 @@ public class ImageDataPack {
 	private int imageHeight;
 	private BufferedImage edgeTrackedImageBI;
 	
-	
-	public void setThresholdImage(byte[] thresholdImage) {
-		this.thresholdImage = thresholdImage;
-	}
-
+//	public void setThresholdImage(byte[] thresholdImage) {
+//		this.thresholdImage = thresholdImage;
+//	}
 
 	public void setEdgeDetectedImage(byte[] edgeDetectedImage) {
 		this.edgeDetectedImage = edgeDetectedImage;
@@ -32,12 +29,6 @@ public class ImageDataPack {
 
 	public void setEdgeTrackedImage(byte[] edgeTrackedImage) {
 		this.edgeTrackedImage = edgeTrackedImage;
-		
-		edgeTrackedImageBI = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_3BYTE_BGR);
-		
-		for (int y=0; y<imageHeight; y++)
-			for (int x=0; x<imageWidth; x++)
-				edgeTrackedImageBI.setRGB(x, y, edgeTrackedImage[y*imageWidth+x]!=0?0x00FF0000:0);
 				
 	}
 	
@@ -49,11 +40,6 @@ public class ImageDataPack {
 	
 	public void setHeight(int imageHeight) {
 		this.imageHeight = imageHeight;
-	}
-
-
-	public byte[] getThresholdImage() {
-		return thresholdImage;
 	}
 	
 	

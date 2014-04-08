@@ -1,3 +1,5 @@
 bin/
 *.log
 *.class
+/testimgs/*
+*.kate-swp

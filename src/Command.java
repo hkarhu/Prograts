@@ -32,9 +32,9 @@ public class Command {
 	public String getCommandString(){
 		switch (type) {
 			case STEP: return "STP";
-			case ROTL: return "STP";
-			case ROTR: return "STP";
-			case PEW: return "STP";
+			case ROTL: return "RTL";
+			case ROTR: return "RTR";
+			case PEW: return "PEW";
 			default: return "???";
 		}
 	}

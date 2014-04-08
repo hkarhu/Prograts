@@ -1,14 +1,28 @@
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 
+import org.lwjgl.Sys;
+import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.utils.Converters;
+
+import tripcodescanner.AlgoEdgeDetection;
+import tripcodescanner.AlgoEdgeFollow;
+import tripcodescanner.AlgoEllipseFitting;
+import tripcodescanner.AlgoFindConcentricEllipses;
+import tripcodescanner.DecipherTRIPcode;
+import tripcodescanner.Edgel;
+import tripcodescanner.EllipseParams;
+import tripcodescanner.ImageDataPack;
+import tripcodescanner.TargetParams;
+import ae.routines.S;
 
 public class TripCircle {
 
@@ -18,8 +32,9 @@ public class TripCircle {
 	private final int SAMPLE_FRAME_SIZE = 64;
 	private final int THRESHOLD = 127;
 	private final float ROUGH_STEP = 0.35f;
-	private final float FINE_STEP = 0.005f;
-
+	private final float FINE_STEP = 0.05f;
+	private final int SCAN_DIVISIONS = 60;
+	
 	private int last_index;
 
 	private int lastX = 0;
@@ -136,22 +151,26 @@ public class TripCircle {
 		return angle;
 	}
 	
-	private float findAngleBySweep(float from, float step, int iterations, Mat m){
+	private float findAngleBySweep(float from, float step, Mat m){
 	
 		float angle = from;
 		float value;
 		int interrupt = 0;
 		
 		do {
-			
 			float xi = (float) (Math.sin(angle));
 			float yi = (float) (Math.cos(angle));
 			
-			int x = (int)(xi*12 + SAMPLE_FRAME_SIZE/2.0f);				
-			int y = (int)(yi*12 + SAMPLE_FRAME_SIZE/2.0f);
+			value = 0;
 			
-			value = (float) m.get(y, x)[0];
+			for(int r = 8; r < 15; r++){
+				int x = (int)(xi*r + SAMPLE_FRAME_SIZE/2.0f);				
+				int y = (int)(yi*r + SAMPLE_FRAME_SIZE/2.0f);
+				value += (float) m.get(y, x)[0];
+			}
 			
+			value /= 15-8;
+		
 			angle -= step;
 			
 			interrupt ++;
@@ -209,57 +228,155 @@ public class TripCircle {
 		M.put(0, 0, new float[] {1,0,xShift,0,1,yShift});
 		Imgproc.warpAffine(frame, frame, M, new Size(SAMPLE_FRAME_SIZE, SAMPLE_FRAME_SIZE));
 		//frame.convertTo(frame, -1, 2, -50);
-		Imgproc.threshold(frame, frame, 90, 255, Imgproc.THRESH_BINARY);
+		
+		Imgproc.threshold(frame, frame, THRESHOLD, 255, Imgproc.THRESH_BINARY);
 
 		float roughAngle = 0;
 		float refinedAngle = 0;
 
 		roughAngle = findAngleByMaximum(0, (float) (2*Math.PI), ROUGH_STEP, frame);
-		
-		refinedAngle = findAngleBySweep(roughAngle-ROUGH_STEP*0.5f, FINE_STEP, 5, frame);
+		refinedAngle = findAngleBySweep(roughAngle-ROUGH_STEP, FINE_STEP, frame);
 		
 		updateAngle(refinedAngle);
+		
+		float size = (2*SAMPLE_FRAME_SIZE-outerBottom-outerTop-outerLeft-outerRight)/(float)SAMPLE_FRAME_SIZE;
+		
+		//System.out.println("Approximated size: " + size);
 				
-		Imgproc.warpAffine(frame, frame, Imgproc.getRotationMatrix2D(new Point(SAMPLE_FRAME_SIZE/2, SAMPLE_FRAME_SIZE/2), Math.toDegrees(-refinedAngle), 1), new Size(SAMPLE_FRAME_SIZE, SAMPLE_FRAME_SIZE));
+		Imgproc.warpAffine(frame, frame, Imgproc.getRotationMatrix2D(new Point(SAMPLE_FRAME_SIZE/2, SAMPLE_FRAME_SIZE/2), Math.toDegrees(-refinedAngle), 1/(size*0.5f)), new Size(SAMPLE_FRAME_SIZE, SAMPLE_FRAME_SIZE));
+//		Imgproc.erode(frame, frame, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(3,3)));
+		
+//		//Accumulate data
+//		if(accumFrame == null) accumFrame = Mat.zeros(SAMPLE_FRAME_SIZE, SAMPLE_FRAME_SIZE, CvType.CV_32FC1);
+//		Imgproc.accumulateWeighted(frame, accumFrame, 0.2f);		
+//		accumFrame.convertTo(frame, CvType.CV_8UC1);
+	
+//		ImageDataPack idp = new ImageDataPack();
+		
+//		Imgproc.dilate(frame, frame, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(3,3)));
+//		Imgproc.Canny(frame, frame, THRESHOLD, THRESHOLD);
+//
+//		ArrayList<ArrayList<Edgel>> edges = AlgoEdgeFollow.edgeFollowing(frame, SAMPLE_FRAME_SIZE);
+//		int numEdges = edges.size();
+//		System.out.println(numEdges);
+		
+//        ArrayList<EllipseParams> paramEdgesEllipses = new ArrayList<EllipseParams>(numEdges);
+//        
+//        System.out.println(paramEdgesEllipses.get(0).getAlpha());
+        
+//        for (int i = 0; i < numEdges; i++) {
+////        	int n = 0;
+////        	for (Edgel e : edges.get(i)) {
+////        		n++;
+////        		S.printf("EDGES DEBUG("+i+","+n+"): " + edges);
+////        	}
+//            EllipseParams params = AlgoEllipseFitting.ellipseFitting(edges.get(i));
+//            S.printf("ellipseParams debug("+i+"): " + params);
+//            paramEdgesEllipses.add(params);
+//        }
 
 		processedTripcode = OpenCVUtils.matToBufferedImage(frame);
 		Graphics2D g =  (Graphics2D) processedTripcode.getGraphics();
 		
-		code = "";
+		int[] rawData = new int[SCAN_DIVISIONS];
+		int di = 0;
 		
-		for(float i=(float) (Math.PI*0.15f); i < Math.PI*2; i += Math.PI*0.25f){
+		float df = ((outerTop+outerBottom)/(float)(outerLeft+outerRight));
+		//float dcos = ((outerLeft+outerRight)/(float)(outerLeft+outerRight));
 		
+		for(float i=(float) (Math.PI*0.2f); i < Math.PI*2; i += (Math.PI*2)/SCAN_DIVISIONS){
+			
 			float xi = (float) (Math.sin(i));
 			float yi = (float) (Math.cos(i));
 	
 			int x = (int)(xi*25 + SAMPLE_FRAME_SIZE/2.0f);				
 			int y = (int)(yi*25 + SAMPLE_FRAME_SIZE/2.0f);
+			if(x < 0) x = 0; else if(x >= SAMPLE_FRAME_SIZE) x = SAMPLE_FRAME_SIZE-1;
+			if(y < 0) y = 0; else if(y >= SAMPLE_FRAME_SIZE) y = SAMPLE_FRAME_SIZE-1;
 			
-			g.setColor(Color.white);
-			g.drawLine(SAMPLE_FRAME_SIZE/2, SAMPLE_FRAME_SIZE/2, x, y);
+			g.setColor(Color.black);
+			//g.drawLine(SAMPLE_FRAME_SIZE/2, SAMPLE_FRAME_SIZE/2, x, y);
 			
-			x = (int)(xi*14 + SAMPLE_FRAME_SIZE/2.0f);				
-			y = (int)(yi*14 + SAMPLE_FRAME_SIZE/2.0f);
-
-			float value1 = (float) ((frame.get(y, x)[0] + frame.get(y, x+1)[0] + frame.get(y+1, x)[0] + frame.get(y+1, x+1)[0])/4);
-
-			x = (int)(xi*8 + SAMPLE_FRAME_SIZE/2.0f);				
-			y = (int)(yi*8 + SAMPLE_FRAME_SIZE/2.0f);
+			//g.setColor(Color.white);
 			
-			float value2 = (float) ((frame.get(y, x)[0] + frame.get(y, x+1)[0] + frame.get(y+1, x)[0] + frame.get(y+1, x+1)[0])/4);
+			float value1 = 255;
+			float value2 = 255;
+			
+			for(int r=13; r < 17; r++){
+				x = (int)(xi*r + SAMPLE_FRAME_SIZE/2.0f);				
+				y = (int)(yi*r + SAMPLE_FRAME_SIZE/2.0f);
+				if(x < 0) x = 0; else if(x >= SAMPLE_FRAME_SIZE) x = SAMPLE_FRAME_SIZE-1;
+				if(y < 0) y = 0; else if(y >= SAMPLE_FRAME_SIZE) y = SAMPLE_FRAME_SIZE-1;
+				
+				value1 += (float) (frame.get(y, x)[0]);
+				g.drawLine(x, y, x, y);
+			}
+			value1 /= 4;
+			
+			for(int r=20; r < 24; r++){
+				x = (int)(xi*r + SAMPLE_FRAME_SIZE/2.0f);	
+				y = (int)(yi*r + SAMPLE_FRAME_SIZE/2.0f);
+				if(x < 0) x = 0; else if(x >= SAMPLE_FRAME_SIZE) x = SAMPLE_FRAME_SIZE-1;
+				if(y < 0) y = 0; else if(y >= SAMPLE_FRAME_SIZE) y = SAMPLE_FRAME_SIZE-1;
+				
+				value2 += (float) (frame.get(y, x)[0]);
+				//value2 += (float) (frame.get(y, x)[0]);
+				g.drawLine(x, y, x, y);
+			}
+			value2 /= 4;
+			
+			//System.out.println(i + " " +value1 + " " +  value2);
+			
+			//float value2 = (float) ((frame.get(y, x)[0] + frame.get(y, x+1)[0] + frame.get(y+1, x)[0] + frame.get(y+1, x+1)[0])/4);
 			
 			if(value1 < THRESHOLD && value2 > THRESHOLD){
-				code = code + "X";
+				rawData[di] = 1;
 			} else if(value1 > THRESHOLD && value2 < THRESHOLD){
-				code = code + "0";
+				rawData[di] = 2;
 			} else if(value1 < THRESHOLD && value2 < THRESHOLD){
-				code = code + ".";
+				rawData[di] = 3;
 			} else {
-				code = code + " ";
+				rawData[di] = 0;
 			}
 			
+			di++;
+			
 		}
+		
+		final int DATA_LENGTH = 6;
+		int[] data = new int[DATA_LENGTH];
+		boolean dataCorrect = true;
+		int ndi = 0;
+		
+		for(di=0; di < SCAN_DIVISIONS; di++){
+			if(rawData[di] == 3) continue;
+			data[ndi] = rawData[di];			
+			while(di < SCAN_DIVISIONS && data[ndi] == rawData[di]){
+				di++;
+			}
+			ndi++;
+			if(ndi >= DATA_LENGTH) break;
+		}
+		
+		//Correctness check
+		if(ndi == DATA_LENGTH){
+			int ld = -1;
+			for(int d : data){
+				if(d == ld){
+					dataCorrect = false;
+					break;
+				}
+				ld = d;
+			}
+		} else {
 
+			dataCorrect = false;
+		}
+		
+		code = "";
+		if(dataCorrect){
+			for(int d : data) code += "" + d;
+		}
 	}
 	
 	public float getAngle(){
@@ -267,7 +384,7 @@ public class TripCircle {
 	}
 
 	private void updateAngle(float b){
-		a = (a+b)/2;
+		if(a==0) a=b; else a = (a+a+b)/3;
 	}
 	
 	public boolean isDead(){
