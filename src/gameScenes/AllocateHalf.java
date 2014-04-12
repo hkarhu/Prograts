@@ -1,3 +1,4 @@
+package gameScenes;
 import org.lwjgl.opengl.GL11;
 
 import ae.gl.GLGraphicRoutines;
@@ -6,20 +7,18 @@ import ae.gl.text.GLBitmapFontBlitter;
 import ae.gl.texture.GLTextureManager;
 
 
-public class ScreenAllocate {
+public class AllocateHalf {
 	
 	private boolean rotate = false;
 	private long aniTime = 0;
 	private boolean activate = false;
 	private boolean deactivate = false;
 	
-	public ScreenAllocate(boolean b) {
+	public AllocateHalf(boolean b) {
 		this.rotate = b;
 	}
 	
-	public void glDraw(long t){
-		
-		GL11.glEnable(GL11.GL_BLEND);
+	public void glDraw(long time){
 		
 		GL11.glPushMatrix();
 			GLTextureManager.unbindTexture();

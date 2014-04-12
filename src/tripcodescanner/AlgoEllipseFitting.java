@@ -35,8 +35,8 @@ public class AlgoEllipseFitting {
 
         // 1.- Build the Design Matrix of size (NUM_POINTS*6)
         for (int i = 0; i < numPoints; i++) {
-            tx = ( (Edgel) edgeToFit.get(i)).getCoordX();
-            ty = ( (Edgel) edgeToFit.get(i)).getCoordY();
+            tx = edgeToFit.get(i).getCoordX();
+            ty = edgeToFit.get(i).getCoordY();
 
             D[i + 1][1] = tx * tx;
             D[i + 1][2] = tx * ty;

@@ -1,5 +1,5 @@
 
-public class GLGameBoard extends GLDrawableItem {
+public class GLRatBoard extends GLDrawableItem {
 
 	private final int BOARD_SIZE = 8;
 	

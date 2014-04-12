@@ -175,17 +175,17 @@ public class MatrixUtils {
 	  for (j=1;j<=N+1;j++)
 	    A[k][j]=B[k][j];
 	  for (j=N+2;j<=2*N+1;j++)
-	    A[k][j]=(float)0;
-	  A[k][k-1+N+2]=(float)1;
+	    A[k][j]=0;
+	  A[k][k-1+N+2]=1;
 	}
       for (k=1;k<=N;k++)
 	{
-	  maxpivot=Math.abs((double)A[k][k]);
+	  maxpivot=Math.abs(A[k][k]);
 	  npivot=k;
 	  for (i=k;i<=N;i++)
-	    if (maxpivot<Math.abs((double)A[i][k]))
+	    if (maxpivot<Math.abs(A[i][k]))
 	      {
-		maxpivot=Math.abs((double)A[i][k]);
+		maxpivot=Math.abs(A[i][k]);
 		npivot=i;
 	      }
 	  if (maxpivot>=eps)

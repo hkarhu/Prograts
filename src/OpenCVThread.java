@@ -1,6 +1,5 @@
 import java.util.concurrent.ConcurrentLinkedDeque;
 
-import org.omg.PortableServer.THREAD_POLICY_ID;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
@@ -16,7 +15,7 @@ public class OpenCVThread {
 	}
 
 	private ConcurrentLinkedDeque<Mat> matrixQueue;
-	private ConcurrentLinkedDeque<TripCircle> circleQueue;
+	private ConcurrentLinkedDeque<RawTripCircleData> circleQueue;
 	private VideoCapture inputVideo;
 	private volatile boolean running = true;
 	private final Thread workerThread;
@@ -36,8 +35,12 @@ public class OpenCVThread {
 	protected void processData() {
 		//Init
 		try {
-			inputVideo = new VideoCapture(0);
+			inputVideo = new VideoCapture();
+			inputVideo.open(0);
 			Thread.sleep(1000);
+			inputVideo.set(OpenCVUtils.CAP_PROP_FRAME_WIDTH, 640);
+			inputVideo.set(OpenCVUtils.CAP_PROP_FRAME_HEIGHT, 480);
+			inputVideo.set(OpenCVUtils.CAP_PROP_FPS, 60);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -87,7 +90,7 @@ public class OpenCVThread {
 					
 					double[] coords = circles.get(0,i);
 					
-					for(TripCircle c : circleQueue){
+					for(RawTripCircleData c : circleQueue){
 						if(c.isCloseTo(coords)){
 							c.processNewCoordinates(circles.get(0, i), gc);
 							coords = null;
@@ -96,7 +99,7 @@ public class OpenCVThread {
 					}
 					
 					if(coords != null){
-						circleQueue.add(new TripCircle(coords, gc));
+						circleQueue.add(new RawTripCircleData(coords, gc));
 					}
 					
 				}
@@ -138,11 +141,11 @@ public class OpenCVThread {
 		else return null;
 	}
 
-	public TripCircle[] getCircles(){
-		for(TripCircle c : circleQueue){
+	public RawTripCircleData[] getCircles(){
+		for(RawTripCircleData c : circleQueue){
 			if(c.isDead()) circleQueue.remove(c);
 		}
-		return circleQueue.toArray(new TripCircle[0]);
+		return circleQueue.toArray(new RawTripCircleData[0]);
 	}
 
 }

@@ -53,7 +53,7 @@ public class AlgoAdaptiveThreshold {
         while (iRow < imageDataPack.getHeight()) {
             // Sweep from Right to Left
             for (int iRightLeft = imageDataPack.getWidth() - 1; iRightLeft >= 0; iRightLeft--) {
-                if (iRightLeft == (int) imageDataPack.getWidth() - 1) {
+                if (iRightLeft == imageDataPack.getWidth() - 1) {
                     currentG[iRightLeft] = prevG[imageDataPack.getWidth() - 1] -
                         (prevG[imageDataPack.getWidth() - 1] / s) +
                         (imageData[iRow*imageDataPack.getWidth() + iRightLeft]&255);

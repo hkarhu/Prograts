@@ -7,20 +7,13 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
-import java.io.File;
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.Timer;
 
 import org.opencv.core.Mat;
-
-import tripcodescanner.TRIPCodeScanner;
-import ae.routines.S;
 
 public class WebcamImageProcessor extends JFrame {
 
@@ -59,7 +52,7 @@ public class WebcamImageProcessor extends JFrame {
 		this.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosed(WindowEvent e) {
-				ocvt.stop();
+				shutdown();
 			}
 		});
 		this.setPreferredSize(new Dimension(800,600));
@@ -77,7 +70,7 @@ public class WebcamImageProcessor extends JFrame {
 		if(m != null){
 			webcamImage = OpenCVUtils.matToBufferedImage(m);
 			int i=0;
-			for(TripCircle c : ocvt.getCircles()){
+			for(RawTripCircleData c : ocvt.getCircles()){
 				if(c == null) continue;
 				Graphics2D g = (Graphics2D) webcamImage.getGraphics();
 				g.setColor(Color.green);
@@ -88,6 +81,16 @@ public class WebcamImageProcessor extends JFrame {
 				i++;
 			}
 			repaint();
+		}
+		
+		for(RawTripCircleData c : ocvt.getCircles()){
+			informListeners(c.getX(), c.getY(), c.getAngle(), c.getID());
+		}
+	}
+
+	private void informListeners(float x, float y, float a, int id) {
+		for(ARCardListener l : listeners){
+			l.cardDataUpdated(id, x, y, a);
 		}
 	}
 

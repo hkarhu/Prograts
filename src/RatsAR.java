@@ -1,8 +1,8 @@
 
 public class RatsAR {
 
-	public static final int WINDOW_WIDTH = 1280/2;
-	public static final int WINDOW_HEIGHT = 768/2;
+	public static final int WINDOW_WIDTH = 1280;
+	public static final int WINDOW_HEIGHT = 720;
 	
 	static OpenGLTableAugment table;
 	static WebcamImageProcessor input;
@@ -20,6 +20,7 @@ public class RatsAR {
 
 	public static void requestShutdown() {
 		input.shutdown();
+		table.requestClose();
 	}
 
 }

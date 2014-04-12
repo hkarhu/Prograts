@@ -3,6 +3,8 @@ package tripcodescanner;
 
 import java.util.ArrayList;
 
+import org.opencv.core.Mat;
+
 public class AlgoTrackEdgels {
 	
 	public static void trackEdgels(byte[] edgeDetectedNMSImage, ArrayList<Edgel> edgels, int initEdgelX, int initEdgelY) {
@@ -23,8 +25,6 @@ public class AlgoTrackEdgels {
             testX = prevX;
             testY = prevY + 1;
             posPixel = testX * imageWidth + testY;
-            
-            if(posPixel >= 0 && posPixel < imageWidth)
             if ((edgeDetectedNMSImage[posPixel]&255) != 0) {
                 edgels.add(new Edgel(testX, testY));
                 // this pixel has already been included in an edge so wipe it out
@@ -37,7 +37,6 @@ public class AlgoTrackEdgels {
             testX = prevX + 1;
             testY = prevY + 1;
             posPixel = testX * imageWidth + testY;
-            if(posPixel >= 0 && posPixel < imageWidth)
             if ((edgeDetectedNMSImage[posPixel]&255) != 0) {
                 edgels.add(new Edgel(testX, testY));
                 // this pixel has already been included in an edge so wipe it out
@@ -50,7 +49,6 @@ public class AlgoTrackEdgels {
             testX = prevX + 1;
             testY = prevY;
             posPixel = testX * imageWidth + testY;
-            if(posPixel >= 0 && posPixel < imageWidth)
             if ((edgeDetectedNMSImage[posPixel]&255) != 0) {
                 edgels.add(new Edgel(testX, testY));
                 // this pixel has already been included in an edge so wipe it out
@@ -63,7 +61,6 @@ public class AlgoTrackEdgels {
             testX = prevX + 1;
             testY = prevY - 1;
             posPixel = testX * imageWidth + testY;
-            if(posPixel >= 0 && posPixel < imageWidth)
             if ((edgeDetectedNMSImage[posPixel]&255) != 0) {
                 edgels.add(new Edgel(testX, testY));
                 // this pixel has already been included in an edge so wipe it out
@@ -76,7 +73,6 @@ public class AlgoTrackEdgels {
             testX = prevX;
             testY = prevY - 1;
             posPixel = testX * imageWidth + testY;
-            if(posPixel >= 0 && posPixel < imageWidth)
             if ((edgeDetectedNMSImage[posPixel]&255) != 0) {
                 edgels.add(new Edgel(testX, testY));
                 // this pixel has already been included in an edge so wipe it out
@@ -89,7 +85,6 @@ public class AlgoTrackEdgels {
             testX = prevX - 1;
             testY = prevY - 1;
             posPixel = testX * imageWidth + testY;
-            if(posPixel >= 0 && posPixel < imageWidth)
             if ((edgeDetectedNMSImage[posPixel]&255) != 0) {
                 edgels.add(new Edgel(testX, testY));
                 // this pixel has already been included in an edge so wipe it out
@@ -102,7 +97,6 @@ public class AlgoTrackEdgels {
             testX = prevX - 1;
             testY = prevY;
             posPixel = testX * imageWidth + testY;
-            if(posPixel >= 0 && posPixel < imageWidth)
             if ((edgeDetectedNMSImage[posPixel]&255) != 0) {
                 edgels.add(new Edgel(testX, testY));
                 // this pixel has already been included in an edge so wipe it out
@@ -115,7 +109,6 @@ public class AlgoTrackEdgels {
             testX = prevX - 1;
             testY = prevY + 1;
             posPixel = testX * imageWidth + testY;
-            if(posPixel >= 0 && posPixel < imageWidth)
             if ((edgeDetectedNMSImage[posPixel]&255) != 0) {
                 edgels.add(new Edgel(testX, testY));
                 // this pixel has already been included in an edge so wipe it out

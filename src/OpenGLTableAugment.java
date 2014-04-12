@@ -1,3 +1,7 @@
+import gameScenes.AllocateHalf;
+import gameScenes.GameScene;
+import gameScenes.IntroScene;
+
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -18,76 +22,44 @@ import ae.gl.GLValues;
 import ae.gl.core.DisplayModePack;
 import ae.gl.core.GLCore;
 import ae.gl.core.GLKeyboardListener;
-import ae.gl.text.GLBitmapFontBlitter;
 import ae.gl.texture.GLTextureManager;
 import ae.routines.S;
 
 
 public class OpenGLTableAugment extends GLCore implements GLKeyboardListener, ARCardListener  {
 
-	public enum State {
-		INTRO, ALLOCATE, PROGRAM_DELAY, PROGRAM
-	}
-	
-	private State gameState;
-	private State nextGameState;
 	private long startTime;
-	private long programTime;
-	private ScreenIntro startScreen;
-	private ScreenAllocate p1AllocateScreen;
-	private ScreenAllocate p2AllocateScreen;
+	private long currentTime;
+	private IntroScene intro;
 	
-	private HashMap<Integer, ARCard> p1Cards, p2Cards;
-	private List<ARCard> trackedCards;
+	private List<ARCard> p1Cards, p2Cards;
+	private HashMap<Integer, ARCard> knownCards;
 	
-	private long allocateTimer;
+	private LinkedList<GameScene> gameScenes;
 	
 	public OpenGLTableAugment() {
+		
+		knownCards = new HashMap<>();
+		p1Cards = new LinkedList<>();
+		p2Cards = new LinkedList<>();
+		
+		gameScenes = new LinkedList<GameScene>();
 		
 		keyboardListeners.add(this);
 		
 		GLValues.setScreenSize(RatsAR.WINDOW_WIDTH, RatsAR.WINDOW_HEIGHT);
 		GLValues.calculateRatios();
 		
-		startScreen = new ScreenIntro();
-		p1AllocateScreen = new ScreenAllocate(true);
-		p2AllocateScreen = new ScreenAllocate(false);
-		
-		trackedCards = new LinkedList<>();
-		//trackedCards.add(new ARCard(1, 1, 1, 127, new Command(Command.Type.PEW)));
-		p1AllocateScreen.activate();
-		p2AllocateScreen.activate();
-		
-		p1Cards = new HashMap<>();
-		p2Cards = new HashMap<>();
-		
-		goToState(State.INTRO);
+		intro = new IntroScene();
+
+		addScene(intro);
 		
 		startTime = System.currentTimeMillis();
 		
 	}
 	
-	private void goToState(State state) {
-		switch (state) {
-			case ALLOCATE:
-				gameState = State.ALLOCATE;
-				allocateTimer = programTime + 2100;
-				p1AllocateScreen.activate();
-				p2AllocateScreen.activate();
-				break;
-	
-			case INTRO:
-				gameState = State.INTRO;
-				break;
-			case PROGRAM_DELAY:
-				p1AllocateScreen.deactivate();
-				p2AllocateScreen.deactivate();
-			case PROGRAM:
-				gameState = State.PROGRAM_DELAY;
-				break;
-			default:
-				break;
-		}
+	private void addScene(GameScene s) {
+		gameScenes.add(s);
 	}
 
 	@Override
@@ -178,15 +150,13 @@ public class OpenGLTableAugment extends GLCore implements GLKeyboardListener, AR
 		
 		Display.setLocation(2550, 0);
 		
-		startScreen.glInit();
-		
 		return true;
 	}
 
 	@Override
 	public void glLoop() {
 
-		programTime = System.currentTimeMillis() - startTime;
+		currentTime = System.currentTimeMillis() - startTime;
 		
 		GL11.glClear(
 				GL11.GL_COLOR_BUFFER_BIT |
@@ -207,50 +177,13 @@ public class OpenGLTableAugment extends GLCore implements GLKeyboardListener, AR
 		GLGraphicRoutines.drawRepeatedBackgroundPlane(-GLValues.glWidth*0.49f, -GLValues.glHeight*0.49f, GLValues.glWidth*0.49f, GLValues.glHeight*0.49f);
 		
 		GL11.glPushMatrix();
-
-			GL11.glTranslatef(0, 0, 1f);
-	
-			GL11.glPushMatrix();
-				for(ARCard c : trackedCards){
-					c.glDraw();
-				}
-			GL11.glPopMatrix();
-			
-			switch (gameState) {
-				case ALLOCATE:
-					p1AllocateScreen.glDraw(programTime);
-					p2AllocateScreen.glDraw(programTime);
-					float q = 1-(allocateTimer-programTime)/10000.0f;
-					GLTextureManager.unbindTexture();
-					GL11.glColor3f(1, 1, 1);
-					if (q >= 1){
-						System.out.println("START!");
-						goToState(State.PROGRAM_DELAY);
-					} else if(q > 0){
-						GL11.glPushMatrix();
-							GLGraphicRoutines.drawLineRect(1.0f, GLValues.glWidth*0.49f, GLValues.glHeight*0.15f, GLValues.glWidth*0.51f, GLValues.glHeight*0.85f, 0);
-							GLGraphicRoutines.draw2DRect(GLValues.glWidth*0.492f, GLValues.glHeight*(0.154f + 0.346f*q), GLValues.glWidth*0.508f, GLValues.glHeight*(0.846f - 0.354f*q), 0);
-							GL11.glTranslatef(GLValues.glWidth*0.5f, GLValues.glHeight*0.08f, 0);
-							GL11.glRotatef(90, 0, 0, 1);
-							GLBitmapFontBlitter.drawString(999-(int)(999*q)+"", "font_code", GLValues.glWidth*0.02f, GLValues.glWidth*0.02f, GLBitmapFontBlitter.Alignment.CENTERED);
-							GL11.glTranslatef(GLValues.glWidth*0.5f, 0, 0);
-							GL11.glRotatef(180, 0, 0, 1);
-							GLBitmapFontBlitter.drawString(999-(int)(999*q)+"", "font_code", GLValues.glWidth*0.02f, GLValues.glWidth*0.02f, GLBitmapFontBlitter.Alignment.CENTERED);
-						GL11.glPopMatrix();
-					}
-					break;
-				case PROGRAM_DELAY:
-					p1AllocateScreen.glDraw(programTime);
-					p2AllocateScreen.glDraw(programTime);
-					break;
-				case INTRO:
-					startScreen.glDraw(programTime);
-					break;
-					
-				default:
-					break;
+		
+			if(gameScenes.getFirst().isRunning()){
+				gameScenes.getFirst().glDraw(currentTime);
+			} else {
+				gameScenes.removeFirst();
 			}
-
+		
 		GL11.glPopMatrix();
 
 		Display.sync(60);
@@ -278,12 +211,12 @@ public class OpenGLTableAugment extends GLCore implements GLKeyboardListener, AR
 
 	@Override
 	public void glKeyUp(int eventKey) {
-		if(eventKey == 28) goToState(State.ALLOCATE);
+		System.out.println(eventKey);
+		if(eventKey == 28) gameScenes.removeFirst();
 	}
 
 	@Override
-	public void cardDataUpdated(int code, float x, float y, float r, float q) {
-		// TODO Auto-generated method stub
+	public void cardDataUpdated(int id, float x, float y, float a) {
 		
 	}
 

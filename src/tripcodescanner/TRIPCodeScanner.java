@@ -97,7 +97,7 @@ public class TRIPCodeScanner {
         final ArrayList<TargetParams> targetsRecognized = new ArrayList<TargetParams>();
         int numTargets = paramMaxConcEllipses.size();
         for (int iTarget = 0; iTarget < numTargets; iTarget++) {
-            EllipseParams params = (EllipseParams)paramMaxConcEllipses.get(iTarget);
+            EllipseParams params = paramMaxConcEllipses.get(iTarget);
             System.out.println("EllipseParams: "+params);
             String code = DecipherTRIPcode.decipherTRIPcode(params, imageWidth, imageHeight, imageData);
             // HACK swap x and y in params, because it is wrong
@@ -109,7 +109,7 @@ public class TRIPCodeScanner {
         
         
         for (int i=0; i<targetsRecognized.size(); i++) {
-            TargetParams params = (TargetParams)targetsRecognized.get(i);
+            TargetParams params = targetsRecognized.get(i);
             System.out.println("Code for target " + i + ": " + params.getCode() + " - " + params.getDecimalCode());
             System.out.println("Target location: " + params.getEllipseParams().getX() + ":" +
                                params.getEllipseParams().getY());

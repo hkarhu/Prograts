@@ -2,29 +2,13 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-
-import org.lwjgl.Sys;
-import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-import org.opencv.utils.Converters;
 
-import tripcodescanner.AlgoEdgeDetection;
-import tripcodescanner.AlgoEdgeFollow;
-import tripcodescanner.AlgoEllipseFitting;
-import tripcodescanner.AlgoFindConcentricEllipses;
-import tripcodescanner.DecipherTRIPcode;
-import tripcodescanner.Edgel;
-import tripcodescanner.EllipseParams;
-import tripcodescanner.ImageDataPack;
-import tripcodescanner.TargetParams;
-import ae.routines.S;
-
-public class TripCircle {
+public class RawTripCircleData {
 
 	private final int BUFFER_SIZE = 5;
 	private final int PROXIMITY = 50;
@@ -53,7 +37,7 @@ public class TripCircle {
 	private BufferedImage processedTripcode;
 	private String code;
 
-	public TripCircle() {
+	public RawTripCircleData() {
 		x = new float[BUFFER_SIZE];
 		y = new float[BUFFER_SIZE];
 		r = new float[BUFFER_SIZE];
@@ -61,7 +45,7 @@ public class TripCircle {
 		processedTripcode = new BufferedImage(SAMPLE_FRAME_SIZE, SAMPLE_FRAME_SIZE, BufferedImage.TYPE_3BYTE_BGR);
 	}
 
-	public TripCircle(double[] coords, Mat m) {
+	public RawTripCircleData(double[] coords, Mat m) {
 		this();
 		for(int i=0; i < BUFFER_SIZE; i++){
 			x[i] = (float) coords[0];
@@ -79,10 +63,10 @@ public class TripCircle {
 			return;
 		}
 
-		int yLow = (int) (getY()-SAMPLE_FRAME_SIZE/2);
-		int yHigh = (int) (getY()+SAMPLE_FRAME_SIZE/2);
-		int xLow = (int) (getX()-SAMPLE_FRAME_SIZE/2);
-		int xHigh = (int) (getX()+SAMPLE_FRAME_SIZE/2);
+		int yLow = getY()-SAMPLE_FRAME_SIZE/2;
+		int yHigh = getY()+SAMPLE_FRAME_SIZE/2;
+		int xLow = getX()-SAMPLE_FRAME_SIZE/2;
+		int xHigh = getX()+SAMPLE_FRAME_SIZE/2;
 
 		if(yLow < 0) {
 			yHigh = SAMPLE_FRAME_SIZE;
@@ -457,6 +441,10 @@ public class TripCircle {
 		g.setColor(Color.blue);
 		g.drawString("  "+code, 2, 8);
 		return processedTripcode;
+	}
+
+	public int getID() {
+		return 0;
 	}
 
 }

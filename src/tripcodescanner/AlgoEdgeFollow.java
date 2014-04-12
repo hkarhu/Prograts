@@ -59,11 +59,10 @@ public class AlgoEdgeFollow {
                         // If the number of points in the edgel is minor than 30
                         // b) If the EdgeNumPixels / DistanceBetweenEdgeExtremes < 10 is an invalid edge
                         //    because we are looking for edges with elliptical shape that should form closed chains of edgels
-                        int distanceExtremeEdgels = Math.abs( ( (Edgel)
-                            currentEdge.get(0)).getCoordX() -
-                            ( (Edgel) currentEdge.get(numEdgels - 1)).getCoordX()) +
-                            Math.abs( ( (Edgel) currentEdge.get(0)).getCoordY() -
-                                     ( (Edgel) currentEdge.get(numEdgels - 1)).
+                        int distanceExtremeEdgels = Math.abs( currentEdge.get(0).getCoordX() -
+                            currentEdge.get(numEdgels - 1).getCoordX()) +
+                            Math.abs( currentEdge.get(0).getCoordY() -
+                                     currentEdge.get(numEdgels - 1).
                                      getCoordY());
 
                         if (numEdgels > 30) {
@@ -72,10 +71,9 @@ public class AlgoEdgeFollow {
                                 //if ( ((float)(numEdgels / DistanceExtremeEdgels)) > 5.0 ) {
                                 edgesList.add(currentEdge);
                                 for (int iEdgel = 0; iEdgel < numEdgels; iEdgel++)
-                                    edgeTrackedImage[ ( (Edgel)
-                                        currentEdge.get(iEdgel)).getCoordX() *
+                                    edgeTrackedImage[ currentEdge.get(iEdgel).getCoordX() *
                                         sampleSize +
-                                        ( (Edgel) currentEdge.get(iEdgel)).
+                                        currentEdge.get(iEdgel).
                                         getCoordY()] = AlgorithmConstants.WHITE;
                             }
                         } else {
@@ -84,10 +82,9 @@ public class AlgoEdgeFollow {
                                 (numEdgels / distanceExtremeEdgels) > 5) {
                                 edgesList.add(currentEdge);
                                 for (int iEdgel = 0; iEdgel < numEdgels; iEdgel++)
-                                    edgeTrackedImage[ ( (Edgel)
-                                        currentEdge.get(iEdgel)).getCoordX() *
+                                    edgeTrackedImage[ currentEdge.get(iEdgel).getCoordX() *
                                         sampleSize +
-                                        ( (Edgel) currentEdge.get(iEdgel)).
+                                        currentEdge.get(iEdgel).
                                         getCoordY()] = AlgorithmConstants.WHITE;
                             }
                         }

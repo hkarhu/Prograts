@@ -57,7 +57,8 @@ public class Edgel {
         }
     }
 
-    public String toString() {
+    @Override
+	public String toString() {
         return "[" + this.getCoordX() + " - " + this.getCoordY() + "]";
     }
 }
