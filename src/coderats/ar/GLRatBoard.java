@@ -41,7 +41,7 @@ public class GLRatBoard extends GLDrawableItem {
 
 				for(GLRat r : rats){
 					if(r.getX() == x && r.getY() == y){
-						r.glDraw();
+						r.glDraw(time);
 					}
 				}
 				GL11.glTranslatef(0, SQUARE_SIZE, 0);
@@ -51,6 +51,10 @@ public class GLRatBoard extends GLDrawableItem {
 		
 		GL11.glPopMatrix();
 
+	}
+	
+	public void advanceLogic(Command p1Command, Command p2Command){
+		
 	}
 	
 	

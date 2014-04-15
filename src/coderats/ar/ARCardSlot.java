@@ -17,7 +17,7 @@ public class ARCardSlot extends GLDrawableItem {
 	private float slot_width = 0.4f*SCALE;
 	private float slot_heigth = 0.6f*SCALE;
 	
-	private ARCard card;
+	private Command card;
 	
 	private float activateTime = -1;
 		

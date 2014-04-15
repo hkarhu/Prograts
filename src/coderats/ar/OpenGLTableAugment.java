@@ -64,10 +64,6 @@ public class OpenGLTableAugment extends GLCore implements GLKeyboardListener, AR
 		startTime = System.currentTimeMillis();
 		
 	}
-	
-	private void addScene(GameScene s) {
-		gameScenes.add(s);
-	}
 
 	@Override
 	public DisplayModePack glPickDisplayMode() throws Exception {
@@ -109,7 +105,8 @@ public class OpenGLTableAugment extends GLCore implements GLKeyboardListener, AR
 		GL11.glCullFace( GL11.GL_BACK );
 
 		//GL11.glEnable( GL11.GL_BLEND );
-		GL11.glEnable( GL11.GL_LIGHTING );
+		//GL11.glEnable( GL11.GL_LIGHTING );
+		GL11.glDisable(GL11.GL_LIGHTING);
 		GL11.glEnable( GL11.GL_DITHER );
 		//GL11.glEnable( GL11.GL_SHADE_MODEL );
 		GL11.glEnable( GL11.GL_SMOOTH );
@@ -175,7 +172,6 @@ public class OpenGLTableAugment extends GLCore implements GLKeyboardListener, AR
 		GL11.glLoadIdentity();
 		GL11.glTranslatef(0, 0, 0);
 		GLGraphicRoutines.initOrtho();
-		GL11.glDisable(GL11.GL_LIGHTING);
 
 		//startScreen.glDraw(currentTime);
 		
@@ -204,9 +200,9 @@ public class OpenGLTableAugment extends GLCore implements GLKeyboardListener, AR
 	}
 
 	private void resetGameEngine(){
-		addScene(intro);
-		addScene(allocateStage);
-		addScene(assembleStage);
+		gameScenes.add(intro);
+		gameScenes.add(allocateStage);
+		gameScenes.add(assembleStage);
 	}
 	
 	@Override

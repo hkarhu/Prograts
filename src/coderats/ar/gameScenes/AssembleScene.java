@@ -72,8 +72,8 @@ public class AssembleScene extends GameScene {
 			
 		}
 		GL11.glPushMatrix();
-			GL11.glColor3f(0, 0, 1);
-			GLBitmapFontBlitter.blitSinString((char)0x9f+"    ------------"+(char)0x9f+"    ------------", 0.5f, 0.8f, 1, 1.9f, -time*0.001f, "font_default");
+			GL11.glColor4f(0, 0, 1, 0.5f);
+			GLBitmapFontBlitter.blitSinString((char)0x9f+"    ------------"+(char)0x9f+"    ------------", 0.5f, 0.8f, 1, 2.5f, -time*0.001f, "font_default");
 		GL11.glPopMatrix();
 	}
 

@@ -10,17 +10,17 @@ public class RatsAR {
 	
 	public static void main(String[] args) {
 
-		input = new WebcamImageProcessor();
+		//input = new WebcamImageProcessor();
 		table = new OpenGLTableAugment();
 		
-		table.setKnownCards(input.getKnownCards());
+		//table.setKnownCards(input.getKnownCards());
 		
 		table.startGL();
 		
 	}
 
 	public static void requestShutdown() {
-		input.shutdown();
+		//input.shutdown();
 		table.requestClose();
 	}
 

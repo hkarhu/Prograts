@@ -1,10 +1,13 @@
 package coderats.ar;
 
+import org.lwjgl.opengl.GL11;
+
 import ae.gl.GLGraphicRoutines;
+import ae.gl.texture.GLTextureManager;
 
 public class GLRat {
 
-	private static float RAT_SIZE = 0.1f;
+	private static float RAT_SIZE = 0.9f;
 	
 	private int x;
 	private int y;
@@ -18,8 +21,13 @@ public class GLRat {
 		this.r = r;
 	}
 	
-	public void glDraw(){
-		GLGraphicRoutines.drawLineRect(1.0f, -RAT_SIZE, -RAT_SIZE, RAT_SIZE, RAT_SIZE, 0);
+	public void glDraw(long time){
+		RAT_SIZE = 0.3f;
+		GLTextureManager.getInstance().bindTexture("rat");
+		GL11.glPushMatrix();
+			//GL11.glRotatef(90*r+(float) Math.sin(time), 0, 0, 1);
+			GLGraphicRoutines.draw2DRect(-RAT_SIZE, -RAT_SIZE, RAT_SIZE, RAT_SIZE, 0);
+		GL11.glPopMatrix();
 	}
 	
 	public void stp(){
