@@ -12,6 +12,8 @@ public class ARCard extends GLDrawableItem {
 	float y;
 	float id;
 	float angle;
+	float quality;
+	
 	Command cmd;
 	
 	float c1x;
@@ -23,12 +25,15 @@ public class ARCard extends GLDrawableItem {
 	float c4x;
 	float c4y;
 	
-	public ARCard(float x, float y, float angle, float id, Command cmd) {
+	public ARCard(float x, float y, float angle, float id, float quality) {
+		
+		cmd = null;
+		
 		this.x = x;
 		this.y = y;
 		this.angle = angle;
 		this.id = id;
-		this.cmd = cmd;
+		this.quality = quality;
 		
 		c1x = c2x = -0.1575f*SCALE;
 		c3x = c4x = 0.2825f*SCALE;
@@ -36,16 +41,13 @@ public class ARCard extends GLDrawableItem {
 		c1y = c4y = 0.31f*SCALE;
 		
 	}
-	
-	public ARCard(int x, int y, float angle, int id) {
-		this(x, y, angle, id, null);
-	}
 
 	@Override
 	public void glDraw(long time) {
+		
 		GL11.glPushMatrix();
 			
-			cmd.commandGLColorize();
+			//cmd.commandGLColorize();
 			GL11.glTranslatef(x, y, 0);
 			GL11.glRotatef((float) Math.toDegrees(angle), 0, 0, 1);
 			
@@ -60,16 +62,21 @@ public class ARCard extends GLDrawableItem {
 			
 			GL11.glTranslatef(0.065f*SCALE, 0.215f*SCALE, 0);
 			
-			GLBitmapFontBlitter.drawString(cmd.getCommandString(), "font_default", 0.1f*SCALE, 0.2f*SCALE, GLBitmapFontBlitter.Alignment.CENTERED);
+			//GLBitmapFontBlitter.drawString(cmd.getCommandString(), "font_default", 0.1f*SCALE, 0.2f*SCALE, GLBitmapFontBlitter.Alignment.CENTERED);
 			
 			//GLGraphicRoutines.drawLineRect(1.0f, -GLValues.glWidth*0.49f, -GLValues.glHeight*0.49f, GLValues.glWidth*0.49f, GLValues.glHeight*0.49f, 0);
 		GL11.glPopMatrix();
 	}
 
-	public void updateValues(float x, float y, float a) {
+	public void updateValues(float x, float y, float a, float quality) {
+		this.quality = quality;
 		this.x = x;
 		this.y = y;
 		this.angle = a;
+	}
+
+	public float getQuality() {
+		return quality;
 	}
 
 }

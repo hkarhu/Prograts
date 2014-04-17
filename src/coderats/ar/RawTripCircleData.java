@@ -3,6 +3,9 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.lang.reflect.Array;
+import java.util.Arrays;
+
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
@@ -11,8 +14,8 @@ import org.opencv.imgproc.Imgproc;
 
 public class RawTripCircleData {
 
-	private final int BUFFER_SIZE = 5;
-	private final int PROXIMITY = 50;
+	private final int BUFFER_SIZE = 10;
+	private final int PROXIMITY = 52;
 	private final int TIMEOUT = 250;
 	private final int SAMPLE_FRAME_SIZE = 64;
 	private final int THRESHOLD = 127;
@@ -38,11 +41,14 @@ public class RawTripCircleData {
 
 	private BufferedImage processedTripcode;
 	private int code;
+	private int[] code_confirms;
+	private int max_code_index;
 
 	public RawTripCircleData() {
 		x = new float[BUFFER_SIZE];
 		y = new float[BUFFER_SIZE];
 		r = new float[BUFFER_SIZE];
+		code_confirms = new int[BUFFER_SIZE];
 		code = 0;
 		processedTripcode = new BufferedImage(SAMPLE_FRAME_SIZE, SAMPLE_FRAME_SIZE, BufferedImage.TYPE_3BYTE_BGR);
 	}
@@ -363,13 +369,23 @@ public class RawTripCircleData {
 		}
 		
 		if(dataCorrect){
-			code = data[0] + data[1]*3 + data[2]*9 + data[3]*27 + data[4]*81 + data[5]*243;
+			
+			int newCode = data[0] + data[1]*3 + data[2]*9 + data[3]*27 + data[4]*81 + data[5]*243;
+
+			for(int i=0; i < code_confirms.length; i++){
+				if(code_confirms[i] == newCode){
+					if(i > max_code_index) max_code_index = i;
+					continue;
+				}
+				code_confirms[i] = newCode;
+			}
+			
 		}
 		
 	}
 
 	private void updateAngle(float b){
-		if(a==0) a=b; else a = (a+a+b)/3;
+		if(a==0) a=b; else a = (3*a+b)/4;
 		lastAngle = a;
 	}
 	
@@ -437,12 +453,12 @@ public class RawTripCircleData {
 		g.setColor(Color.white);
 		g.fillRect(0, 0, 64, 8);
 		g.setColor(Color.blue);
-		g.drawString("  "+code, 2, 8);
+		g.drawString("  "+getID(), 2, 8);
 		return processedTripcode;
 	}
 
 	public int getID() {
-		return code;
+		return code_confirms[max_code_index];
 	}
 	
 	public int getX(){
@@ -454,12 +470,101 @@ public class RawTripCircleData {
 	}
 
 	public float getQuality() {
-		if(code != 0) return 1;
-		return 0;
+		
+		float quality = 1;
+		
+		int[] c = codemode(code_confirms.clone());
+		
+		if(c[0] == 0) return 0;
+		
+		quality = c[1]/(float)BUFFER_SIZE;
+		
+		//quality = 0.5f*(1-separation(r));
+		
+		//quality -= (separation(x)/30 + separation(y)/30);
+		
+		//quality += 1 - (System.currentTimeMillis() - timestamp)/TIMEOUT;
+		
+		if(quality < 0) return 0;
+		if(quality > 1) return 1;
+		return quality;
+		
+	}
+	
+	public static float separation(float a[]){
+		Arrays.sort(a);
+		float min = Integer.MAX_VALUE;
+		float max = 0;
+		
+		for(float i : a){
+			if(i < min) min = i;
+			else if(i > max) max = i;
+		}
+		
+		return max - min;
+	}
+	
+	public static int[] codemode(int a[]) {
+		
+		Arrays.sort(a);
+		
+		int modeNum = a[0];
+		int testNum = a[0];
+		int curCount = 0;
+		int maxCount = 0;
+		
+		for(int i=1; i < a.length; i++){
+			
+			if(a[i] == 0) break;
+			
+			if(a[i] == testNum){
+				curCount++;
+			} else {
+				if(curCount > maxCount){
+					modeNum = testNum;
+					maxCount = curCount;
+				}
+				testNum = a[i];
+				curCount = 0;
+			}
+			
+			if(maxCount >= a.length-i) break;
+		}
+		
+		return new int[] {modeNum, maxCount};
+		
+	}
+	
+	private float getMostFrequent(float[] a){
+		Arrays.sort(a);
+		
+		float modeNum = a[0];
+		float testNum = a[0];
+		float curCount = 0;
+		float maxCount = 0;
+		
+		for(int i=1; i < a.length; i++){
+			
+			if(a[i] == testNum){
+				curCount++;
+			} else {
+				if(curCount > maxCount){
+					modeNum = testNum;
+					maxCount = curCount;
+				}
+				testNum = a[i];
+				curCount = 0;
+			}
+			
+			if(maxCount >= a.length-i) break;
+			
+		}
+		
+		return modeNum;
 	}
 	
 	public float getAngle(){
-		return lastAngle;
+		return r[last_index];
 	}
 
 }

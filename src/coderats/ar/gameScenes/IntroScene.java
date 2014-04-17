@@ -1,9 +1,14 @@
 package coderats.ar.gameScenes;
 
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
+
+import javax.swing.text.html.parser.Entity;
 
 import org.lwjgl.opengl.GL11;
 
+import coderats.ar.ARCard;
 import ae.gl.GLGraphicRoutines;
 import ae.gl.GLValues;
 import ae.gl.text.GLBitmapFontBlitter;
@@ -17,14 +22,16 @@ public class IntroScene extends GameScene {
 	private long currentTime = -1;
 	private boolean exit = false;
 	
-	private ConcurrentLinkedDeque<float[]> trackedCards;
+	private ConcurrentHashMap<Integer, ARCard> knownCards;
 
-	public IntroScene() {
+	public IntroScene(ConcurrentHashMap<Integer, ARCard> knownCards) {
 
 		particleCloud = new ParticleCloud();
 		particleCloud.setNumParticles(2000);
 
-		trackedCards = new ConcurrentLinkedDeque<>();
+		this.knownCards = knownCards;
+		
+		System.out.println(knownCards.size());
 		
 		for(int i=0; i<particleCloud.getNumParticles(); i++) particleCloud.advance();
 
@@ -99,20 +106,15 @@ public class IntroScene extends GameScene {
 	
 			GL11.glPopMatrix();
 			
-			System.out.println(st);
-			
 			if(st > 1) exit = true;
 		}
 		
-//		for(float[] p : trackedCards){
-//			GL11.glPushMatrix();
-//				GL11.glTranslatef(GLValues.glWidth/2, GLValues.glHeight/2, 0);
-//				GLTextureManager.unbindTexture();
-//				GL11.glTranslatef(p[0], p[1]-0.2f, 0);
-//				GL11.glRotatef(time*0.02f, 0, 0, 1f);
-//				GLGraphicRoutines.drawLineCircle(0.4f, 30, 0.2f);
-//			GL11.glPopMatrix();
-//		}
+		if(knownCards.size() >= 1){
+			for(Entry<Integer, ARCard> c : knownCards.entrySet()){
+				ARCard card = c.getValue();
+				if(card.getQuality() > 0.8f) card.glDraw(time);
+			}
+		}
 		
 	}
 

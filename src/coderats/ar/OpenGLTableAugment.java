@@ -4,9 +4,7 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
@@ -15,10 +13,6 @@ import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.PixelFormat;
 
-import coderats.ar.gameScenes.AllocateScene;
-import coderats.ar.gameScenes.AssembleScene;
-import coderats.ar.gameScenes.GameScene;
-import coderats.ar.gameScenes.IntroScene;
 import ae.AE;
 import ae.gl.GLGraphicRoutines;
 import ae.gl.GLValues;
@@ -27,6 +21,10 @@ import ae.gl.core.GLCore;
 import ae.gl.core.GLKeyboardListener;
 import ae.gl.texture.GLTextureManager;
 import ae.routines.S;
+import coderats.ar.gameScenes.AllocateScene;
+import coderats.ar.gameScenes.AssembleScene;
+import coderats.ar.gameScenes.GameScene;
+import coderats.ar.gameScenes.IntroScene;
 
 
 public class OpenGLTableAugment extends GLCore implements GLKeyboardListener, ARCardListener  {
@@ -38,13 +36,12 @@ public class OpenGLTableAugment extends GLCore implements GLKeyboardListener, AR
 	private AssembleScene assembleStage;
 	
 	private ConcurrentLinkedDeque<ARCard> p1Cards, p2Cards;
-	private ConcurrentHashMap<Integer, ARCard> knownCards;
+	//private ConcurrentHashMap<Integer, ARCard> knownCards;
 	
 	private LinkedList<GameScene> gameScenes;
 	
-	public OpenGLTableAugment() {
+	public OpenGLTableAugment(ConcurrentHashMap<Integer, ARCard> knownCards) {
 		
-		knownCards = new ConcurrentHashMap<>();
 		p1Cards = new ConcurrentLinkedDeque<>();
 		p2Cards = new ConcurrentLinkedDeque<>();
 		
@@ -55,7 +52,9 @@ public class OpenGLTableAugment extends GLCore implements GLKeyboardListener, AR
 		GLValues.setScreenSize(RatsAR.WINDOW_WIDTH, RatsAR.WINDOW_HEIGHT);
 		GLValues.calculateRatios();
 		
-		intro = new IntroScene();
+		//this.knownCards = knownCards;
+		
+		intro = new IntroScene(knownCards);
 		allocateStage = new AllocateScene();
 		assembleStage = new AssembleScene();
 
@@ -226,15 +225,16 @@ public class OpenGLTableAugment extends GLCore implements GLKeyboardListener, AR
 	public void glKeyUp(int eventKey) {
 		System.out.println(eventKey);
 		gameScenes.getFirst().processInput(eventKey);
+		
 	}
 
 	@Override
 	public void cardDataUpdated(int id) {
 		//knownCards.get(id).updateValues(x,y,a);
 	}
-
-	public void setKnownCards(ConcurrentHashMap<Integer, ARCard> knownCards) {
-		this.knownCards = knownCards;
+	
+	public void setKnownCards(ConcurrentHashMap<Integer, ARCard> t){
+		System.out.println("setknow" + t.size());
 	}
 
 }

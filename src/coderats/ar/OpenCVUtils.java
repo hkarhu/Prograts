@@ -78,7 +78,7 @@ public class OpenCVUtils {
 			return null;  
 		}  
 		BufferedImage image = new BufferedImage(cols, rows, type);  
-		image.getRaster().setDataElements(0, 0, cols, rows, data);  
+		image.getRaster().setDataElements(0, 0, cols, rows, data);
 		return image;
 	}  
 

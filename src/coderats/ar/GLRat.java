@@ -7,12 +7,12 @@ import ae.gl.texture.GLTextureManager;
 
 public class GLRat {
 
-	private static float RAT_SIZE = 0.9f;
+	private static final float RAT_SIZE = 0.2f;
 	
 	private int x;
 	private int y;
 	private int r;
-	boolean shooting=false;
+	boolean shooting = false;
 	boolean nop = false;
 	
 	public GLRat(int x, int y, int r) {
@@ -22,10 +22,9 @@ public class GLRat {
 	}
 	
 	public void glDraw(long time){
-		RAT_SIZE = 0.3f;
 		GLTextureManager.getInstance().bindTexture("rat");
 		GL11.glPushMatrix();
-			//GL11.glRotatef(90*r+(float) Math.sin(time), 0, 0, 1);
+			GL11.glRotatef(90*r+(float) Math.sin(time*0.004f), 0, 0, 1);
 			GLGraphicRoutines.draw2DRect(-RAT_SIZE, -RAT_SIZE, RAT_SIZE, RAT_SIZE, 0);
 		GL11.glPopMatrix();
 	}

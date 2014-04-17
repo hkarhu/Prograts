@@ -17,7 +17,7 @@ public class ARCardSlot extends GLDrawableItem {
 	private float slot_width = 0.4f*SCALE;
 	private float slot_heigth = 0.6f*SCALE;
 	
-	private Command card;
+	private Command command;
 	
 	private float activateTime = -1;
 		
@@ -56,8 +56,8 @@ public class ARCardSlot extends GLDrawableItem {
 		return false;
 	}
 
-	public void setARCard(ARCard card){
-		this.card = card;
+	public void setCommand(Command c){
+		this.command = c;
 	}
 	
 }
