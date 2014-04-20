@@ -6,8 +6,8 @@ import org.lwjgl.opengl.GL11;
 
 public class Command {
 	
-	enum Type {
-		STEP, ROTL, ROTR, PEW
+	public enum Type {
+		STP, ROL, ROR, PEW, NOP
 	}
 	
 	private Type type;
@@ -18,25 +18,46 @@ public class Command {
 
 	public Color getCommandColor(){
 		switch (type) {
-			case STEP: return Color.getHSBColor(1, 1, 1);
-			case ROTL: return Color.getHSBColor(1, 1, 1);
-			case ROTR: return Color.getHSBColor(1, 1, 1);
-			case PEW: return Color.getHSBColor(1, 1, 1);
+			case STP: return Color.getHSBColor(0, 0, 1);
+			case ROL: return Color.getHSBColor(1, 0, 1);
+			case ROR: return Color.getHSBColor(0, 1, 1);
+			case PEW: return Color.getHSBColor(1, 0, 0);
 			default: return Color.white;
 		}
 	}
 	
-	public void commandGLColorize(){
-		GL11.glColor3f(getCommandColor().getRed()/255.0f, getCommandColor().getGreen()/255.0f, getCommandColor().getBlue()/255.0f);
+	public void GLColorizeDark(){
+		switch (type) {
+		case STP: GL11.glColor4f(0, 0, 0.5f, 1); break;
+		case ROL: GL11.glColor4f(0.5f, 0, 0.5f, 1); break;
+		case ROR: GL11.glColor4f(0, 0.5f, 0.5f, 1); break;
+		case PEW: GL11.glColor4f(0.5f, 0, 0, 1); break;
+		default:  GL11.glColor4f(0.5f, 0.5f, 0.5f, 1); break;
+		}
 	}
 	
 	public String getCommandString(){
 		switch (type) {
-			case STEP: return "STP";
-			case ROTL: return "RTL";
-			case ROTR: return "RTR";
+			case STP: return "STP";
+			case ROL: return "ROL";
+			case ROR: return "ROR";
 			case PEW: return "PEW";
-			default: return "???";
+			default: return "NOP";
 		}
+	}
+
+	public void GLColorizeLight() {
+		switch (type) {
+		case STP: GL11.glColor4f(0, 0, 1, 1); break;
+		case ROL: GL11.glColor4f(1, 0, 1, 1); break;
+		case ROR: GL11.glColor4f(0, 1, 1, 1); break;
+		case PEW: GL11.glColor4f(1, 0, 0, 1); break;
+		default:  GL11.glColor4f(1, 1, 1, 1); break;
+		}
+	}
+
+	public Type getType() {
+		if(type == null) return Type.NOP;
+		return type;
 	}
 }

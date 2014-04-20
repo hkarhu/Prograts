@@ -65,7 +65,7 @@ public class OpenCVUtils {
 			break;  
 		case 3:  
 			type = BufferedImage.TYPE_INT_BGR;  
-			// bgr to rgb  
+			// bgr to rgb
 			byte b;  
 			for(int i=0; i<data.length; i=i+3) {  
 				b = data[i];  

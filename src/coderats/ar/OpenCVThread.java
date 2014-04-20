@@ -45,11 +45,11 @@ public class OpenCVThread {
 		//Init
 		try {
 			inputVideo = new VideoCapture();
-			inputVideo.open(0);
+			inputVideo.open(1);
 			Thread.sleep(1000);
 			inputVideo.set(OpenCVUtils.CAP_PROP_FRAME_WIDTH, 640);
 			inputVideo.set(OpenCVUtils.CAP_PROP_FRAME_HEIGHT, 480);
-			inputVideo.set(OpenCVUtils.CAP_PROP_FPS, 60);
+			inputVideo.set(OpenCVUtils.CAP_PROP_FPS, 30);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}

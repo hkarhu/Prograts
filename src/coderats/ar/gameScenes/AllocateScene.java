@@ -1,7 +1,13 @@
 package coderats.ar.gameScenes;
 
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.lwjgl.opengl.GL11;
 
+import coderats.ar.ARCard;
+import coderats.ar.ARCardListener;
+import coderats.ar.Command;
 import ae.gl.GLGraphicRoutines;
 import ae.gl.GLValues;
 import ae.gl.text.GLBitmapFontBlitter;
@@ -9,16 +15,27 @@ import ae.gl.texture.GLTextureManager;
 
 public class AllocateScene extends GameScene {
 
+	private static final int ALLOCATE_TIME = 5000;
 	private long allocateTimer;
 	private long exitTime;
 	private AllocateHalf p1Allocate;
 	private AllocateHalf p2Allocate;
+	
+	private ConcurrentHashMap<Integer, ARCard> knownCards;
+	private ConcurrentHashMap<Integer, ARCard> p1Cards, p2Cards;
 
-	public AllocateScene() {
+	public AllocateScene(ConcurrentHashMap<Integer, ARCard> knownCards, ConcurrentHashMap<Integer, ARCard> p1Cards, ConcurrentHashMap<Integer, ARCard> p2Cards) {
+		
+		this.knownCards = knownCards;
+		
 		p1Allocate = new AllocateHalf(true);
 		p2Allocate = new AllocateHalf(false);
 		allocateTimer = -1;
 		exitTime = -1;
+		
+		this.p1Cards = p1Cards;
+		this.p2Cards = p2Cards;
+		
 	}
 
 	@Override
@@ -45,11 +62,11 @@ public class AllocateScene extends GameScene {
 			GL11.glTranslatef(GLValues.glWidth*0.5f, GLValues.glHeight*0.5f, -5);
 			GLBitmapFontBlitter.blitSinString("ALLOCATE      ALLOCATE      ", 0.5f, 0.9f, 1, 1+3*(1-in), 0.9f+(float)Math.sin(time*0.003f)*0.2f, "font_code");
 			
-			allocateTimer = time+10000;
+			allocateTimer = time+ALLOCATE_TIME;
 
 		} else {
 
-			float q = 1-(allocateTimer-time)/10000.0f;
+			float q = 1-(allocateTimer-time)/(float)ALLOCATE_TIME;
 
 			GLTextureManager.unbindTexture();
 			GL11.glColor4f(1, 1, 1, 1);
@@ -62,7 +79,7 @@ public class AllocateScene extends GameScene {
 					GL11.glPushMatrix();
 					GLGraphicRoutines.drawLineRect(1.0f, GLValues.glWidth*0.49f, GLValues.glHeight*0.15f, GLValues.glWidth*0.51f, GLValues.glHeight*0.85f, 0);
 					GLGraphicRoutines.draw2DRect(GLValues.glWidth*0.492f, GLValues.glHeight*(0.154f + 0.346f*q), GLValues.glWidth*0.508f, GLValues.glHeight*(0.846f - 0.354f*q), 0);
-					GL11.glTranslatef(GLValues.glWidth*0.5f, GLValues.glHeight*0.08f, 0);
+					GL11.glTranslatef(GLValues.glWidth*0.5f, 0, 0);
 					GL11.glRotatef(90, 0, 0, 1);
 					GLBitmapFontBlitter.drawString(999-(int)(999*q)+"", "font_code", GLValues.glWidth*0.02f, GLValues.glWidth*0.02f, GLBitmapFontBlitter.Alignment.CENTERED);
 					GL11.glTranslatef(GLValues.glWidth*0.5f, 0, 0);
@@ -70,6 +87,14 @@ public class AllocateScene extends GameScene {
 					GLBitmapFontBlitter.drawString(999-(int)(999*q)+"", "font_code", GLValues.glWidth*0.02f, GLValues.glWidth*0.02f, GLBitmapFontBlitter.Alignment.CENTERED);
 					GL11.glPopMatrix();
 				}
+				
+				if(knownCards.size() >= 1){
+					for(Entry<Integer, ARCard> c : knownCards.entrySet()){
+						ARCard card = c.getValue();
+						if(card.getQuality() >= 0.8f) card.glDraw(time);
+					}
+				}
+				
 			} else if(time > exitTime) setRunning(false);
 		}
 
@@ -78,5 +103,57 @@ public class AllocateScene extends GameScene {
 	@Override
 	public void processInput(int inputKey) {
 
+	}
+
+	@Override
+	public void cardDataUpdated(int id) {
+		if(!isRunning()) return;
+		ARCard c = knownCards.get(id);
+		
+		if(c.getX() < GLValues.glWidth/2){
+			//P2 Cards
+			if(c.getY() < GLValues.glHeight/2){
+				if(c.getX() < GLValues.glWidth*0.25f){
+					c.setCommand(new Command(Command.Type.PEW));
+				} else {
+					c.setCommand(new Command(Command.Type.ROL));
+				}
+			} else {
+				if(c.getX() < GLValues.glWidth*0.25f){
+					c.setCommand(new Command(Command.Type.STP));
+				} else {
+					c.setCommand(new Command(Command.Type.ROR));
+				}
+			}
+			
+			p1Cards.remove(id);
+			p2Cards.put(id, c);
+			
+		} else {
+			//P1 Cards
+			if(c.getY() > GLValues.glHeight/2){
+				if(c.getX() > GLValues.glWidth*0.75f){
+					c.setCommand(new Command(Command.Type.PEW));
+				} else {
+					c.setCommand(new Command(Command.Type.ROL));
+				}
+			} else {
+				if(c.getX() > GLValues.glWidth*0.75f){
+					c.setCommand(new Command(Command.Type.STP));
+				} else {
+					c.setCommand(new Command(Command.Type.ROR));
+				}
+			}
+			
+			p2Cards.remove(id);
+			p1Cards.put(id, c);
+			
+		}
+		
+	}
+
+	@Override
+	public void cardAppeared(int id) {
+		cardDataUpdated(id);
 	}
 }

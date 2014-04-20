@@ -112,7 +112,7 @@ public class IntroScene extends GameScene {
 		if(knownCards.size() >= 1){
 			for(Entry<Integer, ARCard> c : knownCards.entrySet()){
 				ARCard card = c.getValue();
-				if(card.getQuality() > 0.8f) card.glDraw(time);
+				if(card.getQuality() >= 0.8f) card.glDrawDebug(time);
 			}
 		}
 		
@@ -126,6 +126,18 @@ public class IntroScene extends GameScene {
 	@Override
 	public void processInput(int inputKey) {
 		exitTime = currentTime + EXIT_DURATION;
+	}
+
+	@Override
+	public void cardAppeared(int id) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void cardDataUpdated(int id) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }

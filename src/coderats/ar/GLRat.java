@@ -2,18 +2,20 @@ package coderats.ar;
 
 import org.lwjgl.opengl.GL11;
 
+import coderats.ar.Command.Type;
 import ae.gl.GLGraphicRoutines;
 import ae.gl.texture.GLTextureManager;
 
 public class GLRat {
 
-	private static final float RAT_SIZE = 0.2f;
+	private static final float RAT_SIZE = 0.3f;
+	private static final int ANIM_LENGTH = 500;
 	
 	private int x;
 	private int y;
 	private int r;
-	boolean shooting = false;
-	boolean nop = false;
+	private Type lastCMD;
+	long anitime = -1;
 	
 	public GLRat(int x, int y, int r) {
 		this.x = x;
@@ -22,14 +24,36 @@ public class GLRat {
 	}
 	
 	public void glDraw(long time){
-		GLTextureManager.getInstance().bindTexture("rat");
+		
 		GL11.glPushMatrix();
-			GL11.glRotatef(90*r+(float) Math.sin(time*0.004f), 0, 0, 1);
-			GLGraphicRoutines.draw2DRect(-RAT_SIZE, -RAT_SIZE, RAT_SIZE, RAT_SIZE, 0);
+			GL11.glRotatef(90*r+180, 0, 0, 1);
+			GLGraphicRoutines.drawLineCircle(0.1f, 3, 2.0f);
+			GL11.glRotatef(-270, 0, 0, 1);
+			GL11.glColor3f(0.4f, 0.4f, 0.4f);
+			
+			
+			GL11.glColor4f(1,1,1,1);
+			GLTextureManager.getInstance().bindTexture("rat");
+			if(anitime > time){
+				float at = (anitime-time)/(float)ANIM_LENGTH;
+				switch (lastCMD) {
+					case STP: 
+						GL11.glTranslatef(-RAT_SIZE*at, 0, 0); 
+						GL11.glRotatef((float)Math.sin(time*0.002f)*0.4f, 0,0,1);
+					break;
+					case ROL: break;
+					case ROR: break;
+					case PEW: GL11.glScalef(2, 2, 2); break;
+					default: 
+						break;
+				}
+			}
+			GLGraphicRoutines.draw2DRect(-RAT_SIZE, -RAT_SIZE, RAT_SIZE, RAT_SIZE, -2);
+	
 		GL11.glPopMatrix();
 	}
 	
-	public void stp(){
+	private void stp(){
 		switch (r) {
 		case 0: y--; break;
 		case 1: x++; break;
@@ -39,22 +63,22 @@ public class GLRat {
 		}
 	}
 	
-	public void rol(){
+	private void rol(){
 		r--;
 		if(r < 0) r=3;
 	}
 	
-	public void ror(){
+	private void ror(){
 		r++;
-		if(r >= 3) r=0;
+		if(r > 3) r=0;
 	}
 	
-	public void pew(){
-		shooting=true;
+	private void pew(){
+		
 	}
 	
-	public void nop(){
-		nop = true;
+	private void nop(){
+		
 	}
 
 	public int getX() {
@@ -79,6 +103,18 @@ public class GLRat {
 
 	public void setRotation(int r) {
 		this.r = r;
+	}
+
+	public void execute(Type cmd, long time) {
+		switch (cmd) {
+			case STP: stp(); break;
+			case ROL: rol(); break;
+			case ROR: ror(); break;
+			case PEW: pew(); break;
+			default: nop(); break;
+		}
+		lastCMD = cmd;
+		anitime = time + ANIM_LENGTH;
 	}
 
 }

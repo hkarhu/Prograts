@@ -14,14 +14,14 @@ import org.opencv.imgproc.Imgproc;
 
 public class RawTripCircleData {
 
-	private final int BUFFER_SIZE = 10;
-	private final int PROXIMITY = 52;
-	private final int TIMEOUT = 250;
-	private final int SAMPLE_FRAME_SIZE = 64;
-	private final int THRESHOLD = 127;
-	private final float ROUGH_STEP = 0.35f;
-	private final float FINE_STEP = 0.05f;
-	private final int SCAN_DIVISIONS = 60;
+	private static final int BUFFER_SIZE = 10;
+	private static final int PROXIMITY = 52;
+	private static final int TIMEOUT = 250;
+	private static final int SAMPLE_FRAME_SIZE = 64;
+	private static final int THRESHOLD = 127;
+	private static final float ROUGH_STEP = 0.7f;
+	private static final float FINE_STEP = 0.18f;
+	private static final int SCAN_DIVISIONS = 30;
 	
 	private int last_index;
 
@@ -118,7 +118,7 @@ public class RawTripCircleData {
 	//		}
 	//	}
 
-	private float findAngleByMaximum(float from, float to, float step, Mat m){
+	private float findAngleByMaximum(float from, float to, float step, Mat m, Graphics2D g){
 		int lim = 0;
 		float target = Integer.MAX_VALUE;
 		float angle = from;
@@ -130,10 +130,11 @@ public class RawTripCircleData {
 			float yi = (float) (Math.cos(i));
 			lim = 0;
 
-			for(int d = 5; d < 25; d++){
+			for(int d = 5; d <= 30; d++){
 				int x = (int)(xi*d + SAMPLE_FRAME_SIZE/2.0f);				
 				int y = (int)(yi*d + SAMPLE_FRAME_SIZE/2.0f);
 				lim += m.get(y, x)[0];
+				g.drawLine(x, y, x, y);
 			}
 			
 			if(lim < target){
@@ -145,7 +146,7 @@ public class RawTripCircleData {
 		return angle;
 	}
 	
-	private float findAngleBySweep(float from, float step, Mat m){
+	private float findAngleBySweep(float from, float step, Mat m, Graphics2D g){
 	
 		float angle = from;
 		float value;
@@ -157,19 +158,27 @@ public class RawTripCircleData {
 			
 			value = 0;
 			
-			for(int r = 8; r < 15; r++){
+			g.setColor(Color.green);
+			
+			for(int r = 15; r <= 20; r++){
 				int x = (int)(xi*r + SAMPLE_FRAME_SIZE/2.0f);				
 				int y = (int)(yi*r + SAMPLE_FRAME_SIZE/2.0f);
 				value += (float) m.get(y, x)[0];
+				g.drawLine(x, y, x, y);
 			}
 			
-			value /= 15-8;
+			value /= 5;
+			
+			if(value > THRESHOLD){
+				angle += step;
+				step *= 0.5f;
+			}
 		
 			angle -= step;
 			
 			interrupt ++;
 		
-		} while (value < THRESHOLD && interrupt < 50);
+		} while (interrupt < 10);
 		
 		return angle;
 	}
@@ -230,8 +239,11 @@ public class RawTripCircleData {
 		float roughAngle = 0;
 		float refinedAngle = 0;
 
-		roughAngle = findAngleByMaximum(0, (float) (2*Math.PI), ROUGH_STEP, frame);
-		refinedAngle = findAngleBySweep(roughAngle-ROUGH_STEP, FINE_STEP, frame);
+		processedTripcode = OpenCVUtils.matToBufferedImage(frame);
+		Graphics2D g =  (Graphics2D) processedTripcode.getGraphics();
+		
+		roughAngle = findAngleByMaximum(0, (float) (2*Math.PI), ROUGH_STEP, frame, g);
+		refinedAngle = findAngleBySweep(roughAngle, FINE_STEP, frame, g);
 		
 		updateAngle(refinedAngle);
 		
@@ -271,8 +283,7 @@ public class RawTripCircleData {
 //            paramEdgesEllipses.add(params);
 //        }
 
-		processedTripcode = OpenCVUtils.matToBufferedImage(frame);
-		Graphics2D g =  (Graphics2D) processedTripcode.getGraphics();
+
 		
 		int[] rawData = new int[SCAN_DIVISIONS];
 		int di = 0;
@@ -290,7 +301,7 @@ public class RawTripCircleData {
 			if(x < 0) x = 0; else if(x >= SAMPLE_FRAME_SIZE) x = SAMPLE_FRAME_SIZE-1;
 			if(y < 0) y = 0; else if(y >= SAMPLE_FRAME_SIZE) y = SAMPLE_FRAME_SIZE-1;
 			
-			g.setColor(Color.black);
+			//g.setColor(Color.black);
 			//g.drawLine(SAMPLE_FRAME_SIZE/2, SAMPLE_FRAME_SIZE/2, x, y);
 			
 			//g.setColor(Color.white);
@@ -305,7 +316,7 @@ public class RawTripCircleData {
 				if(y < 0) y = 0; else if(y >= SAMPLE_FRAME_SIZE) y = SAMPLE_FRAME_SIZE-1;
 				
 				value1 += (float) (frame.get(y, x)[0]);
-				g.drawLine(x, y, x, y);
+				//g.drawLine(x, y, x, y);
 			}
 			value1 /= 3;
 			
@@ -317,7 +328,7 @@ public class RawTripCircleData {
 				
 				value2 += (float) (frame.get(y, x)[0]);
 				//value2 += (float) (frame.get(y, x)[0]);
-				g.drawLine(x, y, x, y);
+				//g.drawLine(x, y, x, y);
 			}
 			value2 /= 3;
 			
@@ -372,21 +383,23 @@ public class RawTripCircleData {
 			
 			int newCode = data[0] + data[1]*3 + data[2]*9 + data[3]*27 + data[4]*81 + data[5]*243;
 
-			for(int i=0; i < code_confirms.length; i++){
-				if(code_confirms[i] == newCode){
-					if(i > max_code_index) max_code_index = i;
-					continue;
-				}
-				code_confirms[i] = newCode;
-			}
+//			for(int i=0; i < code_confirms.length; i++){
+//				if(code_confirms[i] == newCode){
+//					if(i > max_code_index) max_code_index = i;
+//					continue;
+//				}
+//				code_confirms[i] = newCode;
+//			}
+			
+			code_confirms[last_index] = newCode;
 			
 		}
 		
 	}
 
 	private void updateAngle(float b){
-		if(a==0) a=b; else a = (3*a+b)/4;
-		lastAngle = a;
+		lastAngle = b;
+		//lastAngle += 0.1f;
 	}
 	
 	public boolean isDead(){
@@ -415,29 +428,29 @@ public class RawTripCircleData {
 		return false;
 	}
 
-//	public int getSmoothX() {
-//		if(xRecalc){
-//			lastX = 0;
-//			for(int i=0; i < BUFFER_SIZE; i++){
-//				lastX += x[i];
-//			}
-//			lastX /= BUFFER_SIZE;
-//			xRecalc = false;
-//		}
-//		return lastX;
-//	}
-//
-//	public int getSmoothY() {
-//		if(yRecalc){
-//			lastY = 0;
-//			for(int i=0; i < BUFFER_SIZE; i++){
-//				lastY += y[i];
-//			}
-//			lastY /= BUFFER_SIZE;
-//			yRecalc = false;
-//		}
-//		return lastY;
-//	}
+	public int getSmoothX() {
+		if(xRecalc){
+			lastX = 0;
+			for(int i=0; i < BUFFER_SIZE; i++){
+				lastX += x[i];
+			}
+			lastX /= BUFFER_SIZE;
+			xRecalc = false;
+		}
+		return lastX;
+	}
+
+	public int getSmoothY() {
+		if(yRecalc){
+			lastY = 0;
+			for(int i=0; i < BUFFER_SIZE; i++){
+				lastY += y[i];
+			}
+			lastY /= BUFFER_SIZE;
+			yRecalc = false;
+		}
+		return lastY;
+	}
 
 	public int getRadius() {
 		int tr = 0;
@@ -458,7 +471,7 @@ public class RawTripCircleData {
 	}
 
 	public int getID() {
-		return code_confirms[max_code_index];
+		return codemode(code_confirms.clone())[0];
 	}
 	
 	public int getX(){
@@ -477,13 +490,13 @@ public class RawTripCircleData {
 		
 		if(c[0] == 0) return 0;
 		
-		quality = c[1]/(float)BUFFER_SIZE;
+		//quality = c[1]/(float)BUFFER_SIZE;
 		
 		//quality = 0.5f*(1-separation(r));
 		
 		//quality -= (separation(x)/30 + separation(y)/30);
 		
-		//quality += 1 - (System.currentTimeMillis() - timestamp)/TIMEOUT;
+		quality -= (System.currentTimeMillis() - timestamp)/TIMEOUT;
 		
 		if(quality < 0) return 0;
 		if(quality > 1) return 1;
@@ -564,7 +577,7 @@ public class RawTripCircleData {
 	}
 	
 	public float getAngle(){
-		return r[last_index];
+		return lastAngle;
 	}
 
 }

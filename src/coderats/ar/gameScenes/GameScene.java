@@ -1,6 +1,8 @@
 package coderats.ar.gameScenes;
 
-public abstract class GameScene {
+import coderats.ar.ARCardListener;
+
+public abstract class GameScene implements ARCardListener {
 
 	private boolean running = false;
 	

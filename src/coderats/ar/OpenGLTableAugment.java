@@ -4,6 +4,7 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -27,7 +28,7 @@ import coderats.ar.gameScenes.GameScene;
 import coderats.ar.gameScenes.IntroScene;
 
 
-public class OpenGLTableAugment extends GLCore implements GLKeyboardListener, ARCardListener  {
+public class OpenGLTableAugment extends GLCore implements GLKeyboardListener, ARCardListener {
 
 	private long startTime;
 	private long currentTime;
@@ -35,15 +36,14 @@ public class OpenGLTableAugment extends GLCore implements GLKeyboardListener, AR
 	private AllocateScene allocateStage;
 	private AssembleScene assembleStage;
 	
-	private ConcurrentLinkedDeque<ARCard> p1Cards, p2Cards;
-	//private ConcurrentHashMap<Integer, ARCard> knownCards;
+	private ConcurrentHashMap<Integer, ARCard> p1Cards, p2Cards;
 	
 	private LinkedList<GameScene> gameScenes;
 	
 	public OpenGLTableAugment(ConcurrentHashMap<Integer, ARCard> knownCards) {
 		
-		p1Cards = new ConcurrentLinkedDeque<>();
-		p2Cards = new ConcurrentLinkedDeque<>();
+		p1Cards = new ConcurrentHashMap<>();
+		p2Cards = new ConcurrentHashMap<>();
 		
 		gameScenes = new LinkedList<GameScene>();
 		
@@ -55,8 +55,8 @@ public class OpenGLTableAugment extends GLCore implements GLKeyboardListener, AR
 		//this.knownCards = knownCards;
 		
 		intro = new IntroScene(knownCards);
-		allocateStage = new AllocateScene();
-		assembleStage = new AssembleScene();
+		allocateStage = new AllocateScene(knownCards, p1Cards, p2Cards);
+		assembleStage = new AssembleScene(knownCards, p1Cards, p2Cards);
 
 		resetGameEngine();
 		
@@ -228,13 +228,19 @@ public class OpenGLTableAugment extends GLCore implements GLKeyboardListener, AR
 		
 	}
 
-	@Override
-	public void cardDataUpdated(int id) {
-		//knownCards.get(id).updateValues(x,y,a);
-	}
-	
 	public void setKnownCards(ConcurrentHashMap<Integer, ARCard> t){
 		System.out.println("setknow" + t.size());
 	}
+
+	@Override
+	public void cardAppeared(int id) {
+		gameScenes.getFirst().cardAppeared(id);
+	}
+	
+	@Override
+	public void cardDataUpdated(int id) {
+		gameScenes.getFirst().cardDataUpdated(id);
+	}
+	
 
 }
