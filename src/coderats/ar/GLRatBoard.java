@@ -62,8 +62,14 @@ public class GLRatBoard extends GLDrawableItem {
 		rats.get(0).execute(p1Command, time);
 		rats.get(1).execute(p2Command, time);
 		
+		if(ratOutsideBoard(rats.get(0))){
+			//TODO
+		}
 		
-		
+	}
+
+	private boolean ratOutsideBoard(GLRat glRat) {
+		return glRat.getX() >= 8 || glRat.getX() < 0 || glRat.getY() >= 8 || glRat.getY() < 0;
 	}
 
 	public void punishPlayers(ConcurrentHashMap<Integer, ARCard> p1Cards,

@@ -32,7 +32,6 @@ public class GLRat {
 			GL11.glRotatef(-270, 0, 0, 1);
 			GL11.glColor3f(0.4f, 0.4f, 0.4f);
 			
-			
 			GL11.glColor4f(1,1,1,1);
 			GLTextureManager.getInstance().bindTexture("rat");
 			if(anitime > time || lastCMD.equals(Type.NOP)){
@@ -54,15 +53,14 @@ public class GLRat {
 						} else {
 							GLTextureManager.getInstance().bindTexture("rat_fire1");
 						}
-					
 						break;
 					default:
+						//GL11.glRotatef(time*0.03f, 0, 0, 1);
 						if(Math.sin(time*0.01f) < 0){
 							GLTextureManager.getInstance().bindTexture("rat_nop0");
 						} else {
 							GLTextureManager.getInstance().bindTexture("rat_nop1");
 						}
-					
 						break;
 				}
 			}

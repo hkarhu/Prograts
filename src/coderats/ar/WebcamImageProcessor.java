@@ -170,10 +170,10 @@ public class WebcamImageProcessor extends JFrame implements MouseListener, Mouse
 				if(c == null) continue;
 				
 				if(c.getQuality() >= 1 && knownCards.containsKey(c.getID())){
-					knownCards.get(c.getID()).updateValues(getCalibratedGLX(c.getX()), getCalibratedGLY(c.getY()), c.getAngle(), c.getQuality());
+					knownCards.get(c.getID()).updateValues(getCalibratedGLX(c.getX(),c.getY()), getCalibratedGLY(c.getX(),c.getY()), c.getAngle(), c.getQuality());
 					informListenersCardUpdated(c.getID());
 				} else {
-					knownCards.put(c.getID(), new ARCard(getCalibratedGLX(c.getX()), getCalibratedGLY(c.getY()), c.getAngle(), c.getID(), c.getQuality()));
+					knownCards.put(c.getID(), new ARCard(getCalibratedGLX(c.getX(),c.getY()), getCalibratedGLY(c.getX(),c.getY()), c.getAngle(), c.getID(), c.getQuality()));
 					informListenersCardAppeared(c.getID());
 				}
 				
@@ -184,8 +184,8 @@ public class WebcamImageProcessor extends JFrame implements MouseListener, Mouse
 				
 				webcamDebugG.setColor(Color.cyan);
 				webcamDebugG.drawLine(CPs[0][0],CPs[0][1], CPs[1][0], CPs[1][1]);
-				//webcamDebugG.drawLine(CPs[1][0],CPs[1][1], CPs[2][0], CPs[2][1]);
-				//webcamDebugG.drawLine(CPs[2][0],CPs[2][1], CPs[3][0], CPs[3][1]);
+				webcamDebugG.drawLine(CPs[1][0],CPs[1][1], CPs[2][0], CPs[2][1]);
+				webcamDebugG.drawLine(CPs[2][0],CPs[2][1], CPs[3][0], CPs[3][1]);
 				webcamDebugG.drawLine(CPs[3][0],CPs[3][1], CPs[0][0], CPs[0][1]);
 				
 				int dbgx = (i/8)*64;
@@ -264,12 +264,24 @@ public class WebcamImageProcessor extends JFrame implements MouseListener, Mouse
 		}
 	}
 	
-	private float getCalibratedGLX(int x){
-		return (1-(imageWidth-CPs[0][0]-CPs[1][0])/(float)imageWidth)*((x-CPs[0][0])/(float)imageWidth)*GLValues.glWidth;
+	private float getCalibratedGLX(int x, int y){
+		
+		float ymo = (y-(CPs[0][1]+CPs[3][1])/2.0f)/(float)(CPs[3][1]-CPs[0][1]);
+		float ymi = 1-ymo;
+		
+		return (((x-CPs[0][0])/(float)(CPs[1][0]-CPs[0][0]))*ymi + 
+				((x-CPs[3][0])/(float)(CPs[2][0]-CPs[3][0]))*ymo
+				)*GLValues.glWidth;
+		//return (1+(imageWidth-CPs[0][0]-CPs[1][0])/(float)imageWidth)*((x-CPs[0][0])/(float)imageWidth)*GLValues.glWidth;
 	}
 	
-	private float getCalibratedGLY(int y){
-		return (1-(imageHeight-CPs[0][1]-CPs[3][1])/(float)imageHeight)*((y-CPs[0][1])/(float)imageHeight)*GLValues.glHeight;
+	private float getCalibratedGLY(int x, int y){
+		float xmo = (x-(CPs[0][0]+CPs[1][0])/2.0f)/(float)(CPs[1][0]-CPs[0][0]);
+		float xmi = 1-xmo;
+		
+		return (((y-CPs[0][1])/(float)(CPs[3][1]-CPs[0][1]))*xmi + 
+				((y-CPs[1][1])/(float)(CPs[2][1]-CPs[1][1]))*xmo
+				)*GLValues.glHeight;
 	}
 	
 	@Override

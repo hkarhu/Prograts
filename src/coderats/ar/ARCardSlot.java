@@ -83,8 +83,14 @@ public class ARCardSlot extends GLDrawableItem {
 	
 	public boolean hits(ARCard card){
 		
-		return card.getX() > x-slot_width*0.5f && card.getX() < x+slot_width && 
-				card.getY() > y-slot_heigth && card.getY() < y+slot_heigth;
+		if(a > 180){
+			return card.getX() > x-slot_width && card.getX() < x+slot_width*0.5f && 
+					card.getY() > y-slot_heigth && card.getY() < y+slot_heigth;
+				
+		} else {
+			return card.getX() > x-slot_width*0.5f && card.getX() < x+slot_width && 
+					card.getY() > y-slot_heigth && card.getY() < y+slot_heigth;
+		}
 	}
 
 	public Type getSlottedCommandType() {
