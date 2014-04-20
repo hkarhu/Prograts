@@ -15,7 +15,7 @@ import ae.gl.texture.GLTextureManager;
 
 public class AllocateScene extends GameScene {
 
-	private static final int ALLOCATE_TIME = 5000;
+	private static final int ALLOCATE_TIME = 30000;
 	private long allocateTimer;
 	private long exitTime;
 	private AllocateHalf p1Allocate;
@@ -109,6 +109,12 @@ public class AllocateScene extends GameScene {
 	public void cardDataUpdated(int id) {
 		if(!isRunning()) return;
 		ARCard c = knownCards.get(id);
+		
+		if(c.getQuality() < 0.8f){
+			p1Cards.remove(id);
+			p2Cards.remove(id);
+			return;
+		}
 		
 		if(c.getX() < GLValues.glWidth/2){
 			//P2 Cards

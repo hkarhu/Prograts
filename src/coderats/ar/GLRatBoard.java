@@ -2,6 +2,7 @@ package coderats.ar;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.lwjgl.opengl.GL11;
 
@@ -63,6 +64,17 @@ public class GLRatBoard extends GLDrawableItem {
 		
 		
 		
+	}
+
+	public void punishPlayers(ConcurrentHashMap<Integer, ARCard> p1Cards,
+			ConcurrentHashMap<Integer, ARCard> p2Cards) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public boolean returnToAllocate() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }

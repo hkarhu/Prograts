@@ -2,9 +2,9 @@ package coderats.ar;
 
 import org.lwjgl.opengl.GL11;
 
-import coderats.ar.Command.Type;
 import ae.gl.GLGraphicRoutines;
 import ae.gl.texture.GLTextureManager;
+import coderats.ar.Command.Type;
 
 public class GLRat {
 
@@ -21,6 +21,7 @@ public class GLRat {
 		this.x = x;
 		this.y = y;
 		this.r = r;
+		lastCMD = Type.NOP;
 	}
 	
 	public void glDraw(long time){
@@ -34,17 +35,34 @@ public class GLRat {
 			
 			GL11.glColor4f(1,1,1,1);
 			GLTextureManager.getInstance().bindTexture("rat");
-			if(anitime > time){
+			if(anitime > time || lastCMD.equals(Type.NOP)){
 				float at = (anitime-time)/(float)ANIM_LENGTH;
 				switch (lastCMD) {
 					case STP: 
 						GL11.glTranslatef(-RAT_SIZE*at, 0, 0); 
-						GL11.glRotatef((float)Math.sin(time*0.002f)*0.4f, 0,0,1);
+						GL11.glRotatef((float)Math.sin(at*Math.PI*4)*10, 0,0,1);
 					break;
-					case ROL: break;
-					case ROR: break;
-					case PEW: GL11.glScalef(2, 2, 2); break;
-					default: 
+					case ROL:
+						GL11.glRotatef(90*at, 0,0,1);
+						break;
+					case ROR:
+						GL11.glRotatef(-90*at, 0,0,1);
+						break;
+					case PEW: 
+						if(time%2 == 0){
+							GLTextureManager.getInstance().bindTexture("rat_fire0");
+						} else {
+							GLTextureManager.getInstance().bindTexture("rat_fire1");
+						}
+					
+						break;
+					default:
+						if(Math.sin(time*0.01f) < 0){
+							GLTextureManager.getInstance().bindTexture("rat_nop0");
+						} else {
+							GLTextureManager.getInstance().bindTexture("rat_nop1");
+						}
+					
 						break;
 				}
 			}

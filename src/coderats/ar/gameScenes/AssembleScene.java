@@ -8,8 +8,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.lwjgl.opengl.GL11;
 
+import ae.gl.GLGraphicRoutines;
 import ae.gl.GLValues;
 import ae.gl.text.GLBitmapFontBlitter;
+import ae.gl.texture.GLTextureManager;
 import coderats.ar.ARCard;
 import coderats.ar.ARCardListener;
 import coderats.ar.ARCardSlot;
@@ -64,48 +66,76 @@ public class AssembleScene extends GameScene {
 	public void glDraw(long time) {
 		
 		GL11.glPushMatrix();
-		
-		if(knownCards.size() >= 1){
-			for(Entry<Integer, ARCard> c : knownCards.entrySet()){
-				ARCard card = c.getValue();
-				if(card.getQuality() >= 0.8f) card.glDraw(time);
+			if(knownCards.size() >= 1){
+				for(Entry<Integer, ARCard> c : knownCards.entrySet()){
+					ARCard card = c.getValue();
+					if(card.getQuality() >= 0.8f) card.glDraw(time);
+				}
 			}
-		}
-		
 		GL11.glPopMatrix();
 		
-		for(GLDrawableItem i : gameItems){
-			i.glDraw(time);
-		}
 		
-//		GL11.glPushMatrix();
-//		GL11.glRotatef(90, 0, 0, 1);
-//		GL11.glTranslatef(-2, -0.3f, 0);
-//		GLBitmapFontBlitter.drawString("# Cards", "font_code", GLValues.glWidth*0.014f, GLValues.glWidth*0.02f, GLBitmapFontBlitter.Alignment.CENTERED);
-//		GL11.glTranslatef(0, 0.5f, 0);
-//		GLBitmapFontBlitter.drawString(p1Cards.size() + "", "font_default", GLValues.glWidth*0.05f, GLValues.glWidth*0.1f, GLBitmapFontBlitter.Alignment.CENTERED);
-//		GL11.glPopMatrix();
-//		if(time < 3000){
-//			float in = (3000-time)/3000.0f;
-//			GL11.glColor4f(1, 1, 1, in);
-//			
-//			GLBitmapFontBlitter.blitSinString("ASSEMBLE      ASSEMBLE      ", 0.5f, 0.9f, 1, 1+3*(1-in), 0.9f+(float)Math.sin(time*0.003f)*0.2f, "font_code");
-//		}
-//		
-//		if(time < 10000){
-//			
-//		} else {
+		if(time < 3000){
+			GL11.glColor4f(0.2f, 0.2f, 0.2f, 1);
+			GLTextureManager.unbindTexture();
+			GLGraphicRoutines.drawRepeatedBackgroundPlane(1, 1, 1, 1);
+			GL11.glColor4f(1,1,1,1);
+			GL11.glPushMatrix();
+				GL11.glTranslatef(GLValues.glWidth*0.5f, GLValues.glHeight*0.5f, 0);
+				GLBitmapFontBlitter.blitSinString("READY?      READY?      ", 0.5f, 0.9f, 1, 2.5f, 0.9f+(float)Math.sin(time*0.003f)*0.2f, "font_code");
+			GL11.glPopMatrix();
+		} else if(time < 10000){
+			
+			for(ARCardSlot s : p1CardSlots){
+				s.glDraw(time);
+			}
+			
+			for(ARCardSlot s : p2CardSlots){
+				s.glDraw(time);
+			}
+			
+			float in = (10000-time)/3000.0f;
+			GL11.glColor4f(1, 1, 1, in);
+			GL11.glPushMatrix();
+				GL11.glTranslatef(GLValues.glWidth*0.5f, GLValues.glHeight*0.5f, 0);
+				GLBitmapFontBlitter.blitSinString("ASSEMBLE      ASSEMBLE      ", 0.5f, 0.9f, 1, 1+3*(1-in), 0.9f+(float)Math.sin(time*0.003f)*0.2f, "font_code");
+			GL11.glPopMatrix();
+		} else {
+			
+			for(GLDrawableItem i : gameItems){
+				i.glDraw(time);
+			}
 
-//			GL11.glPushMatrix();
-//				GL11.glColor4f(0, 0, 1, 0.5f);
-//				GL11.glTranslatef(0, 0, 4);
-//				GLBitmapFontBlitter.blitSinString("    " + "    ", 0.5f, 0.8f, 1, 2.5f, -time*0.001f, "font_default");
-//			GL11.glPopMatrix();
-//		}
-		
-		if(time > logicStepTime){
-			stepLogic(time);
-			logicStepTime = time + LOGIC_STEP_DELAY;
+			GL11.glPushMatrix();
+				GL11.glTranslatef(GLValues.glWidth*0.5f, GLValues.glHeight*0.5f, 0);
+				
+				GL11.glPushMatrix();
+					GL11.glColor4f(0, 1, 0, 0.1f);
+					GL11.glTranslatef(0, 0, 4);
+					GLBitmapFontBlitter.blitSinString("    " + "    ", 0.5f, 0.8f, 1, 2f, -time/(float)LOGIC_STEP_DELAY*0.5f, "font_default");
+				GL11.glPopMatrix();
+				
+				GL11.glColor4f(1, 1, 1, 1);
+				GL11.glPushMatrix();
+					GL11.glRotatef(90, 0, 0, 1);
+					GL11.glTranslatef(-2, -0.3f, 0);
+					GLBitmapFontBlitter.drawString("# Cards", "font_code", GLValues.glWidth*0.014f, GLValues.glWidth*0.02f, GLBitmapFontBlitter.Alignment.CENTERED);
+					GL11.glTranslatef(0, 0.45f, 0);
+					GLBitmapFontBlitter.drawString(p2Cards.keySet().size() + "", "font_default", GLValues.glWidth*0.05f, GLValues.glWidth*0.1f, GLBitmapFontBlitter.Alignment.CENTERED);
+				GL11.glPopMatrix();
+				GL11.glPushMatrix();
+					GL11.glRotatef(-90, 0, 0, 1);
+					GL11.glTranslatef(-2, -0.3f, 0);
+					GLBitmapFontBlitter.drawString("# Cards", "font_code", GLValues.glWidth*0.014f, GLValues.glWidth*0.02f, GLBitmapFontBlitter.Alignment.CENTERED);
+					GL11.glTranslatef(0, 0.45f, 0);
+					GLBitmapFontBlitter.drawString(p1Cards.keySet().size() + "", "font_default", GLValues.glWidth*0.05f, GLValues.glWidth*0.1f, GLBitmapFontBlitter.Alignment.CENTERED);
+				GL11.glPopMatrix();
+			GL11.glPopMatrix();
+			
+			if(time > logicStepTime){
+				stepLogic(time);
+				logicStepTime = time + LOGIC_STEP_DELAY;
+			}
 		}
 	}
 
@@ -150,11 +180,15 @@ public class AssembleScene extends GameScene {
 	}
 	
 	private void runCommand(long time){
+		if(gameBoard.returnToAllocate()){
+			
+		}
 		ARCardSlot p1slot = p1CardSlots.get(executeIndex);
 		ARCardSlot p2slot = p2CardSlots.get(4-executeIndex);
 		p1slot.activate(time);
 		p2slot.activate(time);
 		gameBoard.advanceLogic(p1slot.getSlottedCommandType(), p2slot.getSlottedCommandType(), time);
+		gameBoard.punishPlayers(p1Cards, p2Cards);
 		executeIndex++;
 		if(executeIndex >= 5) executeIndex = 0;
 	}
