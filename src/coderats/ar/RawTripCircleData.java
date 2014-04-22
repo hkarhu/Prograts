@@ -3,12 +3,21 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
+import javax.xml.crypto.dsig.spec.XSLTTransformParameterSpec;
+
+import org.omg.IOP.CodecOperations;
+import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
+import org.opencv.core.RotatedRect;
+import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
@@ -22,11 +31,12 @@ public class RawTripCircleData {
 	private static final float ROUGH_STEP = 0.7f;
 	private static final float FINE_STEP = 0.18f;
 	private static final int SCAN_DIVISIONS = 30;
+	private static final int DATA_LENGTH = 6;
 	
 	private int last_index;
 
-	private volatile int lastX = 0;
-	private volatile int lastY = 0;
+	private volatile float lastX = 0;
+	private volatile float lastY = 0;
 	private volatile float lastAngle = 0;
 	private boolean xRecalc = true;
 	private boolean yRecalc = true;
@@ -71,10 +81,10 @@ public class RawTripCircleData {
 			return;
 		}
 
-		int yLow = getY()-SAMPLE_FRAME_SIZE/2;
-		int yHigh = getY()+SAMPLE_FRAME_SIZE/2;
-		int xLow = getX()-SAMPLE_FRAME_SIZE/2;
-		int xHigh = getX()+SAMPLE_FRAME_SIZE/2;
+		int yLow = (int) (getY()-SAMPLE_FRAME_SIZE/2);
+		int yHigh = (int) (getY()+SAMPLE_FRAME_SIZE/2);
+		int xLow = (int) (getX()-SAMPLE_FRAME_SIZE/2);
+		int xHigh = (int) (getX()+SAMPLE_FRAME_SIZE/2);
 
 		if(yLow < 0) {
 			yHigh = SAMPLE_FRAME_SIZE;
@@ -118,7 +128,7 @@ public class RawTripCircleData {
 	//		}
 	//	}
 
-	private float findAngleByMaximum(float from, float to, float step, Mat m, Graphics2D g){
+	private float findAngleByMaximum(float from, float to, float step, Mat m){
 		int lim = 0;
 		float target = Integer.MAX_VALUE;
 		float angle = from;
@@ -134,7 +144,7 @@ public class RawTripCircleData {
 				int x = (int)(xi*d + SAMPLE_FRAME_SIZE/2.0f);				
 				int y = (int)(yi*d + SAMPLE_FRAME_SIZE/2.0f);
 				lim += m.get(y, x)[0];
-				g.drawLine(x, y, x, y);
+				//g.drawLine(x, y, x, y);
 			}
 			
 			if(lim < target){
@@ -146,7 +156,7 @@ public class RawTripCircleData {
 		return angle;
 	}
 	
-	private float findAngleBySweep(float from, float step, Mat m, Graphics2D g){
+	private float findAngleBySweep(float from, float step, Mat m){
 	
 		float angle = from;
 		float value;
@@ -158,13 +168,13 @@ public class RawTripCircleData {
 			
 			value = 0;
 			
-			g.setColor(Color.green);
+			//g.setColor(Color.green);
 			
 			for(int r = 15; r <= 20; r++){
 				int x = (int)(xi*r + SAMPLE_FRAME_SIZE/2.0f);				
 				int y = (int)(yi*r + SAMPLE_FRAME_SIZE/2.0f);
 				value += (float) m.get(y, x)[0];
-				g.drawLine(x, y, x, y);
+				//g.drawLine(x, y, x, y);
 			}
 			
 			value /= 5;
@@ -187,8 +197,8 @@ public class RawTripCircleData {
 		
 		boolean findXMin = true, findXMax = true, findYMin = true, findYMax = true;
 
-		float xShift = 0;
-		float yShift = 0;		
+		double xShift = 0;
+		double yShift = 0;		
 		int outerTop = 0;
 		int outerBottom = 0;
 		int outerLeft = 0;
@@ -222,73 +232,136 @@ public class RawTripCircleData {
 		
 		//System.out.println(innerLeft + " " + innerRight + " " + innerTop + " " + innerBottom);
 		
-		//Correct shift
-		xShift = ((innerRight-innerLeft)+(outerRight-outerLeft))/4.0f;
-		yShift = ((innerBottom-innerTop)+(outerBottom-outerTop))/4.0f;
+//		if(outerTop >= SAMPLE_FRAME_SIZE-1) outerTop = SAMPLE_FRAME_SIZE-1;
+//		if(outerRight >= SAMPLE_FRAME_SIZE-1) outerRight = SAMPLE_FRAME_SIZE-1;
 		
-		//Transform the matrix
+		Mat contourFrame = new Mat();
+		Imgproc.Canny(frame, contourFrame, THRESHOLD, 250);
+		List<MatOfPoint> contours = new ArrayList<MatOfPoint>(2);
+		Mat hierarchy = new Mat();
+		Imgproc.findContours(contourFrame, contours, hierarchy, Imgproc.RETR_EXTERNAL , Imgproc.CHAIN_APPROX_NONE);
+		hierarchy.release();
+		contourFrame.release();
+		
+		MatOfPoint2f edgels = new MatOfPoint2f();
+		
+		double largestArea = 0;
+		
+		for(int i=0; i < contours.size(); i++){
+			
+			MatOfPoint contour = contours.get(i);
+			
+			double contourArea = Imgproc.contourArea(contour);
+			
+			if(largestArea < contourArea){
+				largestArea = contourArea;
+				//Core.drawContours(frame, contours, i, new Scalar(255));
+				contours.get(i).convertTo(edgels, CvType.CV_32FC2);
+			}
+			
+			contour.release();
+		}
+
+		if(edgels.empty() || edgels.rows() < 100) return;
+		
+		RotatedRect ellipse = Imgproc.fitEllipse(edgels);
+		
+		//Correct shift
+		xShift = ((innerRight-innerLeft)+(outerRight-outerLeft) + 2*(SAMPLE_FRAME_SIZE/2 - ellipse.center.x))/6.0f;
+		yShift = ((innerBottom-innerTop)+(outerBottom-outerTop) + 2*(SAMPLE_FRAME_SIZE/2 - ellipse.center.y))/6.0f;
+//		xShift = SAMPLE_FRAME_SIZE/2 - ellipse.center.x;
+//		yShift = SAMPLE_FRAME_SIZE/2 - ellipse.center.y;
+
+//		ArrayList<Edgel> edgels = new ArrayList<Edgel>();
+//		AlgoTrackEdgels.trackEdgels(frame, edgels, outerTop, SAMPLE_FRAME_SIZE/2);
+//		if(!edgels.isEmpty()){
+//			EllipseParams p = AlgoEllipseFitting.ellipseFitting(edgels);
+//			System.out.println(p.getX());
+//		}
+		
+		//Transform image 
+		//TODO: optimize transformation matrices into one before applying the transformation
 		Mat M = Mat.zeros(2, 3, CvType.CV_32F);
-		M.put(0, 0, new float[] {1,0,xShift,0,1,yShift});
+		M.put(0, 0, new double[] {1,0,xShift,
+								  0,1,yShift});
 		Imgproc.warpAffine(frame, frame, M, new Size(SAMPLE_FRAME_SIZE, SAMPLE_FRAME_SIZE));
 		M.release();
-		//frame.convertTo(frame, -1, 2, -50);
 		
-		
-		Imgproc.threshold(frame, frame, THRESHOLD, 255, Imgproc.THRESH_BINARY);
+		M = Imgproc.getRotationMatrix2D(new Point(SAMPLE_FRAME_SIZE/2, SAMPLE_FRAME_SIZE/2), -ellipse.angle, 1);
+		Imgproc.warpAffine(frame, frame, M, new Size(SAMPLE_FRAME_SIZE, SAMPLE_FRAME_SIZE));
+		M.release();
 
+		Imgproc.threshold(frame, frame, THRESHOLD, 255, Imgproc.THRESH_BINARY);
+		
 		float roughAngle = 0;
 		float refinedAngle = 0;
-
-		processedTripcode = OpenCVUtils.matToBufferedImage(frame);
-		Graphics2D g =  (Graphics2D) processedTripcode.getGraphics();
 		
-		roughAngle = findAngleByMaximum(0, (float) (2*Math.PI), ROUGH_STEP, frame, g);
-		refinedAngle = findAngleBySweep(roughAngle, FINE_STEP, frame, g);
+		roughAngle = findAngleByMaximum(0, (float) (2*Math.PI), ROUGH_STEP, frame);
+		refinedAngle = findAngleBySweep(roughAngle, FINE_STEP, frame);
 		
 		updateAngle(refinedAngle);
-		
+
 		float size = (2*SAMPLE_FRAME_SIZE-outerBottom-outerTop-outerLeft-outerRight)/(float)SAMPLE_FRAME_SIZE;
 		
-		//System.out.println("Approximated size: " + size);
-				
-		Imgproc.warpAffine(frame, frame, Imgproc.getRotationMatrix2D(new Point(SAMPLE_FRAME_SIZE/2, SAMPLE_FRAME_SIZE/2), Math.toDegrees(-refinedAngle), 1/(size*0.5f)), new Size(SAMPLE_FRAME_SIZE, SAMPLE_FRAME_SIZE));
-//		Imgproc.erode(frame, frame, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(3,3)));
+		M = Imgproc.getRotationMatrix2D(new Point(SAMPLE_FRAME_SIZE/2, SAMPLE_FRAME_SIZE/2), Math.toDegrees(-refinedAngle), 1/(size*0.5f));//1+(ellipse.size.height/SAMPLE_FRAME_SIZE)*0.5f);
+		Imgproc.warpAffine(frame, frame, M, new Size(SAMPLE_FRAME_SIZE, SAMPLE_FRAME_SIZE));
+		M.release();
 		
 //		//Accumulate data
 //		if(accumFrame == null) accumFrame = Mat.zeros(SAMPLE_FRAME_SIZE, SAMPLE_FRAME_SIZE, CvType.CV_32FC1);
-//		Imgproc.accumulateWeighted(frame, accumFrame, 0.2f);		
+//		Imgproc.accumulateWeighted(frame, accumFrame, 0.2f);
 //		accumFrame.convertTo(frame, CvType.CV_8UC1);
+		
+		processedTripcode = OpenCVUtils.matToBufferedImage(frame);
+		Graphics2D g =  (Graphics2D) processedTripcode.getGraphics();
+		
+		//int newCode = parseCodeBySweep(frame);
+		
+		int newCode = parseCodeByRays(frame, g);
+		
+		if(newCode > 0) code_confirms[last_index] = newCode;
+		
+	}
 	
-//		ImageDataPack idp = new ImageDataPack();
-		
-//		Imgproc.dilate(frame, frame, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(3,3)));
-//		Imgproc.Canny(frame, frame, THRESHOLD, THRESHOLD);
+	private int parseCodeByRays(Mat frame, Graphics2D g){
+
+		for(float i=(float) (Math.PI*0.36f); i < Math.PI*1.75f; i += (Math.PI*2)/8){
+
+			float xi = (float) (Math.sin(i));
+			float yi = (float) (Math.cos(i));
+
+			int x = (int)(xi*25 + SAMPLE_FRAME_SIZE/2.0f);				
+			int y = (int)(yi*25 + SAMPLE_FRAME_SIZE/2.0f);
+			if(x < 0) x = 0; else if(x >= SAMPLE_FRAME_SIZE) x = SAMPLE_FRAME_SIZE-1;
+			if(y < 0) y = 0; else if(y >= SAMPLE_FRAME_SIZE) y = SAMPLE_FRAME_SIZE-1;
+
+			g.setColor(Color.white);
+			g.drawLine(SAMPLE_FRAME_SIZE/2, SAMPLE_FRAME_SIZE/2, x, y);
+
+//			float value1 = 255;
+//			float value2 = 255;
 //
-//		ArrayList<ArrayList<Edgel>> edges = AlgoEdgeFollow.edgeFollowing(frame, SAMPLE_FRAME_SIZE);
-//		int numEdges = edges.size();
-//		System.out.println(numEdges);
-		
-//        ArrayList<EllipseParams> paramEdgesEllipses = new ArrayList<EllipseParams>(numEdges);
-//        
-//        System.out.println(paramEdgesEllipses.get(0).getAlpha());
-        
-//        for (int i = 0; i < numEdges; i++) {
-////        	int n = 0;
-////        	for (Edgel e : edges.get(i)) {
-////        		n++;
-////        		S.printf("EDGES DEBUG("+i+","+n+"): " + edges);
-////        	}
-//            EllipseParams params = AlgoEllipseFitting.ellipseFitting(edges.get(i));
-//            S.printf("ellipseParams debug("+i+"): " + params);
-//            paramEdgesEllipses.add(params);
-//        }
+//			for(int r=13; r < 16; r++){
+//				x = (int)(xi*r + SAMPLE_FRAME_SIZE/2.0f);				
+//				y = (int)(yi*r + SAMPLE_FRAME_SIZE/2.0f);
+//				if(x < 0) x = 0; else if(x >= SAMPLE_FRAME_SIZE) x = SAMPLE_FRAME_SIZE-1;
+//				if(y < 0) y = 0; else if(y >= SAMPLE_FRAME_SIZE) y = SAMPLE_FRAME_SIZE-1;
+//
+//				value1 += (float) (frame.get(y, x)[0]);
+//				//g.drawLine(x, y, x, y);
+//			}
+			
+		}
 
-
+		return -1;
+	}
+	
+	private int parseCodeBySweep(Mat frame){
 		
 		int[] rawData = new int[SCAN_DIVISIONS];
 		int di = 0;
 		
-		float df = ((outerTop+outerBottom)/(float)(outerLeft+outerRight));
+		//float df = ((outerTop+outerBottom)/(float)(outerLeft+outerRight));
 		//float dcos = ((outerLeft+outerRight)/(float)(outerLeft+outerRight));
 		
 		for(float i=(float) (Math.PI*0.2f); i < Math.PI*2; i += (Math.PI*2)/SCAN_DIVISIONS){
@@ -349,12 +422,12 @@ public class RawTripCircleData {
 			di++;
 			
 		}
-		
-		final int DATA_LENGTH = 6;
+	
 		int[] data = new int[DATA_LENGTH];
-		boolean dataCorrect = true;
+		
 		int ndi = 0;
 		
+		//Collapse numbers
 		for(di=0; di < SCAN_DIVISIONS; di++){
 			if(rawData[di] == 3) continue;
 			data[ndi] = rawData[di];			
@@ -365,8 +438,19 @@ public class RawTripCircleData {
 			if(ndi >= DATA_LENGTH) break;
 		}
 		
+		if(checksumOK(data, ndi)){
+			int newCode = data[0] + data[1]*3 + data[2]*9 + data[3]*27 + data[4]*81 + data[5]*243;
+			return newCode;
+		}
+		
+		return -1;
+		
+	}
+	
+	private boolean checksumOK(int[] data, int lastIndex){
+		boolean dataCorrect = true;
 		//Correctness check
-		if(ndi == DATA_LENGTH){
+		if(lastIndex == DATA_LENGTH){
 			int ld = -1;
 			for(int d : data){
 				if(d == ld){
@@ -379,27 +463,11 @@ public class RawTripCircleData {
 			dataCorrect = false;
 		}
 		
-		if(dataCorrect){
-			
-			int newCode = data[0] + data[1]*3 + data[2]*9 + data[3]*27 + data[4]*81 + data[5]*243;
-
-//			for(int i=0; i < code_confirms.length; i++){
-//				if(code_confirms[i] == newCode){
-//					if(i > max_code_index) max_code_index = i;
-//					continue;
-//				}
-//				code_confirms[i] = newCode;
-//			}
-			
-			code_confirms[last_index] = newCode;
-			
-		}
-		
+		return dataCorrect;
 	}
 
 	private void updateAngle(float b){
 		lastAngle = b;
-		//lastAngle += 0.1f;
 	}
 	
 	public boolean isDead(){
@@ -428,29 +496,29 @@ public class RawTripCircleData {
 		return false;
 	}
 
-	public int getSmoothX() {
-		if(xRecalc){
-			lastX = 0;
-			for(int i=0; i < BUFFER_SIZE; i++){
-				lastX += x[i];
-			}
-			lastX /= BUFFER_SIZE;
-			xRecalc = false;
-		}
-		return lastX;
-	}
-
-	public int getSmoothY() {
-		if(yRecalc){
-			lastY = 0;
-			for(int i=0; i < BUFFER_SIZE; i++){
-				lastY += y[i];
-			}
-			lastY /= BUFFER_SIZE;
-			yRecalc = false;
-		}
-		return lastY;
-	}
+//	public int getSmoothX() {
+//		if(xRecalc){
+//			lastX = 0;
+//			for(int i=0; i < BUFFER_SIZE; i++){
+//				lastX += x[i];
+//			}
+//			lastX /= BUFFER_SIZE;
+//			xRecalc = false;
+//		}
+//		return lastX;
+//	}
+//
+//	public int getSmoothY() {
+//		if(yRecalc){
+//			lastY = 0;
+//			for(int i=0; i < BUFFER_SIZE; i++){
+//				lastY += y[i];
+//			}
+//			lastY /= BUFFER_SIZE;
+//			yRecalc = false;
+//		}
+//		return lastY;
+//	}
 
 	public int getRadius() {
 		int tr = 0;
@@ -474,11 +542,11 @@ public class RawTripCircleData {
 		return codemode(code_confirms.clone())[0];
 	}
 	
-	public int getX(){
+	public float getX(){
 		return lastX;
 	}
 
-	public int getY(){
+	public float getY(){
 		return lastY;
 	}
 
@@ -490,7 +558,7 @@ public class RawTripCircleData {
 		
 		if(c[0] == 0) return 0;
 		
-		//quality = c[1]/(float)BUFFER_SIZE;
+		quality -= 0.5f*(c[1]/(float)BUFFER_SIZE);
 		
 		//quality = 0.5f*(1-separation(r));
 		

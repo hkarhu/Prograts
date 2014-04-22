@@ -8,7 +8,7 @@ import ae.gl.texture.GLTextureManager;
 
 public class ARCard extends GLDrawableItem {
 
-	private static final float SCALE = 2f;
+	private static final float SCALE = 1.8f;
 
 	private float x;
 	private float y;

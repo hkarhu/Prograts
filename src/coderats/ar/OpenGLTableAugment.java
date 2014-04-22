@@ -193,12 +193,14 @@ public class OpenGLTableAugment extends GLCore implements GLKeyboardListener, AR
 		
 		GL11.glPopMatrix();
 
-		Display.sync(60);
+		Display.sync(30);
 		swapBuffers();
 
 	}
 
 	private void resetGameEngine(){
+		p1Cards.clear();
+		p2Cards.clear();
 		gameScenes.add(intro);
 		gameScenes.add(allocateStage);
 		gameScenes.add(assembleStage);
@@ -224,7 +226,11 @@ public class OpenGLTableAugment extends GLCore implements GLKeyboardListener, AR
 	@Override
 	public void glKeyUp(int eventKey) {
 		System.out.println(eventKey);
-		gameScenes.getFirst().processInput(eventKey);
+		if(eventKey == 28){
+			resetGameEngine();
+		} else { 
+			gameScenes.getFirst().processInput(eventKey);
+		}
 		
 	}
 

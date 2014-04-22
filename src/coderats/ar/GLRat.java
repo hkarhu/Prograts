@@ -16,12 +16,18 @@ public class GLRat {
 	private int r;
 	private Type lastCMD;
 	long anitime = -1;
+	private boolean alive;
 	
 	public GLRat(int x, int y, int r) {
 		this.x = x;
 		this.y = y;
 		this.r = r;
 		lastCMD = Type.NOP;
+		reset();
+	}
+	
+	public void reset(){
+		alive = true;
 	}
 	
 	public void glDraw(long time){
@@ -127,10 +133,15 @@ public class GLRat {
 			case ROL: rol(); break;
 			case ROR: ror(); break;
 			case PEW: pew(); break;
-			default: nop(); break;
+			case NOP: nop(); break;
+			default: alive = false; break;
 		}
 		lastCMD = cmd;
 		anitime = time + ANIM_LENGTH;
+	}
+	
+	public boolean isAlive() {
+		return alive;
 	}
 
 }

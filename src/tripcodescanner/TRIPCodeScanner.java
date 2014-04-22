@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 
+import coderats.ar.AlgoEllipseFitting;
 import ae.image.netpbm.PPMWriter;
 import ae.image.netpbm.PPMWriterException;
 import ae.routines.S;

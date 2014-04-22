@@ -1,7 +1,9 @@
-package tripcodescanner;
+package coderats.ar;
 
 
 import java.util.ArrayList;
+
+import tripcodescanner.MatrixUtils;
 
 public class AlgoEllipseFitting {
 

@@ -15,7 +15,7 @@ import ae.gl.texture.GLTextureManager;
 
 public class AllocateScene extends GameScene {
 
-	private static final int ALLOCATE_TIME = 30000;
+	private static final int ALLOCATE_TIME = 5000;
 	private long allocateTimer;
 	private long exitTime;
 	private AllocateHalf p1Allocate;

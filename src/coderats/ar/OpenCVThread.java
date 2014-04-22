@@ -15,10 +15,10 @@ public class OpenCVThread {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 	}
 	
-	public static volatile int brightness1 = 50;
-	public static volatile int brightness2 = 50;
-	public static volatile int lowTresh = 133;
-	public static volatile int circdt = 18;
+	public static volatile int par1 = 50;
+	public static volatile int par2 = 50;
+	public static volatile int par3 = 133;
+	public static volatile int par4 = 18;
 
 	private ConcurrentLinkedDeque<Mat> matrixQueue;
 	private ConcurrentLinkedDeque<RawTripCircleData> circleQueue;
@@ -45,11 +45,11 @@ public class OpenCVThread {
 		//Init
 		try {
 			inputVideo = new VideoCapture();
-			inputVideo.open(1);
+			inputVideo.open(0);
 			Thread.sleep(1000);
 			inputVideo.set(OpenCVUtils.CAP_PROP_FRAME_WIDTH, 640);
 			inputVideo.set(OpenCVUtils.CAP_PROP_FRAME_HEIGHT, 480);
-			inputVideo.set(OpenCVUtils.CAP_PROP_FPS, 30);
+			inputVideo.set(OpenCVUtils.CAP_PROP_FPS, 60);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -63,7 +63,7 @@ public class OpenCVThread {
 				Mat circ = new Mat();
 				
 				Imgproc.cvtColor(in, in, Imgproc.COLOR_BGR2GRAY);
-				in.convertTo(in, -1, 2.2f, -brightness1);
+				in.convertTo(in, -1, 2.2f, -par1);
 				
 				Imgproc.erode(in, out, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(3,3)));
 				
@@ -75,8 +75,8 @@ public class OpenCVThread {
 				
 				//Imgproc.threshold(hc, hc, 90, 255, Imgproc.THRESH_BINARY);
 				Imgproc.blur(out, tres, new Size(3,3));
-				tres.convertTo(tres, -1, 2.2f, -brightness2);
-				Imgproc.threshold(tres, tres, lowTresh, 255, Imgproc.THRESH_BINARY);
+				tres.convertTo(tres, -1, 2.2f, -par2);
+				Imgproc.threshold(tres, tres, par3, 255, Imgproc.THRESH_BINARY);
 				//Imgproc.adaptiveThreshold(gc, hc, 254, Imgproc.THRESH_BINARY, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, 7, 9);
 				
 				//Imgproc.dilate(hc, hc, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(3,3)));
@@ -89,8 +89,8 @@ public class OpenCVThread {
 
 				//Imgproc.Canny(gc, hc, 80, 40);
 				
-				Imgproc.HoughCircles(tres, circ, Imgproc.CV_HOUGH_GRADIENT, 1, tres.height()/16, 80, circdt, 5, 30);
-
+				Imgproc.HoughCircles(tres, circ, Imgproc.CV_HOUGH_GRADIENT, 1, tres.height()/16, 80, par4, 5, 30);
+				
 				//Core.drawContours(m, contours, 4, new Scalar(40, 233, 45,0 ));
 
 				for (int i = 0; i < circ.cols(); i++){

@@ -1,4 +1,4 @@
-package tripcodescanner;
+package coderats.ar;
 import ae.routines.S;
 
 public class EllipseParams {

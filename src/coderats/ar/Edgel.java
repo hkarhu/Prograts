@@ -1,4 +1,4 @@
-package tripcodescanner;
+package coderats.ar;
 
 
 /**

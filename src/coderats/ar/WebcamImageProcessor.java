@@ -95,49 +95,49 @@ public class WebcamImageProcessor extends JFrame implements MouseListener, Mouse
 		
 		Insets i = this.getInsets();
 		
-		JSlider brightness1 = new JSlider(JSlider.HORIZONTAL, 1, 255, 50);
-		brightness1.setBounds(192 + i.left, 480 + i.top, 200, 24);
-		brightness1.addChangeListener(new ChangeListener() {
+		JSlider slider = new JSlider(JSlider.HORIZONTAL, 1, 255, 50);
+		slider.setBounds(192 + i.left, 480 + i.top, 200, 24);
+		slider.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				OpenCVThread.brightness1 = ((JSlider)e.getSource()).getValue();
+				OpenCVThread.par1 = ((JSlider)e.getSource()).getValue();
 				refreshLabel();
 			}
 		});
-		this.add(brightness1);
+		this.add(slider);
 		
-		JSlider brightness2 = new JSlider(JSlider.HORIZONTAL, 1, 255, 50);
-		brightness2.setBounds(192 + i.left, 510 + i.top, 200, 24);
-		brightness2.addChangeListener(new ChangeListener() {
+		slider = new JSlider(JSlider.HORIZONTAL, 1, 255, 50);
+		slider.setBounds(192 + i.left, 510 + i.top, 200, 24);
+		slider.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				OpenCVThread.brightness2 = ((JSlider)e.getSource()).getValue();
+				OpenCVThread.par2 = ((JSlider)e.getSource()).getValue();
 				refreshLabel();
 			}
 		});
-		this.add(brightness2);
+		this.add(slider);
 		
-		JSlider circdt = new JSlider(JSlider.HORIZONTAL, 2, 50, 18);
-		circdt.setBounds(392 + i.left, 480 + i.top, 200, 24);
-		circdt.addChangeListener(new ChangeListener() {
+		slider = new JSlider(JSlider.HORIZONTAL, 2, 255, 18);
+		slider.setBounds(392 + i.left, 480 + i.top, 200, 24);
+		slider.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				OpenCVThread.circdt = ((JSlider)e.getSource()).getValue();
+				OpenCVThread.par3 = ((JSlider)e.getSource()).getValue();
 				refreshLabel();
 			}
 		});
-		this.add(circdt);
+		this.add(slider);
 		
-		JSlider lowTresh = new JSlider(JSlider.HORIZONTAL, 0, 255, 133);
-		lowTresh.setBounds(392 + i.left, 510 + i.top, 200, 24);
-		lowTresh.addChangeListener(new ChangeListener() {
+		slider = new JSlider(JSlider.HORIZONTAL, 0, 255, 133);
+		slider.setBounds(392 + i.left, 510 + i.top, 200, 24);
+		slider.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				OpenCVThread.lowTresh = ((JSlider)e.getSource()).getValue();
+				OpenCVThread.par4 = ((JSlider)e.getSource()).getValue();
 				refreshLabel();
 			}
 		});
-		this.add(lowTresh);
+		this.add(slider);
 		
 		label = new JLabel("");
 		label.setBounds(192 + i.left, 540 + i.top, 600, 24);
@@ -150,7 +150,7 @@ public class WebcamImageProcessor extends JFrame implements MouseListener, Mouse
 	}
 	
 	private void refreshLabel(){
-		label.setText("BR1 : " + ocvt.brightness1 + "       BR2 : " + ocvt.brightness2 + "       CDT : " + ocvt.circdt + "       LT : " + ocvt.lowTresh);
+		label.setText("BR1 : " + ocvt.par1 + "       BR2 : " + ocvt.par2 + "       CDT : " + ocvt.par3 + "       LT : " + ocvt.par4);
 	}
 	
 	public ConcurrentHashMap<Integer, ARCard> getKnownCards(){
@@ -178,7 +178,7 @@ public class WebcamImageProcessor extends JFrame implements MouseListener, Mouse
 				}
 				
 				webcamDebugG.setColor(Color.getHSBColor(c.getQuality()*0.3f, 1, 1));
-				webcamDebugG.drawOval(c.getX()-25, c.getY()-25, 50, 50);
+				webcamDebugG.drawOval((int)(c.getX()-25), (int) (c.getY()-25), 50, 50);
 				webcamDebugG.setStroke(new BasicStroke(3));
 				//webcamDebugG.fillOval(c.getX()-c.getRadius(), c.getY()-c.getRadius(), c.getRadius()*2, c.getRadius()*2);
 				
@@ -264,7 +264,7 @@ public class WebcamImageProcessor extends JFrame implements MouseListener, Mouse
 		}
 	}
 	
-	private float getCalibratedGLX(int x, int y){
+	private float getCalibratedGLX(float x, float y){
 		
 		float ymo = (y-(CPs[0][1]+CPs[3][1])/2.0f)/(float)(CPs[3][1]-CPs[0][1]);
 		float ymi = 1-ymo;
@@ -275,7 +275,7 @@ public class WebcamImageProcessor extends JFrame implements MouseListener, Mouse
 		//return (1+(imageWidth-CPs[0][0]-CPs[1][0])/(float)imageWidth)*((x-CPs[0][0])/(float)imageWidth)*GLValues.glWidth;
 	}
 	
-	private float getCalibratedGLY(int x, int y){
+	private float getCalibratedGLY(float x, float y){
 		float xmo = (x-(CPs[0][0]+CPs[1][0])/2.0f)/(float)(CPs[1][0]-CPs[0][0]);
 		float xmi = 1-xmo;
 		
