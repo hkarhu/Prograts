@@ -23,7 +23,7 @@ import org.opencv.imgproc.Imgproc;
 
 public class RawTripCircleData {
 
-	private static final int BUFFER_SIZE = 10;
+	private static final int BUFFER_SIZE = 5;
 	private static final int PROXIMITY = 52;
 	private static final int TIMEOUT = 250;
 	private static final int SAMPLE_FRAME_SIZE = 64;
@@ -35,8 +35,9 @@ public class RawTripCircleData {
 	
 	private int last_index;
 
-	private volatile float lastX = 0;
-	private volatile float lastY = 0;
+	private volatile double lastX = 0;
+	private volatile double lastY = 0;
+	private volatile double lastR = 0;
 	private volatile float lastAngle = 0;
 	private boolean xRecalc = true;
 	private boolean yRecalc = true;
@@ -194,44 +195,44 @@ public class RawTripCircleData {
 	}
 	
 	private void processNewFrame(Mat frame){
-		
-		boolean findXMin = true, findXMax = true, findYMin = true, findYMax = true;
-
+	
 		double xShift = 0;
-		double yShift = 0;		
-		int outerTop = 0;
-		int outerBottom = 0;
-		int outerLeft = 0;
-		int outerRight = 0;
+		double yShift = 0;
 		
-		int innerTop = 0;
-		int innerBottom = 0;
-		int innerLeft = 0;
-		int innerRight = 0;
-		
-		//Test where the center is. Inside out.
-		for(int i=1; i < 8; i++){
-			if(findXMax && frame.get(SAMPLE_FRAME_SIZE/2, SAMPLE_FRAME_SIZE/2 + i)[0] > THRESHOLD) innerLeft = i; else findXMax = false;
-			if(findXMin && frame.get(SAMPLE_FRAME_SIZE/2, SAMPLE_FRAME_SIZE/2 - i)[0] > THRESHOLD) innerRight = i; else findXMin = false;
-			if(findYMax && frame.get(SAMPLE_FRAME_SIZE/2 + i, SAMPLE_FRAME_SIZE/2)[0] > THRESHOLD) innerTop = i; else findYMax = false;
-			if(findYMin && frame.get(SAMPLE_FRAME_SIZE/2 - i, SAMPLE_FRAME_SIZE/2)[0] > THRESHOLD) innerBottom = i; else findYMin = false;
-		}
-
-		findXMin = true;
-		findXMax = true;
-		findYMin = true;
-		findYMax = true;
-		
-		//Test the outsides. Outside in.
-		for(int i=1; i < SAMPLE_FRAME_SIZE*0.35f; i++){
-			if(findXMax && frame.get(SAMPLE_FRAME_SIZE/2, i)[0] > THRESHOLD) outerLeft = i; else findXMax = false;
-			if(findXMin && frame.get(SAMPLE_FRAME_SIZE/2, SAMPLE_FRAME_SIZE - 1 - i)[0] > THRESHOLD) outerRight = i; else findXMin = false;
-			if(findYMax && frame.get(i, SAMPLE_FRAME_SIZE/2)[0] > THRESHOLD) outerTop = i; else findYMax = false;
-			if(findYMin && frame.get(SAMPLE_FRAME_SIZE - 1 - i, SAMPLE_FRAME_SIZE/2)[0] > THRESHOLD) outerBottom = i; else findYMin = false;
-		}
-		
-		//System.out.println(innerLeft + " " + innerRight + " " + innerTop + " " + innerBottom);
-		
+//		boolean findXMin = true, findXMax = true, findYMin = true, findYMax = true;
+//		int outerTop = 0;
+//		int outerBottom = 0;
+//		int outerLeft = 0;
+//		int outerRight = 0;
+//		
+//		int innerTop = 0;
+//		int innerBottom = 0;
+//		int innerLeft = 0;
+//		int innerRight = 0;
+//		
+//		//Test where the center is. Inside out.
+//		for(int i=1; i < 8; i++){
+//			if(findXMax && frame.get(SAMPLE_FRAME_SIZE/2, SAMPLE_FRAME_SIZE/2 + i)[0] > THRESHOLD) innerLeft = i; else findXMax = false;
+//			if(findXMin && frame.get(SAMPLE_FRAME_SIZE/2, SAMPLE_FRAME_SIZE/2 - i)[0] > THRESHOLD) innerRight = i; else findXMin = false;
+//			if(findYMax && frame.get(SAMPLE_FRAME_SIZE/2 + i, SAMPLE_FRAME_SIZE/2)[0] > THRESHOLD) innerTop = i; else findYMax = false;
+//			if(findYMin && frame.get(SAMPLE_FRAME_SIZE/2 - i, SAMPLE_FRAME_SIZE/2)[0] > THRESHOLD) innerBottom = i; else findYMin = false;
+//		}
+//
+//		findXMin = true;
+//		findXMax = true;
+//		findYMin = true;
+//		findYMax = true;
+//		
+//		//Test the outsides. Outside in.
+//		for(int i=1; i < SAMPLE_FRAME_SIZE*0.35f; i++){
+//			if(findXMax && frame.get(SAMPLE_FRAME_SIZE/2, i)[0] > THRESHOLD) outerLeft = i; else findXMax = false;
+//			if(findXMin && frame.get(SAMPLE_FRAME_SIZE/2, SAMPLE_FRAME_SIZE - 1 - i)[0] > THRESHOLD) outerRight = i; else findXMin = false;
+//			if(findYMax && frame.get(i, SAMPLE_FRAME_SIZE/2)[0] > THRESHOLD) outerTop = i; else findYMax = false;
+//			if(findYMin && frame.get(SAMPLE_FRAME_SIZE - 1 - i, SAMPLE_FRAME_SIZE/2)[0] > THRESHOLD) outerBottom = i; else findYMin = false;
+//		}
+//		
+//		//System.out.println(innerLeft + " " + innerRight + " " + innerTop + " " + innerBottom);
+//		
 //		if(outerTop >= SAMPLE_FRAME_SIZE-1) outerTop = SAMPLE_FRAME_SIZE-1;
 //		if(outerRight >= SAMPLE_FRAME_SIZE-1) outerRight = SAMPLE_FRAME_SIZE-1;
 		
@@ -262,15 +263,25 @@ public class RawTripCircleData {
 			contour.release();
 		}
 
-		if(edgels.empty() || edgels.rows() < 100) return;
+		if(edgels.empty() || edgels.rows() < 100){
+			edgels.release();
+			return;
+		}
 		
 		RotatedRect ellipse = Imgproc.fitEllipse(edgels);
+
+		edgels.release();
 		
 		//Correct shift
-		xShift = ((innerRight-innerLeft)+(outerRight-outerLeft) + 2*(SAMPLE_FRAME_SIZE/2 - ellipse.center.x))/6.0f;
-		yShift = ((innerBottom-innerTop)+(outerBottom-outerTop) + 2*(SAMPLE_FRAME_SIZE/2 - ellipse.center.y))/6.0f;
-//		xShift = SAMPLE_FRAME_SIZE/2 - ellipse.center.x;
-//		yShift = SAMPLE_FRAME_SIZE/2 - ellipse.center.y;
+//		xShift = ((innerRight-innerLeft)+(outerRight-outerLeft) + 2*(SAMPLE_FRAME_SIZE/2 - ellipse.center.x))/6.0f;
+//		yShift = ((innerBottom-innerTop)+(outerBottom-outerTop) + 2*(SAMPLE_FRAME_SIZE/2 - ellipse.center.y))/6.0f;
+		xShift = SAMPLE_FRAME_SIZE/2.0f - ellipse.center.x;
+		yShift = SAMPLE_FRAME_SIZE/2.0f - ellipse.center.y;
+		
+		lastX += xShift;
+		lastY += yShift;
+		
+
 
 //		ArrayList<Edgel> edgels = new ArrayList<Edgel>();
 //		AlgoTrackEdgels.trackEdgels(frame, edgels, outerTop, SAMPLE_FRAME_SIZE/2);
@@ -287,9 +298,9 @@ public class RawTripCircleData {
 		Imgproc.warpAffine(frame, frame, M, new Size(SAMPLE_FRAME_SIZE, SAMPLE_FRAME_SIZE));
 		M.release();
 		
-		M = Imgproc.getRotationMatrix2D(new Point(SAMPLE_FRAME_SIZE/2, SAMPLE_FRAME_SIZE/2), -ellipse.angle, 1);
-		Imgproc.warpAffine(frame, frame, M, new Size(SAMPLE_FRAME_SIZE, SAMPLE_FRAME_SIZE));
-		M.release();
+//		M = Imgproc.getRotationMatrix2D(new Point(SAMPLE_FRAME_SIZE/2, SAMPLE_FRAME_SIZE/2), -ellipse.angle, 1);
+//		Imgproc.warpAffine(frame, frame, M, new Size(SAMPLE_FRAME_SIZE, SAMPLE_FRAME_SIZE));
+//		M.release();
 
 		Imgproc.threshold(frame, frame, THRESHOLD, 255, Imgproc.THRESH_BINARY);
 		
@@ -300,10 +311,13 @@ public class RawTripCircleData {
 		refinedAngle = findAngleBySweep(roughAngle, FINE_STEP, frame);
 		
 		updateAngle(refinedAngle);
-
-		float size = (2*SAMPLE_FRAME_SIZE-outerBottom-outerTop-outerLeft-outerRight)/(float)SAMPLE_FRAME_SIZE;
 		
-		M = Imgproc.getRotationMatrix2D(new Point(SAMPLE_FRAME_SIZE/2, SAMPLE_FRAME_SIZE/2), Math.toDegrees(-refinedAngle), 1/(size*0.5f));//1+(ellipse.size.height/SAMPLE_FRAME_SIZE)*0.5f);
+		//float size = (2*SAMPLE_FRAME_SIZE-outerBottom-outerTop-outerLeft-outerRight)/(float)SAMPLE_FRAME_SIZE;
+		
+		//Take size with average of W and H
+		float size = (float) (ellipse.size.width+ellipse.size.height)/(float)SAMPLE_FRAME_SIZE;
+		
+		M = Imgproc.getRotationMatrix2D(new Point(SAMPLE_FRAME_SIZE/2, SAMPLE_FRAME_SIZE/2), Math.toDegrees(-refinedAngle), 1/(size*0.5f)); //1+(ellipse.size.height/SAMPLE_FRAME_SIZE)*0.5f);
 		Imgproc.warpAffine(frame, frame, M, new Size(SAMPLE_FRAME_SIZE, SAMPLE_FRAME_SIZE));
 		M.release();
 		
@@ -325,7 +339,10 @@ public class RawTripCircleData {
 	
 	private int parseCodeByRays(Mat frame, Graphics2D g){
 
-		for(float i=(float) (Math.PI*0.36f); i < Math.PI*1.75f; i += (Math.PI*2)/8){
+		char rawData[] = new char[DATA_LENGTH]; 
+		char di = 0;
+		
+		for(float i=(float) (Math.PI*0.36f); i < Math.PI*1.75f; i += (Math.PI*2)/(DATA_LENGTH+2)){
 
 			float xi = (float) (Math.sin(i));
 			float yi = (float) (Math.cos(i));
@@ -335,22 +352,53 @@ public class RawTripCircleData {
 			if(x < 0) x = 0; else if(x >= SAMPLE_FRAME_SIZE) x = SAMPLE_FRAME_SIZE-1;
 			if(y < 0) y = 0; else if(y >= SAMPLE_FRAME_SIZE) y = SAMPLE_FRAME_SIZE-1;
 
-			g.setColor(Color.white);
-			g.drawLine(SAMPLE_FRAME_SIZE/2, SAMPLE_FRAME_SIZE/2, x, y);
+			g.setColor(Color.lightGray);
+			//g.drawLine(SAMPLE_FRAME_SIZE/2, SAMPLE_FRAME_SIZE/2, x, y);
 
-//			float value1 = 255;
-//			float value2 = 255;
-//
-//			for(int r=13; r < 16; r++){
-//				x = (int)(xi*r + SAMPLE_FRAME_SIZE/2.0f);				
-//				y = (int)(yi*r + SAMPLE_FRAME_SIZE/2.0f);
-//				if(x < 0) x = 0; else if(x >= SAMPLE_FRAME_SIZE) x = SAMPLE_FRAME_SIZE-1;
-//				if(y < 0) y = 0; else if(y >= SAMPLE_FRAME_SIZE) y = SAMPLE_FRAME_SIZE-1;
-//
-//				value1 += (float) (frame.get(y, x)[0]);
-//				//g.drawLine(x, y, x, y);
-//			}
+			float value1 = 0;
+			float value2 = 0;
 			
+			for(int r=13; r < 17; r++){
+				x = (int)(xi*r + SAMPLE_FRAME_SIZE/2.0f);				
+				y = (int)(yi*r + SAMPLE_FRAME_SIZE/2.0f);
+				if(x < 0) x = 0; else if(x >= SAMPLE_FRAME_SIZE) x = SAMPLE_FRAME_SIZE-1;
+				if(y < 0) y = 0; else if(y >= SAMPLE_FRAME_SIZE) y = SAMPLE_FRAME_SIZE-1;
+
+				value1 += (float) (frame.get(y, x)[0]);
+				g.drawLine(x, y, x, y);
+			}
+			
+			value1 /= 4;
+			
+			for(int r=19; r < 23; r++){
+				x = (int)(xi*r + SAMPLE_FRAME_SIZE/2.0f);				
+				y = (int)(yi*r + SAMPLE_FRAME_SIZE/2.0f);
+				if(x < 0) x = 0; else if(x >= SAMPLE_FRAME_SIZE) x = SAMPLE_FRAME_SIZE-1;
+				if(y < 0) y = 0; else if(y >= SAMPLE_FRAME_SIZE) y = SAMPLE_FRAME_SIZE-1;
+
+				value2 += (float) (frame.get(y, x)[0]);
+				g.drawLine(x, y, x, y);
+			}
+			
+			value2 /= 4;
+			
+			if(value1 < THRESHOLD && value2 > THRESHOLD){
+				rawData[di] = 1;
+			} else if(value1 > THRESHOLD && value2 < THRESHOLD){
+				rawData[di] = 2;
+			} else if(value1 < THRESHOLD && value2 < THRESHOLD){
+				rawData[di] = 3;
+			} else {
+				rawData[di] = 0;
+			}
+			
+			di++;
+			
+		}
+		
+		if(checksumOK(rawData, 6)){
+			int newCode = rawData[0] + rawData[1]*3 + rawData[2]*9 + rawData[3]*27 + rawData[4]*81 + rawData[5]*243;
+			return newCode;
 		}
 
 		return -1;
@@ -358,8 +406,8 @@ public class RawTripCircleData {
 	
 	private int parseCodeBySweep(Mat frame){
 		
-		int[] rawData = new int[SCAN_DIVISIONS];
-		int di = 0;
+		char[] rawData = new char[SCAN_DIVISIONS];
+		char di = 0;
 		
 		//float df = ((outerTop+outerBottom)/(float)(outerLeft+outerRight));
 		//float dcos = ((outerLeft+outerRight)/(float)(outerLeft+outerRight));
@@ -423,7 +471,7 @@ public class RawTripCircleData {
 			
 		}
 	
-		int[] data = new int[DATA_LENGTH];
+		char[] data = new char[DATA_LENGTH];
 		
 		int ndi = 0;
 		
@@ -447,7 +495,7 @@ public class RawTripCircleData {
 		
 	}
 	
-	private boolean checksumOK(int[] data, int lastIndex){
+	private boolean checksumOK(char[] data, int lastIndex){
 		boolean dataCorrect = true;
 		//Correctness check
 		if(lastIndex == DATA_LENGTH){
@@ -486,9 +534,9 @@ public class RawTripCircleData {
 		updateImage(m);
 		timestamp = System.currentTimeMillis();
 		
-		lastX = (int) coordinates[0];
-		lastY = (int) coordinates[1];
-		
+		lastX = coordinates[0];
+		lastY = coordinates[1];
+		lastR = coordinates[2];
 	}
 
 	public boolean isCloseTo(double[] coordinates){
@@ -543,11 +591,11 @@ public class RawTripCircleData {
 	}
 	
 	public float getX(){
-		return lastX;
+		return (float)lastX;
 	}
 
 	public float getY(){
-		return lastY;
+		return (float)lastY;
 	}
 
 	public float getQuality() {

@@ -45,6 +45,8 @@ public class AllocateScene extends GameScene {
 		allocateTimer = -1;
 		p1Allocate.activate(100);
 		p2Allocate.activate(100);
+		p1Cards.clear();
+		p2Cards.clear();
 	}
 
 	@Override
@@ -53,6 +55,13 @@ public class AllocateScene extends GameScene {
 		p1Allocate.glDraw(time);
 		p2Allocate.glDraw(time);
 
+		if(knownCards.size() >= 1){
+			for(Entry<Integer, ARCard> c : knownCards.entrySet()){
+				ARCard card = c.getValue();
+				if(card.getQuality() >= 0.8f) card.glDraw(time);
+			}
+		}
+		
 		GLTextureManager.unbindTexture();
 
 		if(time < 3000){
@@ -88,14 +97,7 @@ public class AllocateScene extends GameScene {
 					GL11.glPopMatrix();
 				}
 				
-				if(knownCards.size() >= 1){
-					for(Entry<Integer, ARCard> c : knownCards.entrySet()){
-						ARCard card = c.getValue();
-						if(card.getQuality() >= 0.8f) card.glDraw(time);
-					}
-				}
-				
-			} else if(time > exitTime) setRunning(false);
+			} else if(time >= exitTime) setRunning(false);
 		}
 
 	}
@@ -111,6 +113,7 @@ public class AllocateScene extends GameScene {
 		ARCard c = knownCards.get(id);
 		
 		if(c.getQuality() < 0.8f){
+			System.out.println("Allocate removed low quality card " + c.getID());
 			p1Cards.remove(id);
 			p2Cards.remove(id);
 			return;

@@ -45,7 +45,7 @@ public class WebcamImageProcessor extends JFrame implements MouseListener, Mouse
 	private BufferedImage webcamDebug;
 	private Graphics2D webcamDebugG;
 	
-	private int wDebugXShift = 192;  
+	private int wDebugXShift = 192;
 	private int wDebugYShift = 24;
 	
 	static int imageWidth = 640;
@@ -169,7 +169,7 @@ public class WebcamImageProcessor extends JFrame implements MouseListener, Mouse
 			for(RawTripCircleData c : ocvt.getCircles()){
 				if(c == null) continue;
 				
-				if(c.getQuality() >= 1 && knownCards.containsKey(c.getID())){
+				if(knownCards.containsKey(c.getID())){
 					knownCards.get(c.getID()).updateValues(getCalibratedGLX(c.getX(),c.getY()), getCalibratedGLY(c.getX(),c.getY()), c.getAngle(), c.getQuality());
 					informListenersCardUpdated(c.getID());
 				} else {

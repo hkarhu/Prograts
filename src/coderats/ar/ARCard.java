@@ -2,13 +2,13 @@ package coderats.ar;
 import org.lwjgl.opengl.GL11;
 
 import ae.gl.GLGraphicRoutines;
-import ae.gl.GLValues;
 import ae.gl.text.GLBitmapFontBlitter;
 import ae.gl.texture.GLTextureManager;
+import coderats.ar.Command.Type;
 
 public class ARCard extends GLDrawableItem {
 
-	private static final float SCALE = 1.8f;
+	private static final float SCALE = 2f;
 
 	private float x;
 	private float y;
@@ -31,7 +31,7 @@ public class ARCard extends GLDrawableItem {
 	float c4y;
 
 	public ARCard(float x, float y, float angle, int id, float quality) {
-
+		
 		cmd = null;
 
 		this.x = x;
@@ -85,11 +85,13 @@ public class ARCard extends GLDrawableItem {
 
 		} else {
 			
-			GLTextureManager.getInstance().bindTexture("card");
-			GL11.glColor4f(1, 1, 1, 1);
-			cmd.GLColorizeDark();
-			
-			GLTextureManager.getInstance().bindTexture("card");
+			if(broken){
+				GL11.glColor4f(1, 1, 1, 0.6f);	
+				GLTextureManager.getInstance().bindTexture("card_broken");
+			} else {
+				cmd.GLColorizeDark();
+				GLTextureManager.getInstance().bindTexture("card");	
+			}
 
 			GL11.glBegin( GL11.GL_QUADS );
 				GL11.glNormal3f(0,0,1); GL11.glTexCoord2d(0,0); GL11.glVertex3d(c1x, c2y, 0);	
@@ -100,8 +102,12 @@ public class ARCard extends GLDrawableItem {
 
 			GLTextureManager.unbindTexture();
 			GL11.glTranslatef(0, 0, -0.2f);
-			cmd.GLColorizeLight();
-
+			if(broken){
+				GL11.glColor4f(1, 1, 1, 0.8f);	
+			} else {
+				cmd.GLColorizeLight();
+			}
+			
 			GL11.glTranslatef(0, 0.58f, 0);
 			GLBitmapFontBlitter.drawString(cmd.getCommandString(), "font_default", 0.1f*SCALE, 0.2f*SCALE, GLBitmapFontBlitter.Alignment.CENTERED);
 
@@ -118,7 +124,6 @@ public class ARCard extends GLDrawableItem {
 
 		GLTextureManager.getInstance().bindTexture("card");
 	
-
 			GL11.glColor3f(0.3f, 0.3f, 0.3f);
 
 			GL11.glBegin( GL11.GL_QUADS );
@@ -153,7 +158,7 @@ public class ARCard extends GLDrawableItem {
 		this.x = x;
 		this.y = y;
 
-		this.angle = a;
+		this.angle = a*1.05f-0.05f;
 		this.qtime = System.currentTimeMillis();
 	}
 
@@ -174,11 +179,20 @@ public class ARCard extends GLDrawableItem {
 	}
 
 	public Command getCommand() {
+		if(isBroken()) return null;
 		return cmd;
 	}
 
 	public int getID() {
 		return id;
+	}
+
+	public void setBroken(boolean broken) {
+		this.broken = broken;
+	}
+	
+	public boolean isBroken(){
+		return broken;
 	}
 
 }

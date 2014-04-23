@@ -11,6 +11,7 @@ public class ARCardSlot extends GLDrawableItem {
 	
 	private final float SCALE = 1f;
 	private final int ACTIVATE_TIME = 500;
+	private final int BREAK_TIME = 500;
 	
 	float x;
 	float y;
@@ -20,8 +21,10 @@ public class ARCardSlot extends GLDrawableItem {
 	private float slot_heigth = 0.6f*SCALE;
 	
 	private Command c;
+	private ARCard card;
 	
 	private float activateTime = -1;
+	private float breakTime = -1;
 		
 	public ARCardSlot(float x, float y, float a) {
 		this.x = x;
@@ -46,12 +49,18 @@ public class ARCardSlot extends GLDrawableItem {
 				GL11.glColor3f(0, 0, 1);
 				GL11.glScalef(1.0f+(float)Math.abs(Math.sin(Math.PI + Math.PI*at)*0.25f), 1.0f+(float)Math.abs(Math.sin(Math.PI + Math.PI*at)*0.25f), 1);
 				
-				if(activateTime > time){
-					GL11.glColor4f(1, 1, 1, at);
-					GLGraphicRoutines.drawLineRect(1.0f, -slot_width-(1-at), -slot_heigth-(1-at), slot_width+(1-at), slot_heigth+(1-at), 0);
-				}
+				GL11.glColor4f(1, 1, 1, at);
+				GLGraphicRoutines.drawLineRect(1.0f, -slot_width-(1-at), -slot_heigth-(1-at), slot_width+(1-at), slot_heigth+(1-at), 0);
 			}
 		
+			if(breakTime > time){
+				GL11.glColor3f(1, 0, 0);
+				GL11.glScalef(1.0f+(float)Math.abs(Math.sin(Math.PI + Math.PI*at)*0.25f), 1.0f+(float)Math.abs(Math.sin(Math.PI + Math.PI*at)*0.25f), 1);
+				
+				GL11.glColor4f(1, 0, 0, 1-at*2);
+				GLGraphicRoutines.drawLineRect(5.0f, -slot_width-(1-at), -slot_heigth-(1-at), slot_width+(1-at), slot_heigth+(1-at), 0);
+			}
+			
 			if(c == null){
 				GL11.glColor4f(0.3f,0.3f,0.3f, 1);
 				
@@ -97,18 +106,20 @@ public class ARCardSlot extends GLDrawableItem {
 		if(c == null) return Type.NOP;
 		return c.getType();
 	}
-
-	public void setCommand(Command command) {
-		this.c = command;
+	
+	public void bindCard(ARCard card) {
+		this.card = card;
+		if(card != null){
+			this.c = card.getCommand();
+		} else {
+			this.c = null;
+		}
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
+	public void breakContainedCard(long time) {
+		breakTime = time + BREAK_TIME;
+		if(card != null) card.setBroken(true);
+		bindCard(null);
+	}
 	
 }

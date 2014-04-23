@@ -4,10 +4,8 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedDeque;
 
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
@@ -36,7 +34,7 @@ public class OpenGLTableAugment extends GLCore implements GLKeyboardListener, AR
 	private AllocateScene allocateStage;
 	private AssembleScene assembleStage;
 	
-	private ConcurrentHashMap<Integer, ARCard> p1Cards, p2Cards;
+	private ConcurrentHashMap<Integer, ARCard> knownCards, p1Cards, p2Cards;
 	
 	private LinkedList<GameScene> gameScenes;
 	
@@ -45,14 +43,14 @@ public class OpenGLTableAugment extends GLCore implements GLKeyboardListener, AR
 		p1Cards = new ConcurrentHashMap<>();
 		p2Cards = new ConcurrentHashMap<>();
 		
+		this.knownCards = knownCards;
+		
 		gameScenes = new LinkedList<GameScene>();
 		
 		keyboardListeners.add(this);
 		
 		GLValues.setScreenSize(RatsAR.WINDOW_WIDTH, RatsAR.WINDOW_HEIGHT);
 		GLValues.calculateRatios();
-		
-		//this.knownCards = knownCards;
 		
 		intro = new IntroScene(knownCards);
 		allocateStage = new AllocateScene(knownCards, p1Cards, p2Cards);
@@ -193,7 +191,7 @@ public class OpenGLTableAugment extends GLCore implements GLKeyboardListener, AR
 		
 		GL11.glPopMatrix();
 
-		Display.sync(30);
+		Display.sync(60);
 		swapBuffers();
 
 	}
@@ -201,9 +199,14 @@ public class OpenGLTableAugment extends GLCore implements GLKeyboardListener, AR
 	private void resetGameEngine(){
 		p1Cards.clear();
 		p2Cards.clear();
+		gameScenes.clear();
 		gameScenes.add(intro);
 		gameScenes.add(allocateStage);
 		gameScenes.add(assembleStage);
+		
+		for(ARCard c : knownCards.values()){
+			c.setBroken(false);
+		}
 	}
 	
 	@Override
@@ -226,16 +229,12 @@ public class OpenGLTableAugment extends GLCore implements GLKeyboardListener, AR
 	@Override
 	public void glKeyUp(int eventKey) {
 		System.out.println(eventKey);
-		if(eventKey == 28){
+		if(eventKey == 1){
 			resetGameEngine();
 		} else { 
 			gameScenes.getFirst().processInput(eventKey);
 		}
 		
-	}
-
-	public void setKnownCards(ConcurrentHashMap<Integer, ARCard> t){
-		System.out.println("setknow" + t.size());
 	}
 
 	@Override

@@ -3,6 +3,8 @@ package coderats.ar;
 import org.lwjgl.opengl.GL11;
 
 import ae.gl.GLGraphicRoutines;
+import ae.gl.text.GLBitmapFontBlitter;
+import ae.gl.text.GLBitmapFontBlitter.Alignment;
 import ae.gl.texture.GLTextureManager;
 import coderats.ar.Command.Type;
 
@@ -11,6 +13,7 @@ public class GLRat {
 	private static final float RAT_SIZE = 0.3f;
 	private static final int ANIM_LENGTH = 500;
 	
+	private String name;
 	private int x;
 	private int y;
 	private int r;
@@ -18,10 +21,11 @@ public class GLRat {
 	long anitime = -1;
 	private boolean alive;
 	
-	public GLRat(int x, int y, int r) {
+	public GLRat(int x, int y, int r, String name) {
 		this.x = x;
 		this.y = y;
 		this.r = r;
+		this.name = name;
 		lastCMD = Type.NOP;
 		reset();
 	}
@@ -34,13 +38,13 @@ public class GLRat {
 		
 		GL11.glPushMatrix();
 			GL11.glRotatef(90*r+180, 0, 0, 1);
+			GL11.glColor3f(0.4f, 0.4f, 0.4f);
 			GLGraphicRoutines.drawLineCircle(0.1f, 3, 2.0f);
 			GL11.glRotatef(-270, 0, 0, 1);
-			GL11.glColor3f(0.4f, 0.4f, 0.4f);
 			
 			GL11.glColor4f(1,1,1,1);
 			GLTextureManager.getInstance().bindTexture("rat");
-			if(anitime > time || lastCMD.equals(Type.NOP)){
+			if(alive && anitime > time || lastCMD.equals(Type.NOP)){
 				float at = (anitime-time)/(float)ANIM_LENGTH;
 				switch (lastCMD) {
 					case STP: 
@@ -69,8 +73,14 @@ public class GLRat {
 						}
 						break;
 				}
+			} else if(!alive) {
+				GL11.glColor4f(1,1,1,(float) (0.5f+Math.sin(time*0.1f)));
+				GLTextureManager.getInstance().bindTexture("rat_dead");
 			}
 			GLGraphicRoutines.draw2DRect(-RAT_SIZE, -RAT_SIZE, RAT_SIZE, RAT_SIZE, -2);
+			GL11.glColor4f(1, 1, 1, 1);
+			GL11.glTranslatef(-0.1f, -0.03f, -5);
+			GLBitmapFontBlitter.drawString(name, "font_code", 0.08f, 0.08f, Alignment.CENTERED);
 	
 		GL11.glPopMatrix();
 	}
@@ -128,13 +138,17 @@ public class GLRat {
 	}
 
 	public void execute(Type cmd, long time) {
+		if(!alive) return;
 		switch (cmd) {
 			case STP: stp(); break;
 			case ROL: rol(); break;
 			case ROR: ror(); break;
 			case PEW: pew(); break;
 			case NOP: nop(); break;
-			default: alive = false; break;
+			default: 
+				alive = false; 
+				System.out.println("Funny command detected. Killing rat!");
+				break;
 		}
 		lastCMD = cmd;
 		anitime = time + ANIM_LENGTH;
@@ -142,6 +156,14 @@ public class GLRat {
 	
 	public boolean isAlive() {
 		return alive;
+	}
+
+	public boolean isShooting() {
+		return Type.PEW.equals(lastCMD);
+	}
+
+	public void setAlive(boolean alive) {
+		this.alive = alive;
 	}
 
 }
