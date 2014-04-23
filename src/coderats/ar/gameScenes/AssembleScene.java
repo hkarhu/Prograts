@@ -21,8 +21,9 @@ import coderats.ar.GLRatBoard;
 
 public class AssembleScene extends GameScene {
 
-	private final int LOGIC_STEP_DELAY = 2000;
-	private final int START_DELAY = 3000;
+	private final int LOGIC_STEP_DELAY = 1500;
+	private final int PROGRAM_SWEEP_DELAY = 5000;
+	private final int START_DELAY = 10000;
 
 	private ArrayList<ARCardSlot> p1CardSlots;
 	private ArrayList<ARCardSlot> p2CardSlots;
@@ -35,6 +36,7 @@ public class AssembleScene extends GameScene {
 	private ConcurrentHashMap<Integer, ARCard> knownCards, p1Cards, p2Cards;
 	
 	private long logicStepTime = 0;
+	private long roundTime = 0;
 	private int executeIndex = 0;
 	private boolean cardsRemovedFromCenter = false;
 	
@@ -66,14 +68,13 @@ public class AssembleScene extends GameScene {
 	public void init() {
 		setRunning(true);
 		logicStepTime = 0;
+		roundTime = 0;
 		cardsRemovedFromCenter = false;
 		startingTime = 0;
 		executeIndex = 0;
 		for(int i=0; i < 5; i++){
-			p1CardSlots.get(i).activate(0);
-			p1CardSlots.get(i).bindCard(null);
-			p2CardSlots.get(i).activate(0);
-			p2CardSlots.get(i).bindCard(null);
+			p1CardSlots.get(i).reset();
+			p2CardSlots.get(i).reset();
 		}
 		gameBoard.resetGameBoard();
 	}
@@ -154,9 +155,11 @@ public class AssembleScene extends GameScene {
 				GL11.glPopMatrix();
 			GL11.glPopMatrix();
 			
-			if(time > logicStepTime){
-				stepLogic(time);
-				logicStepTime = time + LOGIC_STEP_DELAY;
+			if(time > roundTime){
+				if(time > logicStepTime){
+					stepLogic(time);
+					logicStepTime = time + LOGIC_STEP_DELAY;
+				}
 			}
 		}
 	}
