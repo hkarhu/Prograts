@@ -203,7 +203,7 @@ public class AssembleScene extends GameScene {
 	
 	private void runCommand(long time){
 		if(gameBoard.returnToAllocate()){
-			
+			setRunning(false);
 		}
 		ARCardSlot p1slot = p1CardSlots.get(executeIndex);
 		ARCardSlot p2slot = p2CardSlots.get(4-executeIndex);
@@ -212,6 +212,10 @@ public class AssembleScene extends GameScene {
 		gameBoard.advanceLogic(p1slot, p2slot, time);
 		executeIndex++;
 		if(executeIndex >= 5) executeIndex = 0;
+		
+		p1CardSlots.get(executeIndex).highlight();
+		p2CardSlots.get(4-executeIndex).highlight();
+		
 	}
 
 	@Override
