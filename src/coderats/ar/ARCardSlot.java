@@ -129,7 +129,6 @@ public class ARCardSlot extends GLDrawableItem {
 
 	public void activate(long time) {
 		activateTime = time + ACTIVATE_TIME;
-		breakContainedCard(time);
 		highlighted = false;
 	}
 	

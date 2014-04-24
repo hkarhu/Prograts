@@ -63,7 +63,7 @@ public class OpenCVThread {
 				Mat circ = new Mat();
 				
 				Imgproc.cvtColor(in, in, Imgproc.COLOR_BGR2GRAY);
-				in.convertTo(in, -1, 2.2f, -par1);
+				in.convertTo(in, -1, par2*0.1f, -par1);
 				
 				Imgproc.erode(in, out, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(3,3)));
 				
@@ -75,7 +75,7 @@ public class OpenCVThread {
 				
 				//Imgproc.threshold(hc, hc, 90, 255, Imgproc.THRESH_BINARY);
 				Imgproc.blur(out, tres, new Size(3,3));
-				tres.convertTo(tres, -1, 2.2f, -par2);
+				tres.convertTo(tres, -1, 2.2f, -par1);
 				Imgproc.threshold(tres, tres, par3, 255, Imgproc.THRESH_BINARY);
 				//Imgproc.adaptiveThreshold(gc, hc, 254, Imgproc.THRESH_BINARY, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, 7, 9);
 				

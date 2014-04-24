@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
@@ -149,7 +150,13 @@ public class OpenGLTableAugment extends GLCore implements GLKeyboardListener, AR
 			e.printStackTrace();
 		}
 		
-		Display.setLocation(2550, 0);
+		Display.setLocation(1280, 0);
+		try {
+			Display.setFullscreen(true);
+		} catch (LWJGLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		return true;
 	}
