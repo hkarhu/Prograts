@@ -15,7 +15,7 @@ import ae.gl.texture.GLTextureManager;
 
 public class AllocateScene extends GameScene {
 
-	private static final int ALLOCATE_TIME = 30000;
+	private static final int ALLOCATE_TIME = 20000;
 	private long allocateTimer;
 	private long exitTime;
 	private AllocateHalf p1Allocate;
@@ -86,14 +86,21 @@ public class AllocateScene extends GameScene {
 					exitTime = time + 501;
 				} else if(q > 0){
 					GL11.glPushMatrix();
-					GLGraphicRoutines.drawLineRect(1.0f, GLValues.glWidth*0.49f, GLValues.glHeight*0.15f, GLValues.glWidth*0.51f, GLValues.glHeight*0.85f, 0);
-					GLGraphicRoutines.draw2DRect(GLValues.glWidth*0.492f, GLValues.glHeight*(0.154f + 0.346f*q), GLValues.glWidth*0.508f, GLValues.glHeight*(0.846f - 0.354f*q), 0);
-					GL11.glTranslatef(GLValues.glWidth*0.5f, 0, 0);
-					GL11.glRotatef(90, 0, 0, 1);
-					GLBitmapFontBlitter.drawString(999-(int)(999*q)+"", "font_code", GLValues.glWidth*0.02f, GLValues.glWidth*0.02f, GLBitmapFontBlitter.Alignment.CENTERED);
-					GL11.glTranslatef(GLValues.glWidth*0.5f, 0, 0);
-					GL11.glRotatef(180, 0, 0, 1);
-					GLBitmapFontBlitter.drawString(999-(int)(999*q)+"", "font_code", GLValues.glWidth*0.02f, GLValues.glWidth*0.02f, GLBitmapFontBlitter.Alignment.CENTERED);
+						GLGraphicRoutines.drawLineRect(1.0f, GLValues.glWidth*0.49f, GLValues.glHeight*0.15f, GLValues.glWidth*0.51f, GLValues.glHeight*0.85f, 0);
+						GLGraphicRoutines.draw2DRect(GLValues.glWidth*0.492f, GLValues.glHeight*(0.154f + 0.346f*q), GLValues.glWidth*0.508f, GLValues.glHeight*(0.846f - 0.354f*q), 0);
+						
+						GL11.glPushMatrix();
+							GL11.glTranslatef(GLValues.glWidth*0.5f, GLValues.glHeight*0.075f, 0);
+							GL11.glRotatef(90, 0, 0, 1);
+							GLBitmapFontBlitter.drawString(999-(int)(999*q)+"", "font_code", GLValues.glWidth*0.02f, GLValues.glWidth*0.02f, GLBitmapFontBlitter.Alignment.CENTERED);
+						GL11.glPopMatrix();
+						
+						GL11.glPushMatrix();
+							GL11.glTranslatef(GLValues.glWidth*0.5f, GLValues.glHeight*0.925f, 0);
+							GL11.glRotatef(270, 0, 0, 1);
+							GLBitmapFontBlitter.drawString(999-(int)(999*q)+"", "font_code", GLValues.glWidth*0.02f, GLValues.glWidth*0.02f, GLBitmapFontBlitter.Alignment.CENTERED);
+						GL11.glPopMatrix();
+		
 					GL11.glPopMatrix();
 				}
 				

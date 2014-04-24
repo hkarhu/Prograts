@@ -19,7 +19,9 @@ public class OpenCVThread {
 	public static volatile int par2 = 50;
 	public static volatile int par3 = 133;
 	public static volatile int par4 = 18;
-
+	public static volatile int par5 = 255;
+	public static volatile int par6 = 255;
+	
 	private ConcurrentLinkedDeque<Mat> matrixQueue;
 	private ConcurrentLinkedDeque<RawTripCircleData> circleQueue;
 	private VideoCapture inputVideo;
@@ -75,7 +77,7 @@ public class OpenCVThread {
 				
 				//Imgproc.threshold(hc, hc, 90, 255, Imgproc.THRESH_BINARY);
 				Imgproc.blur(out, tres, new Size(3,3));
-				tres.convertTo(tres, -1, 2.2f, -par1);
+				//tres.convertTo(tres, -1, 2.2f, -par1);
 				Imgproc.threshold(tres, tres, par3, 255, Imgproc.THRESH_BINARY);
 				//Imgproc.adaptiveThreshold(gc, hc, 254, Imgproc.THRESH_BINARY, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, 7, 9);
 				

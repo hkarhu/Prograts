@@ -13,10 +13,16 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JSlider;
@@ -48,23 +54,33 @@ public class WebcamImageProcessor extends JFrame implements MouseListener, Mouse
 	private int wDebugXShift = 192;
 	private int wDebugYShift = 24;
 	
-	static int imageWidth = 640;
-	static int imageHeight = 480;
-	
-	int[][] CPs = {{0,0},{imageWidth,0},{imageWidth,imageHeight},{0, imageHeight}};
 	int movingCP = -1;
 	
 	private final OpenCVThread ocvt;
 	
+	private SavedParams p;
+	
 	public WebcamImageProcessor() {
-		
+
+		try {
+			FileInputStream fileIn = new FileInputStream("calibration.ser");
+			ObjectInputStream in = new ObjectInputStream(fileIn);
+			p = (SavedParams) in.readObject();
+			in.close();
+			fileIn.close();
+
+		} catch(Exception e) {
+			e.printStackTrace();
+			p = new SavedParams();
+		}
+
 		listeners = new Vector<>();
 		
 		addMouseListener(this);
 		addMouseMotionListener(this);
 		
 		cardTrackerDebug = new BufferedImage(64*3, 64*8+24, BufferedImage.TYPE_3BYTE_BGR);
-		webcamDebug = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_4BYTE_ABGR);
+		webcamDebug = new BufferedImage(p.imageWidth, p.imageHeight, BufferedImage.TYPE_4BYTE_ABGR);
 		
 		cardTrackerDebugG = cardTrackerDebug.getGraphics();
 		webcamDebugG = (Graphics2D) webcamDebug.getGraphics();
@@ -138,6 +154,49 @@ public class WebcamImageProcessor extends JFrame implements MouseListener, Mouse
 			}
 		});
 		this.add(slider);
+	
+		slider = new JSlider(JSlider.HORIZONTAL, 2, 255, 18);
+		slider.setBounds(592 + i.left, 480 + i.top, 200, 24);
+		slider.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				OpenCVThread.par5 = ((JSlider)e.getSource()).getValue();
+				refreshLabel();
+			}
+		});
+		this.add(slider);
+		
+		slider = new JSlider(JSlider.HORIZONTAL, 0, 255, 133);
+		slider.setBounds(592 + i.left, 510 + i.top, 200, 24);
+		slider.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				OpenCVThread.par6 = ((JSlider)e.getSource()).getValue();
+				refreshLabel();
+			}
+		});
+		this.add(slider);
+		
+		JButton save = new JButton("Save");
+		save.setBounds(i.left, 520+i.top, 130, 24);
+		save.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					FileOutputStream fileOut = new FileOutputStream("calibration.ser");
+					ObjectOutputStream out = new ObjectOutputStream(fileOut);
+					out.writeObject(p);
+					out.close();
+					fileOut.close();
+					System.out.printf("Serialized calibration.");
+				} catch (IOException ex){
+					ex.printStackTrace();
+				}
+				
+			}
+		});
+		this.add(save);
 		
 		label = new JLabel("");
 		label.setBounds(192 + i.left, 540 + i.top, 600, 24);
@@ -183,13 +242,13 @@ public class WebcamImageProcessor extends JFrame implements MouseListener, Mouse
 				//webcamDebugG.fillOval(c.getX()-c.getRadius(), c.getY()-c.getRadius(), c.getRadius()*2, c.getRadius()*2);
 				
 				webcamDebugG.setColor(Color.cyan);
-				webcamDebugG.drawLine(CPs[0][0],CPs[0][1], CPs[1][0], CPs[1][1]);
-				webcamDebugG.drawLine(CPs[1][0],CPs[1][1], CPs[2][0], CPs[2][1]);
-				webcamDebugG.drawLine(CPs[2][0],CPs[2][1], CPs[3][0], CPs[3][1]);
-				webcamDebugG.drawLine(CPs[3][0],CPs[3][1], CPs[0][0], CPs[0][1]);
+				webcamDebugG.drawLine(p.CPs[0][0],p.CPs[0][1], p.CPs[1][0], p.CPs[1][1]);
+				webcamDebugG.drawLine(p.CPs[1][0],p.CPs[1][1], p.CPs[2][0], p.CPs[2][1]);
+				webcamDebugG.drawLine(p.CPs[2][0],p.CPs[2][1], p.CPs[3][0], p.CPs[3][1]);
+				webcamDebugG.drawLine(p.CPs[3][0],p.CPs[3][1], p.CPs[0][0], p.CPs[0][1]);
 				
 				int dbgx = (i/8)*64;
-				int dbgy = (i%8)*64+24; 
+				int dbgy = (i%8)*64+24;
 				
 				cardTrackerDebugG.drawImage(c.getTripcode(),dbgx,dbgy,null);
 
@@ -239,14 +298,14 @@ public class WebcamImageProcessor extends JFrame implements MouseListener, Mouse
 	@Override
 	public void mousePressed(MouseEvent e) {
 
-		if(e.getX() < imageWidth/2){
-			if(e.getY() < imageHeight/2){
+		if(e.getX() < p.imageWidth/2){
+			if(e.getY() < p.imageHeight/2){
 				movingCP = 0;
 			} else {
 				movingCP = 3;
 			}
 		} else {
-			if(e.getY() < imageHeight/2){
+			if(e.getY() < p.imageHeight/2){
 				movingCP = 1;
 			} else {
 				movingCP = 2;
@@ -259,28 +318,28 @@ public class WebcamImageProcessor extends JFrame implements MouseListener, Mouse
 
 	private void setCalibrationRectPointCoords(MouseEvent e){
 		if(movingCP >= 0){
-			CPs[movingCP][0] = e.getX() - wDebugXShift;
-			CPs[movingCP][1] = e.getY() - wDebugYShift;
+			p.CPs[movingCP][0] = e.getX() - wDebugXShift;
+			p.CPs[movingCP][1] = e.getY() - wDebugYShift;
 		}
 	}
 	
 	private float getCalibratedGLX(float x, float y){
 		
-		float ymo = (y-(CPs[0][1]+CPs[3][1])/2.0f)/(float)(CPs[3][1]-CPs[0][1]);
+		float ymo = (y-(p.CPs[0][1]+p.CPs[3][1])/2.0f)/(float)(p.CPs[3][1]-p.CPs[0][1]);
 		float ymi = 1-ymo;
 		
-		return (((x-CPs[0][0])/(float)(CPs[1][0]-CPs[0][0]))*ymi + 
-				((x-CPs[3][0])/(float)(CPs[2][0]-CPs[3][0]))*ymo
+		return (((x-p.CPs[0][0])/(float)(p.CPs[1][0]-p.CPs[0][0]))*ymi + 
+				((x-p.CPs[3][0])/(float)(p.CPs[2][0]-p.CPs[3][0]))*ymo
 				)*GLValues.glWidth;
 		//return (1+(imageWidth-CPs[0][0]-CPs[1][0])/(float)imageWidth)*((x-CPs[0][0])/(float)imageWidth)*GLValues.glWidth;
 	}
 	
 	private float getCalibratedGLY(float x, float y){
-		float xmo = (x-(CPs[0][0]+CPs[1][0])/2.0f)/(float)(CPs[1][0]-CPs[0][0]);
+		float xmo = (x-(p.CPs[0][0]+p.CPs[1][0])/2.0f)/(float)(p.CPs[1][0]-p.CPs[0][0]);
 		float xmi = 1-xmo;
 		
-		return (((y-CPs[0][1])/(float)(CPs[3][1]-CPs[0][1]))*xmi + 
-				((y-CPs[1][1])/(float)(CPs[2][1]-CPs[1][1]))*xmo
+		return (((y-p.CPs[0][1])/(float)(p.CPs[3][1]-p.CPs[0][1]))*xmi + 
+				((y-p.CPs[1][1])/(float)(p.CPs[2][1]-p.CPs[1][1]))*xmo
 				)*GLValues.glHeight;
 	}
 	
@@ -299,6 +358,6 @@ public class WebcamImageProcessor extends JFrame implements MouseListener, Mouse
 	@Override
 	public void mouseExited(MouseEvent e) {}
 	@Override
-	public void mouseMoved(MouseEvent e) {}
+	public void mouseMoved(MouseEvent e) {} 
 	
 }

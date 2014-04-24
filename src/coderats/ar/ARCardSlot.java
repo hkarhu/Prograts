@@ -104,7 +104,7 @@ public class ARCardSlot extends GLDrawableItem {
 				GLGraphicRoutines.drawLineRect(2.0f, -slot_width, -GLValues.glHeight*0.04f, slot_width, GLValues.glHeight*0.04f, 0);
 
 				GL11.glTranslatef(0, GLValues.glHeight*0.06f, 0);
-				GLBitmapFontBlitter.drawString("[UPLOAD]", "font_default", 0.1f, 0.2f, GLBitmapFontBlitter.Alignment.CENTERED);
+				GLBitmapFontBlitter.drawString("< RUN >", "font_default", 0.1f, 0.2f, GLBitmapFontBlitter.Alignment.CENTERED);
 				
 				//Loading circle
 				GL11.glPushMatrix();

@@ -13,8 +13,11 @@ import ae.gl.GLValues;
 
 public class GLRatBoard extends GLDrawableItem {
 
-	public static final int BOARD_SIZE = 8;
+	public static final int BOARD_SIZE = 6;
 	public static final float SQUARE_SIZE = 0.3f;
+	
+	private long RESET_DELAY;
+	private long resetTime = 0;
 
 	private List<GLRat> rats;
 	private List<GLLazor> lazors;
@@ -52,13 +55,6 @@ public class GLRatBoard extends GLDrawableItem {
 				GL11.glPopMatrix();
 			}
 			
-			for(GLRat r : rats){
-				GL11.glPushMatrix();
-					GL11.glTranslatef(r.getX()*SQUARE_SIZE+0.5f*SQUARE_SIZE, r.getY()*SQUARE_SIZE+0.5f*SQUARE_SIZE, 0);
-					r.glDraw(time);
-				GL11.glPopMatrix();
-			}
-			
 			for(GLLazor l : lazors){
 				GL11.glPushMatrix();
 					GL11.glTranslatef(l.getX()*SQUARE_SIZE+0.5f*SQUARE_SIZE, l.getY()*SQUARE_SIZE+0.5f*SQUARE_SIZE, 0);
@@ -66,8 +62,15 @@ public class GLRatBoard extends GLDrawableItem {
 				GL11.glPopMatrix();
 			}
 			
+			for(GLRat r : rats){
+				GL11.glPushMatrix();
+					GL11.glTranslatef(r.getX()*SQUARE_SIZE+0.5f*SQUARE_SIZE, r.getY()*SQUARE_SIZE+0.5f*SQUARE_SIZE, 0);
+					r.glDraw(time);
+				GL11.glPopMatrix();
+			}
+			
 		GL11.glPopMatrix();
-
+	
 	}
 	
 	public void advanceLogic(ARCardSlot p1Slot, ARCardSlot p2Slot, long time){
@@ -111,7 +114,7 @@ public class GLRatBoard extends GLDrawableItem {
 		}
 		
 	}
-
+	
 	private boolean ratOutsideBoard(GLRat glRat) {
 		return glRat.getX() >= 8 || glRat.getX() < 0 || glRat.getY() >= 8 || glRat.getY() < 0;
 	}

@@ -7,6 +7,8 @@ import ae.gl.GLValues;
 
 public class GLLazor extends GLDrawableItem {
 	
+	private final float ANIM_LENGTH = 200.0f;
+	
 	int x = 0;
 	int y = 0;
 	int d = 0;
@@ -55,9 +57,11 @@ public class GLLazor extends GLDrawableItem {
 	@Override
 	public void glDraw(long time) {
 		
+		float t = (time-startTime)/ANIM_LENGTH;
+		
+		if(t > 1) return;
+		
 		GL11.glPushMatrix();
-			
-			float t = (time-startTime)/200.0f;
 			
 			GL11.glColor4f(1, 0, 0, 1-(float)Math.sin(t*0.2f));
 			
@@ -67,20 +71,20 @@ public class GLLazor extends GLDrawableItem {
 			GL11.glBegin( GL11.GL_LINE_STRIP );			
 				switch (d) {
 				case 0: 
-					GL11.glVertex3d(0, 0, 0);
-					GL11.glVertex3d(0, -getY()*GLRatBoard.SQUARE_SIZE, 0);
+					GL11.glVertex3d(-0.05f, 0, 0);
+					GL11.glVertex3d(-0.05f, -getY()*GLRatBoard.SQUARE_SIZE, 0);
 					break;
 				case 1: 
-					GL11.glVertex3d(0, 0, 0);
-					GL11.glVertex3d((GLRatBoard.BOARD_SIZE-1)*GLRatBoard.SQUARE_SIZE - getX()*GLRatBoard.SQUARE_SIZE, 0, 0);
+					GL11.glVertex3d(0, -0.05f, 0);
+					GL11.glVertex3d((GLRatBoard.BOARD_SIZE-1)*GLRatBoard.SQUARE_SIZE - getX()*GLRatBoard.SQUARE_SIZE, -0.05f, 0);
 					break;
 				case 2: 
-					GL11.glVertex3d(0, 0, 0);
-					GL11.glVertex3d(0, (GLRatBoard.BOARD_SIZE-1)*GLRatBoard.SQUARE_SIZE - getY()*GLRatBoard.SQUARE_SIZE, 0);
+					GL11.glVertex3d(0.05f, 0, 0);
+					GL11.glVertex3d(0.05f, (GLRatBoard.BOARD_SIZE-1)*GLRatBoard.SQUARE_SIZE - getY()*GLRatBoard.SQUARE_SIZE, 0);
 					break;
 				case 3:
-					GL11.glVertex3d(0, 0, 0);
-					GL11.glVertex3d(-getX()*GLRatBoard.SQUARE_SIZE, 0, 0);
+					GL11.glVertex3d(0, 0.05f, 0);
+					GL11.glVertex3d(-getX()*GLRatBoard.SQUARE_SIZE, 0.05f, 0);
 					break;
 				default: break;
 				}
