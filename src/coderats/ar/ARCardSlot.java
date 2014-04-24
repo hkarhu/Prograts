@@ -1,7 +1,6 @@
 package coderats.ar;
 
 import org.lwjgl.opengl.GL11;
-import org.opencv.core.Mat;
 
 import ae.gl.GLGraphicRoutines;
 import ae.gl.GLValues;
@@ -22,7 +21,7 @@ public class ARCardSlot extends GLDrawableItem {
 	private float slot_width = 0.4f*SCALE;
 	private float slot_heigth = 0.6f*SCALE;
 	
-	private Command c;
+	private Command command;
 	private ARCard card;
 	
 	private float activateTime = -1;
@@ -33,7 +32,7 @@ public class ARCardSlot extends GLDrawableItem {
 		this.x = x;
 		this.y = y;
 		this.a = a;
-		this.c = null;
+		this.command = null;
 	}
 
 	@Override
@@ -73,11 +72,11 @@ public class ARCardSlot extends GLDrawableItem {
 				}
 				GL11.glPopMatrix();
 				GLTextureManager.getInstance().bindTexture("card_broken");
-			} else {
-				GLTextureManager.getInstance().bindTexture("card");
 			}
 			
-			if(c == null){
+			GLTextureManager.getInstance().bindTexture("card");
+			
+			if(command == null){
 				GL11.glColor4f(0.3f,0.3f,0.3f, 1);
 				GLGraphicRoutines.draw2DRect(-slot_width, -slot_heigth, slot_width, slot_heigth, 0);
 				GLTextureManager.unbindTexture();
@@ -87,13 +86,14 @@ public class ARCardSlot extends GLDrawableItem {
 				GLBitmapFontBlitter.drawString("NOP", "font_default", 0.2f, 0.4f, GLBitmapFontBlitter.Alignment.CENTERED);
 			} else {
 				GL11.glTranslatef(0, 0, -5);
-				c.GLColorizeLight();
+				GLTextureManager.getInstance().bindTexture("card_"+command.getCommandString().toLowerCase());
+				command.GLColorizeLight();
 				GLGraphicRoutines.draw2DRect(-slot_width, -slot_heigth, slot_width, slot_heigth, 0);
 				GLTextureManager.unbindTexture();
 				GLGraphicRoutines.drawLineRect(1.0f, -slot_width, -slot_heigth, slot_width, slot_heigth, 0);
 				
 				GL11.glTranslatef(0, 0.42f, -0.2f);
-				GLBitmapFontBlitter.drawString(c.getCommandString(), "font_default", 0.2f, 0.4f, GLBitmapFontBlitter.Alignment.CENTERED);
+				GLBitmapFontBlitter.drawString(command.getCommandString(), "font_default", 0.2f, 0.4f, GLBitmapFontBlitter.Alignment.CENTERED);
 			}
 			
 			if(highlighted){
@@ -126,6 +126,14 @@ public class ARCardSlot extends GLDrawableItem {
 			
 		GL11.glPopMatrix();
 	}
+	
+	public void reset(){
+		activateTime = 0;
+		breakTime = 0;
+		highlighted = false;
+		command = null;
+		card = null;
+	}
 
 	public void activate(long time) {
 		activateTime = time + ACTIVATE_TIME;
@@ -133,7 +141,6 @@ public class ARCardSlot extends GLDrawableItem {
 	}
 	
 	public boolean hits(ARCard card){
-		
 		if(a > 180){
 			return card.getX() > x-slot_width && card.getX() < x+slot_width*0.5f && 
 					card.getY() > y-slot_heigth && card.getY() < y+slot_heigth;
@@ -145,16 +152,16 @@ public class ARCardSlot extends GLDrawableItem {
 	}
 
 	public Type getSlottedCommandType() {
-		if(c == null) return Type.NOP;
-		return c.getType();
+		if(command == null) return Type.NOP;
+		return command.getType();
 	}
 	
 	public void bindCard(ARCard card) {
 		this.card = card;
 		if(card != null){
-			this.c = card.getCommand();
+			this.command = card.getCommand();
 		} else {
-			this.c = null;
+			this.command = null;
 		}
 	}
 

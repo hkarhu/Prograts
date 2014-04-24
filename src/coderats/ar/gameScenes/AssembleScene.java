@@ -21,13 +21,15 @@ import coderats.ar.GLRatBoard;
 
 public class AssembleScene extends GameScene {
 
-	private final int LOGIC_STEP_DELAY = 2000;
-	private final int START_DELAY = 3000;
+	private final int LOGIC_STEP_DELAY = 1000;
+	private final int PROGRAM_SWEEP_DELAY = 25000;
+	private final int START_DELAY = 10000;
 
+	private boolean sweep = false;
+	
 	private ArrayList<ARCardSlot> p1CardSlots;
 	private ArrayList<ARCardSlot> p2CardSlots;
 	private GLRatBoard gameBoard;
-	
 	private long startingTime = 0;
 	
 	private List<GLDrawableItem> gameItems;
@@ -35,6 +37,7 @@ public class AssembleScene extends GameScene {
 	private ConcurrentHashMap<Integer, ARCard> knownCards, p1Cards, p2Cards;
 	
 	private long logicStepTime = 0;
+	private long roundTime = 0;
 	private int executeIndex = 0;
 	private boolean cardsRemovedFromCenter = false;
 	
@@ -66,14 +69,13 @@ public class AssembleScene extends GameScene {
 	public void init() {
 		setRunning(true);
 		logicStepTime = 0;
+		roundTime = 0;
 		cardsRemovedFromCenter = false;
 		startingTime = 0;
 		executeIndex = 0;
 		for(int i=0; i < 5; i++){
-			p1CardSlots.get(i).activate(0);
-			p1CardSlots.get(i).bindCard(null);
-			p2CardSlots.get(i).activate(0);
-			p2CardSlots.get(i).bindCard(null);
+			p1CardSlots.get(i).reset();
+			p2CardSlots.get(i).reset();
 		}
 		gameBoard.resetGameBoard();
 	}
@@ -137,26 +139,30 @@ public class AssembleScene extends GameScene {
 					GLBitmapFontBlitter.blitSinString("    " + "    ", 0.5f, 0.8f, 1, 2f, (float)(Math.PI-Math.tan(time/(float)LOGIC_STEP_DELAY*Math.PI)*0.2f), "font_default");
 				GL11.glPopMatrix();
 				
-				GL11.glColor4f(1, 1, 1, 1);
-				GL11.glPushMatrix();
-					GL11.glRotatef(90, 0, 0, 1);
-					GL11.glTranslatef(-2, -0.3f, 0);
-					GLBitmapFontBlitter.drawString("# Cards", "font_code", GLValues.glWidth*0.014f, GLValues.glWidth*0.02f, GLBitmapFontBlitter.Alignment.CENTERED);
-					GL11.glTranslatef(0, 0.45f, 0);
-					GLBitmapFontBlitter.drawString(p2Cards.keySet().size() + "", "font_default", GLValues.glWidth*0.05f, GLValues.glWidth*0.1f, GLBitmapFontBlitter.Alignment.CENTERED);
-				GL11.glPopMatrix();
-				GL11.glPushMatrix();
-					GL11.glRotatef(-90, 0, 0, 1);
-					GL11.glTranslatef(-2, -0.3f, 0);
-					GLBitmapFontBlitter.drawString("# Cards", "font_code", GLValues.glWidth*0.014f, GLValues.glWidth*0.02f, GLBitmapFontBlitter.Alignment.CENTERED);
-					GL11.glTranslatef(0, 0.45f, 0);
-					GLBitmapFontBlitter.drawString(p1Cards.keySet().size() + "", "font_default", GLValues.glWidth*0.05f, GLValues.glWidth*0.1f, GLBitmapFontBlitter.Alignment.CENTERED);
-				GL11.glPopMatrix();
+//				GL11.glColor4f(1, 1, 1, 1);
+//				GL11.glPushMatrix();
+//					GL11.glRotatef(90, 0, 0, 1);
+//					GL11.glTranslatef(-2, -0.3f, 0);
+//					GLBitmapFontBlitter.drawString("# Cards", "font_code", GLValues.glWidth*0.014f, GLValues.glWidth*0.02f, GLBitmapFontBlitter.Alignment.CENTERED);
+//					GL11.glTranslatef(0, 0.45f, 0);
+//					GLBitmapFontBlitter.drawString(p2Cards.keySet().size() + "", "font_default", GLValues.glWidth*0.05f, GLValues.glWidth*0.1f, GLBitmapFontBlitter.Alignment.CENTERED);
+//				GL11.glPopMatrix();
+//				GL11.glPushMatrix();
+//					GL11.glRotatef(-90, 0, 0, 1);
+//					GL11.glTranslatef(-2, -0.3f, 0);
+//					GLBitmapFontBlitter.drawString("# Cards", "font_code", GLValues.glWidth*0.014f, GLValues.glWidth*0.02f, GLBitmapFontBlitter.Alignment.CENTERED);
+//					GL11.glTranslatef(0, 0.45f, 0);
+//					GLBitmapFontBlitter.drawString(p1Cards.keySet().size() + "", "font_default", GLValues.glWidth*0.05f, GLValues.glWidth*0.1f, GLBitmapFontBlitter.Alignment.CENTERED);
+//				GL11.glPopMatrix();
 			GL11.glPopMatrix();
 			
-			if(time > logicStepTime){
-				stepLogic(time);
-				logicStepTime = time + LOGIC_STEP_DELAY;
+			if(true){
+				if(time > logicStepTime){
+					stepLogic(time);
+					logicStepTime = time + LOGIC_STEP_DELAY;
+				}
+			} else {
+				
 			}
 		}
 	}
@@ -220,6 +226,9 @@ public class AssembleScene extends GameScene {
 
 	@Override
 	public void processInput(int inputKey) {
+		if(inputKey == 28){
+			gameBoard.resetGameBoard();
+		}
 	}
 
 	@Override

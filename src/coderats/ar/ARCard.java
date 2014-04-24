@@ -90,7 +90,7 @@ public class ARCard extends GLDrawableItem {
 				GLTextureManager.getInstance().bindTexture("card_broken");
 			} else {
 				cmd.GLColorizeDark();
-				GLTextureManager.getInstance().bindTexture("card");	
+				GLTextureManager.getInstance().bindTexture("card_"+cmd.getCommandString().toLowerCase());	
 			}
 
 			GL11.glBegin( GL11.GL_QUADS );

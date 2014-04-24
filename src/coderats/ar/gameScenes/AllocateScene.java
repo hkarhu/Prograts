@@ -104,7 +104,7 @@ public class AllocateScene extends GameScene {
 
 	@Override
 	public void processInput(int inputKey) {
-
+		if(inputKey == 28) setRunning(false);
 	}
 
 	@Override
