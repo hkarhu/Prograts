@@ -97,10 +97,10 @@ public class GLLazor extends GLDrawableItem {
 	
 	public boolean hitsRat(GLRat r){
 		switch (d) {
-			case 0: return (r.getX() == getX() && r.getY() < getY());
-			case 1: return (r.getY() == getY() && r.getX() > getX());
-			case 2: return (r.getX() == getX() && r.getY() > getY());
-			case 3: return (r.getY() == getY() && r.getX() < getX());
+			case 0: if (r.getX() == getX() && r.getY() < getY()){ r.bumpY(-1); return true; } break;
+			case 1: if (r.getY() == getY() && r.getX() > getX()){ r.bumpX(1); return true; } break;
+			case 2: if (r.getX() == getX() && r.getY() > getY()){ r.bumpY(1);  return true; } break;
+			case 3: if (r.getY() == getY() && r.getX() < getX()){ r.bumpX(-1); return true; } break;
 			default: break;
 		}	
 		return false;

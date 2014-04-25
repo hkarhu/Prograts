@@ -38,7 +38,7 @@ public class Command {
 	
 	public String getCommandString(){
 		switch (type) {
-			case STP: return "STP";
+			case STP: return "FWD";
 			case ROL: return "ROL";
 			case ROR: return "ROR";
 			case PEW: return "PEW";

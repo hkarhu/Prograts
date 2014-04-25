@@ -45,7 +45,11 @@ public class GLRat {
 		GLGraphicRoutines.drawLineCircle(0.1f, 3, 2.0f);
 		GL11.glRotatef(-270, 0, 0, 1);
 		
-		GL11.glColor4f(1,1,1,1);
+		if(name == "B"){
+			GL11.glColor4f(0.5f,0.5f,0.5f,1);
+		} else {
+			GL11.glColor4f(1,1,1,1);
+		}
 		GLTextureManager.getInstance().bindTexture("rat");
 		if(damage && at < 0.5f){
 			GL11.glColor4f(1,0.5f,0.5f,(float) (0.5f+Math.sin(time*0.1f)));
@@ -173,6 +177,17 @@ public class GLRat {
 
 	public void setAlive(boolean alive) {
 		this.alive = alive;
+		//damage = true;
+	}
+
+	public void bumpX(int i) {
+		x += i;
+		//damage = true;
+	}
+
+	public void bumpY(int i) {
+		y += i;
+		//damage = true;
 	}
 
 }

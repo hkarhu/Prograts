@@ -144,52 +144,69 @@ public class AssembleScene extends GameScene {
 					GL11.glColor4f(0, 1, 0, 1);
 					GL11.glPushMatrix();
 						GL11.glRotatef(90, 0, 0, 1);
-						GL11.glTranslatef(0, 1.5f, 0);
+						GL11.glTranslatef(0, 1.5f, -5);
 						GLBitmapFontBlitter.drawString("! EXEC !", "font_default", GLValues.glWidth*0.03f, GLValues.glWidth*0.06f, GLBitmapFontBlitter.Alignment.CENTERED);
 					GL11.glPopMatrix();
 					GL11.glPushMatrix();
 						GL11.glRotatef(270, 0, 0, 1);
-						GL11.glTranslatef(0, 1.5f, 0);
+						GL11.glTranslatef(0, 1.5f, -5);
 						GLBitmapFontBlitter.drawString("! EXEC !", "font_default", GLValues.glWidth*0.03f, GLValues.glWidth*0.06f, GLBitmapFontBlitter.Alignment.CENTERED);
 					GL11.glPopMatrix();
 				}
 				
 				GL11.glColor4f(1, 1, 1, 1);
 				
-				GL11.glPushMatrix();
-					GL11.glRotatef(-90, 0, 0, 1);
-					GL11.glTranslatef(-2, -0.3f, 0);
-					GLBitmapFontBlitter.drawString("", "font_code", GLValues.glWidth*0.014f, GLValues.glWidth*0.02f, GLBitmapFontBlitter.Alignment.CENTERED);
-					GL11.glTranslatef(0, 0.45f, 0);
-					GLBitmapFontBlitter.drawString(gameBoard.getLives(2) + "", "font_default", GLValues.glWidth*0.05f, GLValues.glWidth*0.1f, GLBitmapFontBlitter.Alignment.CENTERED);
-				GL11.glPopMatrix();
-				
-				GL11.glPushMatrix();
-					GL11.glRotatef(90, 0, 0, 1);
-					GL11.glTranslatef(-2, -0.3f, 0);
-					GLBitmapFontBlitter.drawString("", "font_code", GLValues.glWidth*0.014f, GLValues.glWidth*0.02f, GLBitmapFontBlitter.Alignment.CENTERED);
-					GL11.glTranslatef(0, 0.45f, 0);
-					GLBitmapFontBlitter.drawString(gameBoard.getLives(1) + "", "font_default", GLValues.glWidth*0.05f, GLValues.glWidth*0.1f, GLBitmapFontBlitter.Alignment.CENTERED);
-				GL11.glPopMatrix();
+//				GL11.glPushMatrix();
+//					GL11.glRotatef(-90, 0, 0, 1);
+//					GL11.glTranslatef(-2, -0.3f, 0);
+//					GLBitmapFontBlitter.drawString("", "font_code", GLValues.glWidth*0.014f, GLValues.glWidth*0.02f, GLBitmapFontBlitter.Alignment.CENTERED);
+//					GL11.glTranslatef(0, 0.45f, 0);
+//					GLBitmapFontBlitter.drawString(gameBoard.getLives(2) + "", "font_default", GLValues.glWidth*0.05f, GLValues.glWidth*0.1f, GLBitmapFontBlitter.Alignment.CENTERED);
+//				GL11.glPopMatrix();
+//				
+//				GL11.glPushMatrix();
+//					GL11.glRotatef(90, 0, 0, 1);
+//					GL11.glTranslatef(-2, -0.3f, 0);
+//					GLBitmapFontBlitter.drawString("", "font_code", GLValues.glWidth*0.014f, GLValues.glWidth*0.02f, GLBitmapFontBlitter.Alignment.CENTERED);
+//					GL11.glTranslatef(0, 0.45f, 0);
+//					GLBitmapFontBlitter.drawString(gameBoard.getLives(1) + "", "font_default", GLValues.glWidth*0.05f, GLValues.glWidth*0.1f, GLBitmapFontBlitter.Alignment.CENTERED);
+//				GL11.glPopMatrix();
 				
 			GL11.glPopMatrix();
 
-			if(progRun){ //Run Program
-				p1CardSlots.get(executeIndex).highlight();
-				p2CardSlots.get(4-executeIndex).highlight();
-				if(time > logicStepTime){
-					runCommand(time);
-					logicStepTime = time + LOGIC_STEP_DELAY;
+			if(time > resetTime){
+				if(progRun){ //Run Program
+					p1CardSlots.get(executeIndex).highlight();
+					p2CardSlots.get(4-executeIndex).highlight();
+					if(time > logicStepTime){
+						runCommand(time);
+						logicStepTime = time + LOGIC_STEP_DELAY;
+					}
+				} else { //Plan and assemble
+					if(time > logicStepTime){
+						copyToMemory();
+						logicStepTime = time + LOGIC_STEP_DELAY;
+					}
+					if(time > programRoundTime){
+						progRun = true;
+						programRoundTime = time + PROGRAM_RUN_DELAY + LOGIC_STEP_DELAY*NUM_SLOTS;
+					}
 				}
-			} else { //Plan and assemble
-				if(time > logicStepTime){
-					copyToMemory();
-					logicStepTime = time + LOGIC_STEP_DELAY;
-				}
-				if(time > programRoundTime){
-					progRun = true;
-					programRoundTime = time + PROGRAM_RUN_DELAY + LOGIC_STEP_DELAY*NUM_SLOTS;
-				}
+			} else {
+				GL11.glPushMatrix();
+					GL11.glTranslatef(GLValues.glWidth*0.5f, GLValues.glHeight*0.5f, 0);
+					GL11.glColor4f(1, 0, 0, 1);
+					GL11.glPushMatrix();
+						GL11.glRotatef(90, 0, 0, 1);
+						GL11.glTranslatef(0, 1.5f, 0);
+						GLBitmapFontBlitter.drawString("! OFFLINE !", "font_default", GLValues.glWidth*0.03f, GLValues.glWidth*0.06f, GLBitmapFontBlitter.Alignment.CENTERED);
+					GL11.glPopMatrix();
+					GL11.glPushMatrix();
+						GL11.glRotatef(270, 0, 0, 1);
+						GL11.glTranslatef(0, 1.5f, 0);
+						GLBitmapFontBlitter.drawString("! OFFLINE !", "font_default", GLValues.glWidth*0.03f, GLValues.glWidth*0.06f, GLBitmapFontBlitter.Alignment.CENTERED);
+					GL11.glPopMatrix();
+				GL11.glPopMatrix();
 			}
 		}
 	}
@@ -239,6 +256,9 @@ public class AssembleScene extends GameScene {
 		if(executeIndex >= NUM_SLOTS){
 			executeIndex = 0;
 			progRun = false;
+			if(!gameBoard.bothRatsAlive()){
+				resetTime = time + RESET_GAME_DELAY;
+			}
 		}
 		
 	}

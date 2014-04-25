@@ -209,7 +209,7 @@ public class WebcamImageProcessor extends JFrame implements MouseListener, Mouse
 	}
 	
 	private void refreshLabel(){
-		label.setText("BR1 : " + ocvt.par1 + "       BR2 : " + ocvt.par2 + "       CDT : " + ocvt.par3 + "       LT : " + ocvt.par4);
+		label.setText("BR1 : " + ocvt.par1 + "       BR2 : " + ocvt.par2 + "       CDT : " + ocvt.par3 + "       LT : " + ocvt.par4 + "       5 : " + ocvt.par5 + "       6 : " + ocvt.par6);
 	}
 	
 	public ConcurrentHashMap<Integer, ARCard> getKnownCards(){

@@ -43,11 +43,11 @@ public class GLRatBoard extends GLDrawableItem {
 	
 	public void resetRats(){
 		
-		if(!p1rat.isAlive()){
+		if(p1rat != null && !p1rat.isAlive()){
 			p1Lives--;
 		}
-		if(!p2rat.isAlive()){
-			p1Lives--;
+		if(p2rat != null && !p2rat.isAlive()){
+			p2Lives--;
 		}
 		p1rat = new GLRat(1,1,1,"A");
 		p2rat = new GLRat(BOARD_SIZE-2,BOARD_SIZE-2,3,"B");
@@ -96,24 +96,26 @@ public class GLRatBoard extends GLDrawableItem {
 	
 	}
 	
+	public boolean bothRatsAlive(){
+		return p1rat.isAlive() || p2rat.isAlive();
+	}
+	
 	public void advanceLogic(ARCardSlot p1Slot, ARCardSlot p2Slot, long time){
 		
 		lazors.clear();
 		
 		if(p1rat.isAlive()){
 			p1rat.execute(p1Slot.getSlottedCommandType(), time);
+			if(p1rat.isShooting()){
+				lazors.add(new GLLazor(p1rat.getX(), p1rat.getY(), p1rat.getRotation(), time));
+			}
 		}
 		
 		if(p2rat.isAlive()){
 			p2rat.execute(p2Slot.getSlottedCommandType(), time);
-		}
-		
-		if(p1rat.isShooting()){
-			lazors.add(new GLLazor(p1rat.getX(), p1rat.getY(), p1rat.getRotation(), time));
-		}
-		
-		if(p2rat.isShooting()){
-			lazors.add(new GLLazor(p2rat.getX(), p2rat.getY(), p2rat.getRotation(), time));
+			if(p2rat.isShooting()){
+				lazors.add(new GLLazor(p2rat.getX(), p2rat.getY(), p2rat.getRotation(), time));
+			}
 		}
 		
 		for(GLLazor l : lazors){
@@ -136,12 +138,11 @@ public class GLRatBoard extends GLDrawableItem {
 	}
 	
 	private boolean ratOutsideBoard(GLRat glRat) {
-		return glRat.getX() >= 8 || glRat.getX() < 0 || glRat.getY() >= 8 || glRat.getY() < 0;
+		return glRat.getX() >= BOARD_SIZE || glRat.getX() < 0 || glRat.getY() >= BOARD_SIZE || glRat.getY() < 0;
 	}
 
 	public boolean returnToAllocate() {
-		// TODO Auto-generated method stub
-		return false;
+		return p1Lives <= 0 || p2Lives <= 0;
 	}
 
 	public int getLives(int p) {

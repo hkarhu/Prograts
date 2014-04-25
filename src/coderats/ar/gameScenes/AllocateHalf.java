@@ -76,7 +76,7 @@ public class AllocateHalf {
 				GLTextureManager.unbindTexture();			
 				GLGraphicRoutines.draw2DRect(-GLValues.glWidth*0.06f, -GLValues.glHeight*0.02f, GLValues.glWidth*0.06f, GLValues.glHeight*0.02f, 0);
 				GL11.glColor3f(0, 0, 1);
-				GLBitmapFontBlitter.drawString("< STP >", "font_default", 0.02f*GLValues.glWidth, 0.06f*GLValues.glHeight, GLBitmapFontBlitter.Alignment.CENTERED);
+				GLBitmapFontBlitter.drawString("< FWD >", "font_default", 0.02f*GLValues.glWidth, 0.06f*GLValues.glHeight, GLBitmapFontBlitter.Alignment.CENTERED);
 			GL11.glPopMatrix();
 
 			GL11.glPushMatrix();

@@ -20,6 +20,7 @@ public class AllocateScene extends GameScene {
 	private long exitTime;
 	private AllocateHalf p1Allocate;
 	private AllocateHalf p2Allocate;
+	private boolean allocate_broken = true;
 	
 	private ConcurrentHashMap<Integer, ARCard> knownCards;
 	private ConcurrentHashMap<Integer, ARCard> p1Cards, p2Cards;
@@ -120,11 +121,13 @@ public class AllocateScene extends GameScene {
 		ARCard c = knownCards.get(id);
 		
 		if(c.getQuality() < 0.8f){
-			System.out.println("Allocate removed low quality card " + c.getID());
+			System.out.println("Allocate: Removed low quality card " + c.getID());
 			p1Cards.remove(id);
 			p2Cards.remove(id);
 			return;
 		}
+		
+		if(c.isBroken() && !allocate_broken) return; //Don't allocate if the card is broken.
 		
 		if(c.getX() < GLValues.glWidth/2){
 			//P2 Cards

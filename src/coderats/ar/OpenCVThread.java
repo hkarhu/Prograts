@@ -67,22 +67,26 @@ public class OpenCVThread {
 				Imgproc.cvtColor(in, in, Imgproc.COLOR_BGR2GRAY);
 				in.convertTo(in, -1, par2*0.1f, -par1);
 				
+				//Imgproc.equalizeHist(in, in);
+				
 				Imgproc.erode(in, out, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(3,3)));
 				
-				//Imgproc.equalizeHist(gc, hc);
-				
 				//Imgproc.GaussianBlur(hc, hc, new Size(3,3), 51);
-
-				//Imgproc.adaptiveThreshold(gc, gc, 255, Imgproc.THRESH_BINARY, Imgproc.ADAPTIVE_THRESH_MEAN_C, 5, 9);
 				
 				//Imgproc.threshold(hc, hc, 90, 255, Imgproc.THRESH_BINARY);
+								///tres
 				Imgproc.blur(out, tres, new Size(3,3));
-				//tres.convertTo(tres, -1, 2.2f, -par1);
-				Imgproc.threshold(tres, tres, par3, 255, Imgproc.THRESH_BINARY);
-				//Imgproc.adaptiveThreshold(gc, hc, 254, Imgproc.THRESH_BINARY, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, 7, 9);
+				out.convertTo(tres, -1, par5*0.1f, -par6);
+				Imgproc.erode(tres, tres, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(5,5)));
+				//
 				
-				//Imgproc.dilate(hc, hc, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(3,3)));
-				//Imgproc.dilate(hc, hc, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(3,3)));
+				//Imgproc.dilate(out, out, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(5,5)));
+				
+				Imgproc.threshold(tres, tres, par3, 255, Imgproc.THRESH_BINARY);
+				//Imgproc.adaptiveThreshold(tres, tres, 254, Imgproc.THRESH_BINARY, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, 7, 9);
+				
+				//
+				
 				//Imgproc.erode(gc, hc, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(3,3)));		
 			
 				//List<MatOfPoint> contours = new LinkedList<MatOfPoint>();

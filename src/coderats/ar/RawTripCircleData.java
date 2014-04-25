@@ -278,8 +278,8 @@ public class RawTripCircleData {
 		xShift = SAMPLE_FRAME_SIZE/2.0f - ellipse.center.x;
 		yShift = SAMPLE_FRAME_SIZE/2.0f - ellipse.center.y;
 		
-		lastX += xShift;
-		lastY += yShift;
+		lastX -= xShift;
+		lastY -= yShift;
 		
 
 
