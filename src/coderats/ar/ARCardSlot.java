@@ -140,15 +140,17 @@ public class ARCardSlot extends GLDrawableItem {
 		highlighted = false;
 	}
 	
-	public boolean hits(ARCard card){
+	public boolean hits(ARCard c){
+		
 		if(a > 180){
-			return card.getX() > x-slot_width && card.getX() < x+slot_width*0.5f && 
-					card.getY() > y-slot_heigth && card.getY() < y+slot_heigth;
+			return c.getX() > x-slot_width && c.getX() < x+slot_width*0.5f && 
+					c.getY() > y-slot_heigth && c.getY() < y+slot_heigth;
 				
 		} else {
-			return card.getX() > x-slot_width*0.5f && card.getX() < x+slot_width && 
-					card.getY() > y-slot_heigth && card.getY() < y+slot_heigth;
+			return c.getX() > x-slot_width*0.5f && c.getX() < x+slot_width && 
+					c.getY() > y-slot_heigth && c.getY() < y+slot_heigth;
 		}
+		
 	}
 
 	public Type getSlottedCommandType() {
@@ -156,10 +158,16 @@ public class ARCardSlot extends GLDrawableItem {
 		return command.getType();
 	}
 	
-	public void bindCard(ARCard card) {
-		this.card = card;
-		if(card != null){
-			this.command = card.getCommand();
+	public void bindCard(ARCard c) {
+	
+		//BONUX
+		if(this.card != null && (c.getID()-this.card.getID())%5 == 0 && c.getCommand().equals(Type.PEW) && this.card.getCommand().equals(Type.PEW)){
+			c.setCommand(new Command(Type.QQQ));
+		}
+		
+		this.card = c;
+		if(c != null){
+			this.command = c.getCommand();
 		} else {
 			this.command = null;
 		}

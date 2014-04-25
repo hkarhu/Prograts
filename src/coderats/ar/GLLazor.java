@@ -2,24 +2,23 @@ package coderats.ar;
 
 import org.lwjgl.opengl.GL11;
 
-import ae.gl.GLGraphicRoutines;
-import ae.gl.GLValues;
-
 public class GLLazor extends GLDrawableItem {
 	
-	private final float ANIM_LENGTH = 200.0f;
+	public final static float ANIM_LENGTH = 200.0f;
+	protected int x = 0;
+	protected int y = 0;
+	protected int d = 0;
+	protected boolean active = false;
+	protected long startTime = 0;
 	
-	int x = 0;
-	int y = 0;
-	int d = 0;
-	boolean active = false;
-	private long startTime = 0;
-	
-	public GLLazor(int x, int y, int d, long time) {
-		this.startTime = time;
+	public GLLazor(int x, int y, int d) {
 		this.x = x;
 		this.y = y;
 		this.d = d;
+	}
+	
+	public void setTime(long time){
+		this.startTime = time;
 	}
 	
 	public int getX() {

@@ -97,7 +97,7 @@ public class GLRatBoard extends GLDrawableItem {
 	}
 	
 	public boolean bothRatsAlive(){
-		return p1rat.isAlive() || p2rat.isAlive();
+		return p1rat.isAlive() && p2rat.isAlive();
 	}
 	
 	public void advanceLogic(ARCardSlot p1Slot, ARCardSlot p2Slot, long time){
@@ -106,15 +106,21 @@ public class GLRatBoard extends GLDrawableItem {
 		
 		if(p1rat.isAlive()){
 			p1rat.execute(p1Slot.getSlottedCommandType(), time);
-			if(p1rat.isShooting()){
-				lazors.add(new GLLazor(p1rat.getX(), p1rat.getY(), p1rat.getRotation(), time));
+			GLLazor p1Lazor = p1rat.getLazor();
+			if(p1Lazor != null){
+				p1Lazor.setTime(time);
+				lazors.add(p1Lazor);
+				p1rat.setLazor(null);
 			}
 		}
 		
 		if(p2rat.isAlive()){
 			p2rat.execute(p2Slot.getSlottedCommandType(), time);
-			if(p2rat.isShooting()){
-				lazors.add(new GLLazor(p2rat.getX(), p2rat.getY(), p2rat.getRotation(), time));
+			GLLazor p2Lazor = p2rat.getLazor();
+			if(p2Lazor != null){
+				p2Lazor.setTime(time);
+				lazors.add(p2Lazor);
+				p1rat.setLazor(null);
 			}
 		}
 		

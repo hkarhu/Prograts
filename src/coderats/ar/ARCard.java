@@ -108,8 +108,8 @@ public class ARCard extends GLDrawableItem {
 				cmd.GLColorizeLight();
 			}
 			
-			GL11.glTranslatef(0, 0.58f, 0);
-			GLBitmapFontBlitter.drawString(cmd.getCommandString(), "font_default", 0.1f*SCALE, 0.2f*SCALE, GLBitmapFontBlitter.Alignment.CENTERED);
+//			GL11.glTranslatef(0, 0.58f, 0);
+//			GLBitmapFontBlitter.drawString(cmd.getCommandString(), "font_default", 0.1f*SCALE, 0.2f*SCALE, GLBitmapFontBlitter.Alignment.CENTERED);
 
 		}
 		GL11.glPopMatrix();

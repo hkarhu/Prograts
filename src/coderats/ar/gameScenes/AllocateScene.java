@@ -139,7 +139,7 @@ public class AllocateScene extends GameScene {
 				}
 			} else {
 				if(c.getX() < GLValues.glWidth*0.25f){
-					c.setCommand(new Command(Command.Type.STP));
+					c.setCommand(new Command(Command.Type.FWD));
 				} else {
 					c.setCommand(new Command(Command.Type.ROR));
 				}
@@ -158,7 +158,7 @@ public class AllocateScene extends GameScene {
 				}
 			} else {
 				if(c.getX() > GLValues.glWidth*0.75f){
-					c.setCommand(new Command(Command.Type.STP));
+					c.setCommand(new Command(Command.Type.FWD));
 				} else {
 					c.setCommand(new Command(Command.Type.ROR));
 				}

@@ -22,7 +22,7 @@ public class AssembleScene extends GameScene {
 	private final static int NUM_SLOTS = 5;
 	public final static int NUM_LIVES = 3;
 	private final static int LOGIC_STEP_DELAY = 500;
-	private final static int PROGRAM_RUN_DELAY = 20000;
+	private final static int PROGRAM_RUN_DELAY = 2000;
 	private final static int RESET_GAME_DELAY = 5000;
 	private final static int START_GAME_DELAY = 10000;
 	
@@ -174,7 +174,7 @@ public class AssembleScene extends GameScene {
 				
 			GL11.glPopMatrix();
 
-			if(time > resetTime){
+			if(gameBoard.bothRatsAlive()){
 				if(progRun){ //Run Program
 					p1CardSlots.get(executeIndex).highlight();
 					p2CardSlots.get(4-executeIndex).highlight();
@@ -194,7 +194,7 @@ public class AssembleScene extends GameScene {
 				}
 			} else {
 				GL11.glPushMatrix();
-					GL11.glTranslatef(GLValues.glWidth*0.5f, GLValues.glHeight*0.5f, 0);
+					GL11.glTranslatef(GLValues.glWidth*0.5f, GLValues.glHeight*0.5f, -5);
 					GL11.glColor4f(1, 0, 0, 1);
 					GL11.glPushMatrix();
 						GL11.glRotatef(90, 0, 0, 1);

@@ -21,6 +21,7 @@ public class GLRat {
 	long anitime = -1;
 	private boolean alive;
 	private boolean damage;
+	private GLLazor lazor;
 
 	public GLRat(int x, int y, int r, String name) {
 		this.x = x;
@@ -56,7 +57,7 @@ public class GLRat {
 			GLTextureManager.getInstance().bindTexture("rat_damage");
 		} else if(alive && anitime > time || lastCMD.equals(Type.NOP)){
 			switch (lastCMD) {
-			case STP: 
+			case FWD: 
 				GL11.glTranslatef(-RAT_SIZE*at, 0, 0); 
 				GL11.glRotatef((float)Math.sin(at*Math.PI*4)*10, 0,0,1);
 				break;
@@ -66,7 +67,9 @@ public class GLRat {
 			case ROR:
 				GL11.glRotatef(-90*at, 0,0,1);
 				break;
-			case PEW: 
+			case QQQ:
+				GL11.glRotatef((float) Math.sin(at*50)*20, 0, 0, 1);
+			case PEW:  
 				if(time%2 == 0){
 					GLTextureManager.getInstance().bindTexture("rat_fire0");
 				} else {
@@ -115,7 +118,11 @@ public class GLRat {
 	}
 
 	private void pew(){
-
+		lazor = new GLLazor(x, y, r);
+	}
+	
+	private void qqq() {
+		lazor = new GLQLazor(x, y, r);
 	}
 
 	private void nop(){
@@ -149,10 +156,11 @@ public class GLRat {
 	public void execute(Type cmd, long time) {
 		if(!alive) return;
 		switch (cmd) {
-		case STP: stp(); break;
+		case FWD: stp(); break;
 		case ROL: rol(); break;
 		case ROR: ror(); break;
 		case PEW: pew(); break;
+		case QQQ: qqq(); break;
 		case NOP: nop(); break;
 		default: 
 			alive = false; 
@@ -171,8 +179,12 @@ public class GLRat {
 		damage = true;
 	}
 
-	public boolean isShooting() {
-		return Type.PEW.equals(lastCMD);
+	public GLLazor getLazor() {
+		return lazor;
+	}
+	
+	public void setLazor(GLLazor l){
+		this.lazor = l;
 	}
 
 	public void setAlive(boolean alive) {
