@@ -4,10 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.xml.crypto.dsig.keyinfo.RetrievalMethod;
+
 import org.lwjgl.Sys;
 import org.lwjgl.opengl.GL11;
 
 import coderats.ar.Command.Type;
+import coderats.ar.gameScenes.AssembleScene;
 import ae.gl.GLGraphicRoutines;
 import ae.gl.GLValues;
 
@@ -19,20 +22,35 @@ public class GLRatBoard extends GLDrawableItem {
 	private long RESET_DELAY;
 	private long resetTime = 0;
 
-	private List<GLRat> rats;
+	private int p1Lives = AssembleScene.NUM_LIVES;
+	private int p2Lives = AssembleScene.NUM_LIVES;
+	
+	private GLRat p1rat;
+	private GLRat p2rat;
 	private List<GLLazor> lazors;
 	
 	public GLRatBoard() {
-		rats = new ArrayList<>(2);
 		lazors = new ArrayList<>(2);
 		resetGameBoard();
 	}
 	
 	public void resetGameBoard(){
-		rats.clear();
+		p1Lives = AssembleScene.NUM_LIVES;
+		p2Lives = AssembleScene.NUM_LIVES;
 		lazors.clear();
-		rats.add(new GLRat(1,1,1,"A"));
-		rats.add(new GLRat(BOARD_SIZE-2,BOARD_SIZE-2,3,"B"));
+		resetRats();
+	}
+	
+	public void resetRats(){
+		
+		if(!p1rat.isAlive()){
+			p1Lives--;
+		}
+		if(!p2rat.isAlive()){
+			p1Lives--;
+		}
+		p1rat = new GLRat(1,1,1,"A");
+		p2rat = new GLRat(BOARD_SIZE-2,BOARD_SIZE-2,3,"B");
 	}
 
 	@Override
@@ -62,12 +80,17 @@ public class GLRatBoard extends GLDrawableItem {
 				GL11.glPopMatrix();
 			}
 			
-			for(GLRat r : rats){
-				GL11.glPushMatrix();
-					GL11.glTranslatef(r.getX()*SQUARE_SIZE+0.5f*SQUARE_SIZE, r.getY()*SQUARE_SIZE+0.5f*SQUARE_SIZE, 0);
-					r.glDraw(time);
-				GL11.glPopMatrix();
-			}
+			
+			GL11.glPushMatrix();
+				GL11.glTranslatef(p1rat.getX()*SQUARE_SIZE+0.5f*SQUARE_SIZE, p1rat.getY()*SQUARE_SIZE+0.5f*SQUARE_SIZE, 0);
+				p1rat.glDraw(time);
+			GL11.glPopMatrix();
+			
+			GL11.glPushMatrix();
+				GL11.glTranslatef(p2rat.getX()*SQUARE_SIZE+0.5f*SQUARE_SIZE, p2rat.getY()*SQUARE_SIZE+0.5f*SQUARE_SIZE, 0);
+				p2rat.glDraw(time);
+			GL11.glPopMatrix();
+			
 			
 		GL11.glPopMatrix();
 	
@@ -76,9 +99,6 @@ public class GLRatBoard extends GLDrawableItem {
 	public void advanceLogic(ARCardSlot p1Slot, ARCardSlot p2Slot, long time){
 		
 		lazors.clear();
-		
-		GLRat p1rat = rats.get(0);
-		GLRat p2rat = rats.get(1);
 		
 		if(p1rat.isAlive()){
 			p1rat.execute(p1Slot.getSlottedCommandType(), time);
@@ -122,6 +142,10 @@ public class GLRatBoard extends GLDrawableItem {
 	public boolean returnToAllocate() {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	public int getLives(int p) {
+		if(p == 1) return p1Lives; else return p2Lives;
 	}
 
 }

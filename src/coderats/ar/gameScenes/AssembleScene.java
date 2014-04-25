@@ -19,19 +19,16 @@ import coderats.ar.GLRatBoard;
 
 public class AssembleScene extends GameScene {
 
-	private final int NUM_SLOTS = 5;
-	private final int NUM_LIVES = 3;
-	private final int LOGIC_STEP_DELAY = 500;
-	private final int PROGRAM_RUN_DELAY = 20000;
-	private final int RESET_GAME_DELAY = 5000;
-	private final int START_GAME_DELAY = 10000;
+	private final static int NUM_SLOTS = 5;
+	public final static int NUM_LIVES = 3;
+	private final static int LOGIC_STEP_DELAY = 500;
+	private final static int PROGRAM_RUN_DELAY = 20000;
+	private final static int RESET_GAME_DELAY = 5000;
+	private final static int START_GAME_DELAY = 10000;
 	
 	private ArrayList<ARCardSlot> p1CardSlots;
 	private ArrayList<ARCardSlot> p2CardSlots;
 	private GLRatBoard gameBoard;
-	
-	private int p1Lives = NUM_LIVES;
-	private int p2Lives = NUM_LIVES;
 	
 	private List<GLDrawableItem> gameItems;
 	
@@ -71,8 +68,6 @@ public class AssembleScene extends GameScene {
 	@Override
 	public void init() {
 		setRunning(true);
-		p1Lives = NUM_LIVES;
-		p2Lives = NUM_LIVES;
 		logicStepTime = 0;
 		programRoundTime = 0;
 		cardsRemovedFromCenter = false;
@@ -166,7 +161,7 @@ public class AssembleScene extends GameScene {
 					GL11.glTranslatef(-2, -0.3f, 0);
 					GLBitmapFontBlitter.drawString("", "font_code", GLValues.glWidth*0.014f, GLValues.glWidth*0.02f, GLBitmapFontBlitter.Alignment.CENTERED);
 					GL11.glTranslatef(0, 0.45f, 0);
-					GLBitmapFontBlitter.drawString(p1Lives + "", "font_default", GLValues.glWidth*0.05f, GLValues.glWidth*0.1f, GLBitmapFontBlitter.Alignment.CENTERED);
+					GLBitmapFontBlitter.drawString(gameBoard.getLives(2) + "", "font_default", GLValues.glWidth*0.05f, GLValues.glWidth*0.1f, GLBitmapFontBlitter.Alignment.CENTERED);
 				GL11.glPopMatrix();
 				
 				GL11.glPushMatrix();
@@ -174,7 +169,7 @@ public class AssembleScene extends GameScene {
 					GL11.glTranslatef(-2, -0.3f, 0);
 					GLBitmapFontBlitter.drawString("", "font_code", GLValues.glWidth*0.014f, GLValues.glWidth*0.02f, GLBitmapFontBlitter.Alignment.CENTERED);
 					GL11.glTranslatef(0, 0.45f, 0);
-					GLBitmapFontBlitter.drawString(p1Lives + "", "font_default", GLValues.glWidth*0.05f, GLValues.glWidth*0.1f, GLBitmapFontBlitter.Alignment.CENTERED);
+					GLBitmapFontBlitter.drawString(gameBoard.getLives(1) + "", "font_default", GLValues.glWidth*0.05f, GLValues.glWidth*0.1f, GLBitmapFontBlitter.Alignment.CENTERED);
 				GL11.glPopMatrix();
 				
 			GL11.glPopMatrix();
