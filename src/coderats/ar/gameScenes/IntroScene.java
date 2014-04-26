@@ -41,6 +41,8 @@ public class IntroScene extends GameScene {
 	public void init(){
 		exit = false;
 		exitTime = -1;
+		
+		exitTime = EXIT_DURATION;
 	}
 
 	@Override

@@ -34,6 +34,7 @@ public class GLRat {
 
 	public void reset(){
 		alive = true;
+		lazor = null;
 	}
 
 	public void glDraw(long time){

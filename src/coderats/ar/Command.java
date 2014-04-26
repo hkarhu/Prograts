@@ -46,6 +46,7 @@ public class Command {
 			case ROL: return "ROL";
 			case ROR: return "ROR";
 			case PEW: return "PEW";
+			case QQQ: return "QQQ";
 			default: return "NOP";
 		}
 	}

@@ -92,8 +92,8 @@ public class ARCardSlot extends GLDrawableItem {
 				GLTextureManager.unbindTexture();
 				GLGraphicRoutines.drawLineRect(1.0f, -slot_width, -slot_heigth, slot_width, slot_heigth, 0);
 				
-				GL11.glTranslatef(0, 0.42f, -0.2f);
-				GLBitmapFontBlitter.drawString(command.getCommandString(), "font_default", 0.2f, 0.4f, GLBitmapFontBlitter.Alignment.CENTERED);
+//				GL11.glTranslatef(0, 0.42f, -0.2f);
+//				GLBitmapFontBlitter.drawString(command.getCommandString(), "font_default", 0.2f, 0.4f, GLBitmapFontBlitter.Alignment.CENTERED);
 			}
 			
 			if(highlighted){
@@ -158,19 +158,39 @@ public class ARCardSlot extends GLDrawableItem {
 		return command.getType();
 	}
 	
-	public void bindCard(ARCard c) {
+	int c1id = 0;
+	int c2id = 0;
+	boolean c1p = false;
+	boolean c2p = false;
 	
-		//BONUX
-		if(this.card != null && c.getID() < card.getID() && (c.getID()-this.card.getID())%5 == 0 && c.getCommand().equals(Type.PEW) && this.card.getCommand().equals(Type.PEW)){
-			c.setCommand(new Command(Type.QQQ));
-		}
+	public void bindCard(ARCard c) {
 		
 		this.card = c;
 		if(c != null){
 			this.command = c.getCommand();
+			c2p = c1p;
+			if(this.command != null){
+				if(Type.PEW.equals(this.command.getType())){
+					c1p = true;
+				} else {
+					c1p = c2p = false;
+				}
+			}
+			
+			c2id = c1id;
+			c1id = c.getID();
+			
 		} else {
 			this.command = null;
 		}
+		
+		if(c != null && c1id != c2id && c2id  < c1id && (c1id - c2id) % 7 == 0 && c1p && c2p){
+			c.setCommand(new Command(Type.QQQ));
+			System.out.println("???!" + c1id + " " + c2id);
+			c1id = c2id = 0;
+			c1p = c2p = false;
+		}
+		//c.setCommand(new Command(Type.QQQ));
 	}
 
 	public void breakContainedCard(long time) {

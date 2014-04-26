@@ -18,19 +18,26 @@ import coderats.ar.GLDrawableItem;
 import coderats.ar.GLRatBoard;
 
 public class AssembleScene extends GameScene {
-
+	
+	public final static boolean COMPLEX = false;
 	private final static int NUM_SLOTS = 5;
 	public final static int NUM_LIVES = 3;
 	private final static int LOGIC_STEP_DELAY = 500;
-	private final static int PROGRAM_RUN_DELAY = 2000;
+	private final static int PROGRAM_RUN_DELAY = 20000;
 	private final static int RESET_GAME_DELAY = 5000;
 	private final static int START_GAME_DELAY = 10000;
 	
 	private ArrayList<ARCardSlot> p1CardSlots;
 	private ArrayList<ARCardSlot> p2CardSlots;
+	
+	private ArrayList<ARCardSlot> p1CardSlots2;
+	private ArrayList<ARCardSlot> p2CardSlots2;
+	
 	private GLRatBoard gameBoard;
 	
 	private List<GLDrawableItem> gameItems;
+	
+	private List<GLDrawableItem> gameItemsC;
 	
 	private ConcurrentHashMap<Integer, ARCard> knownCards, p1Cards, p2Cards;
 	
@@ -49,17 +56,30 @@ public class AssembleScene extends GameScene {
 		
 		p1CardSlots = new ArrayList<>();
 		p2CardSlots = new ArrayList<>();
+		p1CardSlots2 = new ArrayList<>();
+		p2CardSlots2 = new ArrayList<>();
 		gameBoard = new GLRatBoard();
 	
 		gameItems = new LinkedList<GLDrawableItem>();
+		gameItemsC = new LinkedList<GLDrawableItem>();
 		
 		for(int i=0; i < NUM_SLOTS; i++){
 			p1CardSlots.add(new ARCardSlot(GLValues.glWidth*0.33f-(float)Math.sin((i/(float)(NUM_SLOTS-1))*Math.PI), GLValues.glHeight*0.1f+0.2f*i*GLValues.glHeight, 90));
 			p2CardSlots.add(new ARCardSlot(GLValues.glWidth*0.66f+(float)Math.sin((i/(float)(NUM_SLOTS-1))*Math.PI), GLValues.glHeight*0.1f+0.2f*i*GLValues.glHeight, 270));
 		}
 		
+		//TODO: Wheeee
+		for(int i=0; i < NUM_SLOTS; i++){
+			p1CardSlots2.add(new ARCardSlot(GLValues.glWidth*0.15f-(float)Math.sin((i/(float)(NUM_SLOTS-1))*Math.PI), GLValues.glHeight*0.1f+0.2f*i*GLValues.glHeight, 90));
+			p2CardSlots2.add(new ARCardSlot(GLValues.glWidth*0.85f+(float)Math.sin((i/(float)(NUM_SLOTS-1))*Math.PI), GLValues.glHeight*0.1f+0.2f*i*GLValues.glHeight, 270));
+		}
+		
 		for(ARCardSlot c : p1CardSlots) gameItems.add(c);
 		for(ARCardSlot c : p2CardSlots) gameItems.add(c);
+		
+		//TODO complex
+		for(ARCardSlot c : p1CardSlots2) gameItemsC.add(c);
+		for(ARCardSlot c : p2CardSlots2) gameItemsC.add(c);
 		
 		gameItems.add(gameBoard);
 		
@@ -77,6 +97,9 @@ public class AssembleScene extends GameScene {
 		for(int i=0; i < NUM_SLOTS; i++){
 			p1CardSlots.get(i).reset();
 			p2CardSlots.get(i).reset();
+			//TODO complex
+			p1CardSlots2.get(i).reset();
+			p2CardSlots2.get(i).reset();
 		}
 		gameBoard.resetGameBoard();
 	}
@@ -112,6 +135,13 @@ public class AssembleScene extends GameScene {
 				i.glDraw(time);
 			}
 
+			//TODO complex
+			if(COMPLEX){
+				for(GLDrawableItem i : gameItemsC){
+					i.glDraw(time);
+				}
+			}
+			
 			GL11.glPushMatrix();
 				GL11.glTranslatef(GLValues.glWidth*0.5f, GLValues.glHeight*0.5f, 0);
 				
@@ -129,7 +159,6 @@ public class AssembleScene extends GameScene {
 					} else {
 						GL11.glColor4f(1, 1, 1, 1);
 					}
-					
 					GL11.glPushMatrix();
 						GL11.glRotatef(90, 0, 0, 1);
 						GL11.glTranslatef(0, 1.25f, 0);
@@ -140,7 +169,7 @@ public class AssembleScene extends GameScene {
 						GL11.glTranslatef(0, 1.25f, 0);
 						GLBitmapFontBlitter.drawString("["+(int)((programRoundTime - time)*0.001f + 1)+ "]", "font_default", GLValues.glWidth*0.03f, GLValues.glWidth*0.06f, GLBitmapFontBlitter.Alignment.CENTERED);
 					GL11.glPopMatrix();
-				} else {
+				} else if (gameBoard.bothRatsAlive()){
 					GL11.glColor4f(0, 1, 0, 1);
 					GL11.glPushMatrix();
 						GL11.glRotatef(90, 0, 0, 1);
@@ -211,6 +240,9 @@ public class AssembleScene extends GameScene {
 						GL11.glPopMatrix();
 					}
 				GL11.glPopMatrix();
+				if(time > resetTime){
+					this.setRunning(false);
+				}
 			}
 		}
 	}
@@ -223,6 +255,16 @@ public class AssembleScene extends GameScene {
 		
 		for(ARCardSlot s : p2CardSlots){
 			s.bindCard(null);
+		}
+		
+		if(COMPLEX){
+			for(ARCardSlot s : p1CardSlots2){
+				s.bindCard(null);
+			}
+			
+			for(ARCardSlot s : p2CardSlots2){
+				s.bindCard(null);
+			}
 		}
 		
 		if(knownCards.size() >= 1){
@@ -245,6 +287,23 @@ public class AssembleScene extends GameScene {
 					}
 				}
 				
+				//TODO complex
+				if(COMPLEX){
+					for(ARCardSlot s : p1CardSlots2){
+						if(s.hits(card)){
+							s.bindCard(card);
+							break;
+						}
+					}
+					
+					for(ARCardSlot s : p2CardSlots2){
+						if(s.hits(card)){
+							s.bindCard(card);
+							break;
+						}
+					}
+				}
+				
 			}
 		}
 	}
@@ -255,14 +314,26 @@ public class AssembleScene extends GameScene {
 		ARCardSlot p2slot = p2CardSlots.get(4-executeIndex);
 		p1slot.activate(time);
 		p2slot.activate(time);
-		gameBoard.advanceLogic(p1slot, p2slot, time);
+		
+		gameBoard.advanceLogic(p1slot, p2slot, null, null, time);
+
+		if(COMPLEX) {
+			ARCardSlot p1slot2 = p1CardSlots.get(executeIndex);
+			ARCardSlot p2slot2 = p2CardSlots.get(4-executeIndex);
+			p1slot.activate(time);
+			p2slot.activate(time);
+			gameBoard.advanceLogic(p1slot, p2slot, p1slot2, p2slot2, time);
+		}
+		
 		executeIndex++;
 		if(executeIndex >= NUM_SLOTS){
 			executeIndex = 0;
 			progRun = false;
-			if(!gameBoard.bothRatsAlive()){
-				resetTime = time + RESET_GAME_DELAY;
-			}
+		}
+		
+		if(!gameBoard.bothRatsAlive()){
+			resetTime = time + RESET_GAME_DELAY;
+			progRun = false;
 		}
 		
 	}

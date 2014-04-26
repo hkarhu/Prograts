@@ -95,7 +95,7 @@ public class GLRatBoard extends GLDrawableItem {
 		return p1rat.isAlive() && p2rat.isAlive();
 	}
 	
-	public void advanceLogic(ARCardSlot p1Slot, ARCardSlot p2Slot, long time){
+	public void advanceLogic(ARCardSlot p1Slot, ARCardSlot p2Slot, ARCardSlot p1CSlot, ARCardSlot p2CSlot, long time){
 		
 		lazors.clear();
 		
@@ -107,6 +107,17 @@ public class GLRatBoard extends GLDrawableItem {
 				lazors.add(p1Lazor);
 				p1rat.setLazor(null);
 			}
+			//TODO complex
+			if(AssembleScene.COMPLEX && p1CSlot != null){
+				p1rat.execute(p1Slot.getSlottedCommandType(), time);
+				p1Lazor = p1rat.getLazor();
+				if(p1Lazor != null){
+					p1Lazor.setTime(time);
+					lazors.add(p1Lazor);
+					p1rat.setLazor(null);
+				}
+			}
+			
 		}
 		
 		if(p2rat.isAlive()){
@@ -115,21 +126,32 @@ public class GLRatBoard extends GLDrawableItem {
 			if(p2Lazor != null){
 				p2Lazor.setTime(time);
 				lazors.add(p2Lazor);
-				p1rat.setLazor(null);
+				p2rat.setLazor(null);
+			}
+			
+			//TODO complex
+			if(AssembleScene.COMPLEX && p2CSlot != null){
+				p2rat.execute(p2CSlot.getSlottedCommandType(), time);
+				p2Lazor = p2rat.getLazor();
+				if(p2Lazor != null){
+					p2Lazor.setTime(time);
+					lazors.add(p2Lazor);
+					p2rat.setLazor(null);
+				}
 			}
 		}
 		
 		for(GLLazor l : lazors){
 			if(l.hitsRat(p1rat)){
 				p1Slot.breakContainedCard(time);
-				p1rat.takeDamage(time);
+				//p1rat.takeDamage(time);
 			}
 			if(l.hitsRat(p2rat)){
 				p2Slot.breakContainedCard(time);
-				p2rat.takeDamage(time);
+				//p2rat.takeDamage(time);
 			}
 		}
-		
+
 		if(ratOutsideBoard(p1rat)){
 			p1rat.setAlive(false);
 		}
@@ -152,7 +174,7 @@ public class GLRatBoard extends GLDrawableItem {
 		if(p == 1) return p1Lives; else return p2Lives;
 	}
 
-	public Object getRat(int i) {
+	public GLRat getRat(int i) {
 		if(i == 1) return p1rat; else return p2rat;
 	}
 

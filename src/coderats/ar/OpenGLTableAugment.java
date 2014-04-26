@@ -57,6 +57,8 @@ public class OpenGLTableAugment extends GLCore implements GLKeyboardListener, AR
 		allocateStage = new AllocateScene(knownCards, p1Cards, p2Cards);
 		assembleStage = new AssembleScene(knownCards, p1Cards, p2Cards);
 
+		gameScenes.add(intro);
+		
 		resetGameEngine();
 		
 		startTime = System.currentTimeMillis();
