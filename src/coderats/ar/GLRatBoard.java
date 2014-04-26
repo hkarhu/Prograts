@@ -2,17 +2,12 @@ package coderats.ar;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
-import javax.xml.crypto.dsig.keyinfo.RetrievalMethod;
-
-import org.lwjgl.Sys;
 import org.lwjgl.opengl.GL11;
 
-import coderats.ar.Command.Type;
-import coderats.ar.gameScenes.AssembleScene;
 import ae.gl.GLGraphicRoutines;
 import ae.gl.GLValues;
+import coderats.ar.gameScenes.AssembleScene;
 
 public class GLRatBoard extends GLDrawableItem {
 
@@ -127,9 +122,11 @@ public class GLRatBoard extends GLDrawableItem {
 		for(GLLazor l : lazors){
 			if(l.hitsRat(p1rat)){
 				p1Slot.breakContainedCard(time);
+				p1rat.takeDamage(time);
 			}
 			if(l.hitsRat(p2rat)){
 				p2Slot.breakContainedCard(time);
+				p2rat.takeDamage(time);
 			}
 		}
 		
@@ -153,6 +150,10 @@ public class GLRatBoard extends GLDrawableItem {
 
 	public int getLives(int p) {
 		if(p == 1) return p1Lives; else return p2Lives;
+	}
+
+	public Object getRat(int i) {
+		if(i == 1) return p1rat; else return p2rat;
 	}
 
 }

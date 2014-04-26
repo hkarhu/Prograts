@@ -196,16 +196,20 @@ public class AssembleScene extends GameScene {
 				GL11.glPushMatrix();
 					GL11.glTranslatef(GLValues.glWidth*0.5f, GLValues.glHeight*0.5f, -5);
 					GL11.glColor4f(1, 0, 0, 1);
-					GL11.glPushMatrix();
-						GL11.glRotatef(90, 0, 0, 1);
-						GL11.glTranslatef(0, 1.5f, 0);
-						GLBitmapFontBlitter.drawString("! OFFLINE !", "font_default", GLValues.glWidth*0.03f, GLValues.glWidth*0.06f, GLBitmapFontBlitter.Alignment.CENTERED);
-					GL11.glPopMatrix();
-					GL11.glPushMatrix();
-						GL11.glRotatef(270, 0, 0, 1);
-						GL11.glTranslatef(0, 1.5f, 0);
-						GLBitmapFontBlitter.drawString("! OFFLINE !", "font_default", GLValues.glWidth*0.03f, GLValues.glWidth*0.06f, GLBitmapFontBlitter.Alignment.CENTERED);
-					GL11.glPopMatrix();
+					if(gameBoard.getRat(0).isAlive()){
+						GL11.glPushMatrix();
+							GL11.glRotatef(90, 0, 0, 1);
+							GL11.glTranslatef(0, 1.5f, 0);
+							GLBitmapFontBlitter.drawString("! OFFLINE !", "font_default", GLValues.glWidth*0.03f, GLValues.glWidth*0.06f, GLBitmapFontBlitter.Alignment.CENTERED);
+						GL11.glPopMatrix();
+					}
+					if(gameBoard.getRat(1).isAlive()){
+						GL11.glPushMatrix();
+							GL11.glRotatef(270, 0, 0, 1);
+							GL11.glTranslatef(0, 1.5f, 0);
+							GLBitmapFontBlitter.drawString("! OFFLINE !", "font_default", GLValues.glWidth*0.03f, GLValues.glWidth*0.06f, GLBitmapFontBlitter.Alignment.CENTERED);
+						GL11.glPopMatrix();
+					}
 				GL11.glPopMatrix();
 			}
 		}

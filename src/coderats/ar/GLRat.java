@@ -52,7 +52,7 @@ public class GLRat {
 			GL11.glColor4f(1,1,1,1);
 		}
 		GLTextureManager.getInstance().bindTexture("rat");
-		if(damage && at < 0.5f){
+		if(damage && at < 0.5f && anitime > time){
 			GL11.glColor4f(1,0.5f,0.5f,(float) (0.5f+Math.sin(time*0.1f)));
 			GLTextureManager.getInstance().bindTexture("rat_damage");
 		} else if(alive && anitime > time || lastCMD.equals(Type.NOP)){
@@ -175,8 +175,9 @@ public class GLRat {
 		return alive;
 	}
 
-	public void takeDamage(){
+	public void takeDamage(long time){
 		damage = true;
+		anitime = time + ANIM_LENGTH;
 	}
 
 	public GLLazor getLazor() {

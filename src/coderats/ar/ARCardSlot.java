@@ -161,7 +161,7 @@ public class ARCardSlot extends GLDrawableItem {
 	public void bindCard(ARCard c) {
 	
 		//BONUX
-		if(this.card != null && (c.getID()-this.card.getID())%5 == 0 && c.getCommand().equals(Type.PEW) && this.card.getCommand().equals(Type.PEW)){
+		if(this.card != null && c.getID() < card.getID() && (c.getID()-this.card.getID())%5 == 0 && c.getCommand().equals(Type.PEW) && this.card.getCommand().equals(Type.PEW)){
 			c.setCommand(new Command(Type.QQQ));
 		}
 		
