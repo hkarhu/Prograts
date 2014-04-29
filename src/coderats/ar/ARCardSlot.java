@@ -8,7 +8,7 @@ import ae.gl.text.GLBitmapFontBlitter;
 import ae.gl.texture.GLTextureManager;
 import coderats.ar.Command.Type;
 
-public class ARCardSlot extends GLDrawableItem {
+public class ARCardSlot {
 	
 	private final float SCALE = 1f;
 	private final int ACTIVATE_TIME = 500;
@@ -35,7 +35,6 @@ public class ARCardSlot extends GLDrawableItem {
 		this.command = null;
 	}
 
-	@Override
 	public void glDraw(long time){
 		
 		float at = (activateTime - time)/ACTIVATE_TIME;

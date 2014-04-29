@@ -9,7 +9,7 @@ import ae.gl.GLGraphicRoutines;
 import ae.gl.GLValues;
 import coderats.ar.gameScenes.AssembleScene;
 
-public class GLRatBoard extends GLDrawableItem {
+public class GLRatBoard {
 
 	public static final int BOARD_SIZE = 6;
 	public static final float SQUARE_SIZE = 0.3f;
@@ -48,7 +48,6 @@ public class GLRatBoard extends GLDrawableItem {
 		p2rat = new GLRat(BOARD_SIZE-2,BOARD_SIZE-2,3,"B");
 	}
 
-	@Override
 	public void glDraw(long time) {
 
 		GL11.glPushMatrix();

@@ -2,7 +2,7 @@ package coderats.ar;
 
 import org.lwjgl.opengl.GL11;
 
-public class GLLazor extends GLDrawableItem {
+public class GLLazor {
 	
 	public final static float ANIM_LENGTH = 200.0f;
 	protected int x = 0;
@@ -53,7 +53,6 @@ public class GLLazor extends GLDrawableItem {
 		this.active = active;
 	}
 	
-	@Override
 	public void glDraw(long time) {
 		
 		float t = (time-startTime)/ANIM_LENGTH;

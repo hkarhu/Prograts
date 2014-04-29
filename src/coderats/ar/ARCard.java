@@ -6,7 +6,7 @@ import ae.gl.text.GLBitmapFontBlitter;
 import ae.gl.texture.GLTextureManager;
 import coderats.ar.Command.Type;
 
-public class ARCard extends GLDrawableItem {
+public class ARCard {
 
 	private static final float SCALE = 2f;
 
@@ -47,7 +47,6 @@ public class ARCard extends GLDrawableItem {
 
 	}
 
-	@Override
 	public void glDraw(long time) {
 
 		GL11.glPushMatrix();

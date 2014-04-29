@@ -1,8 +1,6 @@
 package coderats.ar.gameScenes;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -14,12 +12,11 @@ import ae.gl.text.GLBitmapFontBlitter;
 import ae.gl.texture.GLTextureManager;
 import coderats.ar.ARCard;
 import coderats.ar.ARCardSlot;
-import coderats.ar.GLDrawableItem;
 import coderats.ar.GLRatBoard;
 
 public class AssembleScene extends GameScene {
 	
-	public final static boolean COMPLEX = false;
+	public final static boolean COMPLEX = true;
 	private final static int NUM_SLOTS = 5;
 	public final static int NUM_LIVES = 3;
 	private final static int LOGIC_STEP_DELAY = 500;
@@ -34,10 +31,6 @@ public class AssembleScene extends GameScene {
 	private ArrayList<ARCardSlot> p2CardSlots2;
 	
 	private GLRatBoard gameBoard;
-	
-	private List<GLDrawableItem> gameItems;
-	
-	private List<GLDrawableItem> gameItemsC;
 	
 	private ConcurrentHashMap<Integer, ARCard> knownCards, p1Cards, p2Cards;
 	
@@ -59,9 +52,6 @@ public class AssembleScene extends GameScene {
 		p1CardSlots2 = new ArrayList<>();
 		p2CardSlots2 = new ArrayList<>();
 		gameBoard = new GLRatBoard();
-	
-		gameItems = new LinkedList<GLDrawableItem>();
-		gameItemsC = new LinkedList<GLDrawableItem>();
 		
 		for(int i=0; i < NUM_SLOTS; i++){
 			p1CardSlots.add(new ARCardSlot(GLValues.glWidth*0.33f-(float)Math.sin((i/(float)(NUM_SLOTS-1))*Math.PI), GLValues.glHeight*0.1f+0.2f*i*GLValues.glHeight, 90));
@@ -73,15 +63,6 @@ public class AssembleScene extends GameScene {
 			p1CardSlots2.add(new ARCardSlot(GLValues.glWidth*0.15f-(float)Math.sin((i/(float)(NUM_SLOTS-1))*Math.PI), GLValues.glHeight*0.1f+0.2f*i*GLValues.glHeight, 90));
 			p2CardSlots2.add(new ARCardSlot(GLValues.glWidth*0.85f+(float)Math.sin((i/(float)(NUM_SLOTS-1))*Math.PI), GLValues.glHeight*0.1f+0.2f*i*GLValues.glHeight, 270));
 		}
-		
-		for(ARCardSlot c : p1CardSlots) gameItems.add(c);
-		for(ARCardSlot c : p2CardSlots) gameItems.add(c);
-		
-		//TODO complex
-		for(ARCardSlot c : p1CardSlots2) gameItemsC.add(c);
-		for(ARCardSlot c : p2CardSlots2) gameItemsC.add(c);
-		
-		gameItems.add(gameBoard);
 		
 	}
 	
@@ -131,27 +112,29 @@ public class AssembleScene extends GameScene {
 			progRun = false;
 		} else {
 			
-			for(GLDrawableItem i : gameItems){
+			gameBoard.glDraw(time);
+			
+			for(ARCardSlot i : p1CardSlots){
+				i.glDraw(time);
+			}
+			
+			for(ARCardSlot i : p2CardSlots){
 				i.glDraw(time);
 			}
 
 			//TODO complex
 			if(COMPLEX){
-				for(GLDrawableItem i : gameItemsC){
+				for(ARCardSlot i : p1CardSlots2){
+					i.glDraw(time);
+				}
+				
+				for(ARCardSlot i : p2CardSlots2){
 					i.glDraw(time);
 				}
 			}
 			
 			GL11.glPushMatrix();
 				GL11.glTranslatef(GLValues.glWidth*0.5f, GLValues.glHeight*0.5f, 0);
-				
-				if(progRun){
-					GL11.glPushMatrix();
-						GL11.glColor4f(0, 1, 0, 0.3f);
-						GL11.glTranslatef(0, 0, 4);
-						GLBitmapFontBlitter.blitSinString("    " + "    ", 0.5f, 0.75f, 1, 1.5f, (float)(Math.PI-Math.tan(time/(float)LOGIC_STEP_DELAY*Math.PI)*0.2f), "font_default");
-					GL11.glPopMatrix();
-				}
 				
 				if(!progRun){
 					if((int)((programRoundTime - time)*0.001f + 1) < 5){
@@ -169,7 +152,15 @@ public class AssembleScene extends GameScene {
 						GL11.glTranslatef(0, 1.25f, 0);
 						GLBitmapFontBlitter.drawString("["+(int)((programRoundTime - time)*0.001f + 1)+ "]", "font_default", GLValues.glWidth*0.03f, GLValues.glWidth*0.06f, GLBitmapFontBlitter.Alignment.CENTERED);
 					GL11.glPopMatrix();
+					
 				} else if (gameBoard.bothRatsAlive()){
+					
+					GL11.glPushMatrix();
+						GL11.glColor4f(0, 1, 0, 0.3f);
+						GL11.glTranslatef(0, 0, 4);
+						GLBitmapFontBlitter.blitSinString("    " + "    ", 0.5f, 0.75f, 1, 1.5f, (float)(Math.PI-Math.tan(time/(float)LOGIC_STEP_DELAY*Math.PI)*0.2f), "font_default");
+					GL11.glPopMatrix();
+					
 					GL11.glColor4f(0, 1, 0, 1);
 					GL11.glPushMatrix();
 						GL11.glRotatef(90, 0, 0, 1);
@@ -320,8 +311,8 @@ public class AssembleScene extends GameScene {
 		if(COMPLEX) {
 			ARCardSlot p1slot2 = p1CardSlots.get(executeIndex);
 			ARCardSlot p2slot2 = p2CardSlots.get(4-executeIndex);
-			p1slot.activate(time);
-			p2slot.activate(time);
+			p1slot2.activate(time);
+			p2slot2.activate(time);
 			gameBoard.advanceLogic(p1slot, p2slot, p1slot2, p2slot2, time);
 		}
 		
