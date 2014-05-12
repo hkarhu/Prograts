@@ -28,7 +28,7 @@ import coderats.ar.gameScenes.IntroScene;
 
 
 public class OpenGLTableAugment extends GLCore implements GLKeyboardListener, ARCardListener {
-
+	
 	private long startTime;
 	private long currentTime;
 	private IntroScene intro;

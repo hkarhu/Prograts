@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.xml.bind.annotation.XmlElementDecl.GLOBAL;
+
 import org.lwjgl.opengl.GL11;
 
 import ae.gl.GLGraphicRoutines;
@@ -13,10 +15,11 @@ import ae.gl.texture.GLTextureManager;
 import coderats.ar.ARCard;
 import coderats.ar.ARCardSlot;
 import coderats.ar.GLRatBoard;
+import coderats.ar.Globals;
 
 public class AssembleScene extends GameScene {
 	
-	public final static boolean COMPLEX = true;
+	public final static boolean COMPLEX = false;
 	private final static int NUM_SLOTS = 5;
 	public final static int NUM_LIVES = 3;
 	private final static int LOGIC_STEP_DELAY = 500;
@@ -333,8 +336,18 @@ public class AssembleScene extends GameScene {
 	public void processInput(int inputKey) {
 		switch (inputKey) {
 			case 19: gameBoard.resetGameBoard(); break; //R
-			case 16: cardsRemovedFromCenter = true; break;//Q
+			case 16: cardsRemovedFromCenter = true; break; //Q
 			case 45: progRun = true; break; //X
+			case 44: 
+				p1CardSlots.clear();
+				p2CardSlots.clear();
+				
+				for(int i=0; i < NUM_SLOTS; i++){
+					float ypos = (GLValues.glHeight-(NUM_SLOTS-1)*(Globals.CARD_WIDTH+Globals.CARD_ROW_SPACING))*0.5f+i*Globals.CARD_WIDTH + i*Globals.CARD_ROW_SPACING;
+					p1CardSlots.add(new ARCardSlot(GLValues.glWidth*0.33f-(float)Math.sin((i/(float)(NUM_SLOTS-1))*Math.PI)*Globals.CARD_ROW_ARCH, ypos, 90));
+					p2CardSlots.add(new ARCardSlot(GLValues.glWidth*0.66f+(float)Math.sin((i/(float)(NUM_SLOTS-1))*Math.PI)*Globals.CARD_ROW_ARCH, ypos, 270));
+				}
+				break;
 			default: break;
 		} 
 	}

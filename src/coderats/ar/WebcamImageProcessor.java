@@ -87,7 +87,7 @@ public class WebcamImageProcessor extends JFrame implements MouseListener, Mouse
 		
 		knownCards = new ConcurrentHashMap<>();
 		
-		ocvt = OpenCVThread.start();
+		ocvt = new OpenCVThread(p);
 		
 		Timer t = new Timer(20, new ActionListener() {
 			@Override
@@ -116,7 +116,7 @@ public class WebcamImageProcessor extends JFrame implements MouseListener, Mouse
 		slider.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				OpenCVThread.par1 = ((JSlider)e.getSource()).getValue();
+				p.par1 = ((JSlider)e.getSource()).getValue();
 				refreshLabel();
 			}
 		});
@@ -127,7 +127,7 @@ public class WebcamImageProcessor extends JFrame implements MouseListener, Mouse
 		slider.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				OpenCVThread.par2 = ((JSlider)e.getSource()).getValue();
+				p.par2 = ((JSlider)e.getSource()).getValue();
 				refreshLabel();
 			}
 		});
@@ -138,7 +138,7 @@ public class WebcamImageProcessor extends JFrame implements MouseListener, Mouse
 		slider.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				OpenCVThread.par3 = ((JSlider)e.getSource()).getValue();
+				p.par3 = ((JSlider)e.getSource()).getValue();
 				refreshLabel();
 			}
 		});
@@ -149,7 +149,7 @@ public class WebcamImageProcessor extends JFrame implements MouseListener, Mouse
 		slider.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				OpenCVThread.par4 = ((JSlider)e.getSource()).getValue();
+				p.par4 = ((JSlider)e.getSource()).getValue();
 				refreshLabel();
 			}
 		});
@@ -160,7 +160,7 @@ public class WebcamImageProcessor extends JFrame implements MouseListener, Mouse
 		slider.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				OpenCVThread.par5 = ((JSlider)e.getSource()).getValue();
+				p.par5 = ((JSlider)e.getSource()).getValue();
 				refreshLabel();
 			}
 		});
@@ -171,7 +171,7 @@ public class WebcamImageProcessor extends JFrame implements MouseListener, Mouse
 		slider.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				OpenCVThread.par6 = ((JSlider)e.getSource()).getValue();
+				p.par6 = ((JSlider)e.getSource()).getValue();
 				refreshLabel();
 			}
 		});
@@ -209,7 +209,7 @@ public class WebcamImageProcessor extends JFrame implements MouseListener, Mouse
 	}
 	
 	private void refreshLabel(){
-		label.setText("BR1 : " + ocvt.par1 + "       BR2 : " + ocvt.par2 + "       CDT : " + ocvt.par3 + "       LT : " + ocvt.par4 + "       5 : " + ocvt.par5 + "       6 : " + ocvt.par6);
+		label.setText("BR1 : " + p.par1 + "       BR2 : " + p.par2 + "       CDT : " + p.par3 + "       LT : " + p.par4 + "       5 : " + p.par5 + "       6 : " + p.par6);
 	}
 	
 	public ConcurrentHashMap<Integer, ARCard> getKnownCards(){

@@ -10,7 +10,6 @@ import coderats.ar.Command.Type;
 
 public class ARCardSlot {
 	
-	private final float SCALE = 1f;
 	private final int ACTIVATE_TIME = 500;
 	private final int BREAK_TIME = 500;
 	
@@ -18,8 +17,8 @@ public class ARCardSlot {
 	float y;
 	float a;
 	
-	private float slot_width = 0.4f*SCALE;
-	private float slot_heigth = 0.6f*SCALE;
+	private float slot_width = 0.4f*Globals.CARD_SCALE;
+	private float slot_heigth = 0.6f*Globals.CARD_SCALE;
 	
 	private Command command;
 	private ARCard card;
@@ -59,14 +58,14 @@ public class ARCardSlot {
 				GL11.glPushMatrix();
 				GL11.glColor4f(1, 0, 0, 0.5f+at);
 				GL11.glBindTexture(GL11.GL_TEXTURE_2D, -1);
-				GL11.glLineWidth(10-at*6);
-				GL11.glTranslatef(0, -0.025f*GLValues.glWidth, -5f);
+				GL11.glLineWidth((10-at*6)*Globals.CARD_SCALE);
+				GL11.glTranslatef(0, -0.025f*Globals.CARD_SCALE*GLValues.glWidth, -5f);
 				GL11.glRotatef(time*0.03f, 0, 0, 1);
 				for(float i=0; i < Math.PI*2; i += Math.PI*0.2f){
 					GL11.glBegin( GL11.GL_LINE_STRIP );			
 						GL11.glVertex3d(0, 0, 0);
-						GL11.glVertex3d((float)Math.sin(i-Math.random()*0.1f)*0.25f, (float)Math.cos(i-Math.random()*0.1f)*0.25f, 0);
-						GL11.glVertex3d((float)Math.sin(i+Math.random()*0.2f)*0.3f, (float)Math.cos(i+Math.random()*0.2f)*0.3f, 0);
+						GL11.glVertex3d((float)Math.sin(i-Math.random()*0.1f)*0.25f*Globals.CARD_SCALE, (float)Math.cos(i-Math.random()*0.1f)*0.25f*Globals.CARD_SCALE, 0);
+						GL11.glVertex3d((float)Math.sin(i+Math.random()*0.2f)*0.3f*Globals.CARD_SCALE, (float)Math.cos(i+Math.random()*0.2f)*0.3f*Globals.CARD_SCALE, 0);
 					GL11.glEnd();
 				}
 				GL11.glPopMatrix();
@@ -79,10 +78,10 @@ public class ARCardSlot {
 				GL11.glColor4f(0.3f,0.3f,0.3f, 1);
 				GLGraphicRoutines.draw2DRect(-slot_width, -slot_heigth, slot_width, slot_heigth, 0);
 				GLTextureManager.unbindTexture();
-				GLGraphicRoutines.drawLineRect(1.0f, -slot_width, -slot_heigth, slot_width, slot_heigth, 0);
+				GLGraphicRoutines.drawLineRect(1.0f*Globals.CARD_SCALE, -slot_width, -slot_heigth, slot_width, slot_heigth, 0);
 			
-				GL11.glTranslatef(0, 0.42f, -0.2f);
-				GLBitmapFontBlitter.drawString("NOP", "font_default", 0.2f, 0.4f, GLBitmapFontBlitter.Alignment.CENTERED);
+				GL11.glTranslatef(0, 0.42f*Globals.CARD_SCALE, -0.2f);
+				GLBitmapFontBlitter.drawString("NOP", "font_default", 0.2f*Globals.CARD_SCALE, 0.4f*Globals.CARD_SCALE, GLBitmapFontBlitter.Alignment.CENTERED);
 			} else {
 				GL11.glTranslatef(0, 0, -5);
 				GLTextureManager.getInstance().bindTexture("card_"+command.getCommandString().toLowerCase());
@@ -102,20 +101,20 @@ public class ARCardSlot {
 				GLTextureManager.unbindTexture();
 				GLGraphicRoutines.drawLineRect(2.0f, -slot_width, -GLValues.glHeight*0.04f, slot_width, GLValues.glHeight*0.04f, 0);
 
-				GL11.glTranslatef(0, GLValues.glHeight*0.06f, 0);
-				GLBitmapFontBlitter.drawString("< RUN >", "font_default", 0.1f, 0.2f, GLBitmapFontBlitter.Alignment.CENTERED);
+				GL11.glTranslatef(0, GLValues.glHeight*0.06f*Globals.CARD_SCALE, 0);
+				GLBitmapFontBlitter.drawString("< RUN >", "font_default", 0.1f*Globals.CARD_SCALE, 0.2f*Globals.CARD_SCALE, GLBitmapFontBlitter.Alignment.CENTERED);
 				
 				//Loading circle
 				GL11.glPushMatrix();
 					GL11.glColor4f(1, 1, 1, 0.5f);
-					GL11.glTranslatef(0, -GLValues.glHeight*0.1825f, 0);
+					GL11.glTranslatef(0, -GLValues.glHeight*0.1825f*Globals.CARD_SCALE, 0);
 					GL11.glRotatef(time*0.3f, 0, 0, 1);
-					GLGraphicRoutines.drawLineCircle(0.4f, 20, 2.0f);
+					GLGraphicRoutines.drawLineCircle(0.4f*Globals.CARD_SCALE, 20*Globals.CARD_SCALE, 2.0f*Globals.CARD_SCALE);
 				
 						for(float i=0; i < Math.PI*2; i += Math.PI*0.5f){
 							GL11.glBegin( GL11.GL_LINE_STRIP );			
-								GL11.glVertex3d((float)Math.sin(i)*0.15f, (float)Math.cos(i)*0.15f, 0);
-								GL11.glVertex3d((float)Math.sin(i)*0.25f, (float)Math.cos(i)*0.25f, 0);
+								GL11.glVertex3d((float)Math.sin(i)*0.15f*Globals.CARD_SCALE, (float)Math.cos(i)*0.15f*Globals.CARD_SCALE, 0);
+								GL11.glVertex3d((float)Math.sin(i)*0.25f*Globals.CARD_SCALE, (float)Math.cos(i)*0.25f*Globals.CARD_SCALE, 0);
 								
 							GL11.glEnd();
 						}

@@ -15,20 +15,15 @@ public class OpenCVThread {
 		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 	}
 	
-	public static volatile int par1 = 50;
-	public static volatile int par2 = 50;
-	public static volatile int par3 = 133;
-	public static volatile int par4 = 18;
-	public static volatile int par5 = 255;
-	public static volatile int par6 = 255;
-	
+	private SavedParams p;
 	private ConcurrentLinkedDeque<Mat> matrixQueue;
 	private ConcurrentLinkedDeque<RawTripCircleData> circleQueue;
 	private VideoCapture inputVideo;
 	private volatile boolean running = true;
 	private final Thread workerThread;
 	
-	private OpenCVThread() {
+	OpenCVThread(SavedParams p) {
+		this.p = p;
 		matrixQueue = new ConcurrentLinkedDeque<>();
 		circleQueue = new ConcurrentLinkedDeque<>();
 		workerThread = new Thread(){
@@ -45,15 +40,21 @@ public class OpenCVThread {
 		Mat in = new Mat();
 		
 		//Init
-		try {
-			inputVideo = new VideoCapture();
-			inputVideo.open(0);
-			Thread.sleep(1000);
-			inputVideo.set(OpenCVUtils.CAP_PROP_FRAME_WIDTH, 640);
-			inputVideo.set(OpenCVUtils.CAP_PROP_FRAME_HEIGHT, 480);
-			inputVideo.set(OpenCVUtils.CAP_PROP_FPS, 60);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+		while(inputVideo == null){
+			try {
+				inputVideo = new VideoCapture();
+				inputVideo.open(0);
+				Thread.sleep(1000);
+				inputVideo.set(OpenCVUtils.CAP_PROP_FRAME_WIDTH, 640);
+				inputVideo.set(OpenCVUtils.CAP_PROP_FRAME_HEIGHT, 480);
+				inputVideo.set(OpenCVUtils.CAP_PROP_FPS, 60);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+				break;
+			} catch (Exception e) {
+				e.printStackTrace();
+				inputVideo = null;
+			}
 		}
 
 		//Loop
@@ -65,7 +66,7 @@ public class OpenCVThread {
 				Mat circ = new Mat();
 				
 				Imgproc.cvtColor(in, in, Imgproc.COLOR_BGR2GRAY);
-				in.convertTo(in, -1, par2*0.1f, -par1);
+				in.convertTo(in, -1, p.par2*0.1f, -p.par1);
 				
 				//Imgproc.equalizeHist(in, in);
 				
@@ -76,13 +77,13 @@ public class OpenCVThread {
 				//Imgproc.threshold(hc, hc, 90, 255, Imgproc.THRESH_BINARY);
 								///tres
 				Imgproc.blur(out, tres, new Size(3,3));
-				out.convertTo(tres, -1, par5*0.1f, -par6);
+				out.convertTo(tres, -1, p.par5*0.1f, -p.par6);
 				Imgproc.erode(tres, tres, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(5,5)));
 				//
 				
 				//Imgproc.dilate(out, out, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(5,5)));
 				
-				Imgproc.threshold(tres, tres, par3, 255, Imgproc.THRESH_BINARY);
+				Imgproc.threshold(tres, tres, p.par3, 255, Imgproc.THRESH_BINARY);
 				//Imgproc.adaptiveThreshold(tres, tres, 254, Imgproc.THRESH_BINARY, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, 7, 9);
 				
 				//
@@ -95,7 +96,7 @@ public class OpenCVThread {
 
 				//Imgproc.Canny(gc, hc, 80, 40);
 				
-				Imgproc.HoughCircles(tres, circ, Imgproc.CV_HOUGH_GRADIENT, 1, tres.height()/16, 80, par4, 5, 30);
+				Imgproc.HoughCircles(tres, circ, Imgproc.CV_HOUGH_GRADIENT, 1, tres.height()/16, 80, p.par4, 5, 30);
 				
 				//Core.drawContours(m, contours, 4, new Scalar(40, 233, 45,0 ));
 
@@ -139,10 +140,6 @@ public class OpenCVThread {
 		
 	}
 
-	static public OpenCVThread start(){
-		return new OpenCVThread();
-	}
-
 	public void stop(){
 		running = false;
 		System.out.println("Stopping OpenCV threads...");
@@ -167,6 +164,10 @@ public class OpenCVThread {
 			if(c.isDead()) circleQueue.remove(c);
 		}
 		return circleQueue.toArray(new RawTripCircleData[0]);
+	}
+
+	public void setParams(SavedParams p) {
+		this.p = p;
 	}
 
 }

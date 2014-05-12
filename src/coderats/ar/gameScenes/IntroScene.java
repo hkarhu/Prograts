@@ -70,7 +70,7 @@ public class IntroScene extends GameScene {
 					GL11.glColor3f(0, 1, 0);
 					GLGraphicRoutines.drawLineCircle(1.76f, 50, 3f);
 					GLGraphicRoutines.drawLineRect(1.0f, -GLValues.glWidth*0.49f, -GLValues.glHeight*0.49f, GLValues.glWidth*0.49f, GLValues.glHeight*0.49f, 0);
-					GLBitmapFontBlitter.blitSinString("CodeRats    CodeRats    CodeRats    CodeRats    CodeRats    ", 0.1f, 0.9f, 1, 2.2f+(float)Math.sin(time*0.001f)*0.2f, time*0.0003f, "font_code");
+					GLBitmapFontBlitter.blitSinString("ProgRats AR    ProgRats AR    ProgRats AR    ProgRats AR    ProgRats AR    ", 0.1f, 0.9f, 1, 2.2f+(float)Math.sin(time*0.001f)*0.2f, time*0.0003f, "font_code");
 				GL11.glPopMatrix();
 	
 			GL11.glPopMatrix();

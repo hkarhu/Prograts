@@ -278,11 +278,10 @@ public class RawTripCircleData {
 		xShift = SAMPLE_FRAME_SIZE/2.0f - ellipse.center.x;
 		yShift = SAMPLE_FRAME_SIZE/2.0f - ellipse.center.y;
 		
+		
 		lastX -= xShift;
 		lastY -= yShift;
 		
-
-
 //		ArrayList<Edgel> edgels = new ArrayList<Edgel>();
 //		AlgoTrackEdgels.trackEdgels(frame, edgels, outerTop, SAMPLE_FRAME_SIZE/2);
 //		if(!edgels.isEmpty()){
@@ -531,12 +530,24 @@ public class RawTripCircleData {
 		r[last_index] = (float) coordinates[2];
 		xRecalc = true;
 		yRecalc = true;
-		updateImage(m);
-		timestamp = System.currentTimeMillis();
-		
+
 		lastX = coordinates[0];
 		lastY = coordinates[1];
 		lastR = coordinates[2];
+		
+		updateImage(m);
+		timestamp = System.currentTimeMillis();
+
+	}
+	
+	private void applyShiftCorrectionForLastCoordinates(float xShift, float yShift){
+		//x[last_index] -= xShift;
+		lastX -= xShift;
+		//y[last_index] -= yShift;
+		lastY -= yShift;
+		
+		xRecalc = false;
+		yRecalc = false;
 	}
 
 	public boolean isCloseTo(double[] coordinates){

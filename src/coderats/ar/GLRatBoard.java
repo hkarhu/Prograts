@@ -11,7 +11,7 @@ import coderats.ar.gameScenes.AssembleScene;
 
 public class GLRatBoard {
 
-	public static final int BOARD_SIZE = 6;
+	public static final int BOARD_SIZE = 5;
 	public static final float SQUARE_SIZE = 0.3f;
 	
 	private long RESET_DELAY;

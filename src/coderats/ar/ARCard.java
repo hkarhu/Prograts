@@ -4,11 +4,8 @@ import org.lwjgl.opengl.GL11;
 import ae.gl.GLGraphicRoutines;
 import ae.gl.text.GLBitmapFontBlitter;
 import ae.gl.texture.GLTextureManager;
-import coderats.ar.Command.Type;
 
 public class ARCard {
-
-	private static final float SCALE = 2f;
 
 	private float x;
 	private float y;
@@ -40,10 +37,10 @@ public class ARCard {
 		this.id = id;
 		this.quality = quality;
 
-		c1x = c2x = -0.2f*SCALE;
-		c3x = c4x = 0.2f*SCALE;
-		c2y = c3y = -0.20f*SCALE;
-		c1y = c4y = 0.38f*SCALE;
+		c1x = c2x = -Globals.CARD_WIDTH*0.5f;
+		c3x = c4x = Globals.CARD_WIDTH*0.5f;
+		c2y = c3y = -0.3448f*Globals.CARD_HEIGTH;
+		c1y = c4y = 0.6555f*Globals.CARD_HEIGTH;
 
 	}
 
@@ -77,9 +74,9 @@ public class ARCard {
 			GLGraphicRoutines.drawLineRect(1.0f,c1x,c2y,c3x,c4y,-1);
 
 			GL11.glTranslatef(0, 0.48f, 0);
-			GLBitmapFontBlitter.drawString("???", "font_default", 0.08f*SCALE, 0.1f*SCALE, GLBitmapFontBlitter.Alignment.CENTERED);
+			GLBitmapFontBlitter.drawString("???", "font_default", 0.08f*Globals.CARD_SCALE, 0.1f*Globals.CARD_SCALE, GLBitmapFontBlitter.Alignment.CENTERED);
 			GL11.glTranslatef(0, 0.18f, 0);
-			GLBitmapFontBlitter.drawString(quality + "   #" + (int)id, "font_default", 0.03f*SCALE, 0.06f*SCALE, GLBitmapFontBlitter.Alignment.CENTERED);			
+			GLBitmapFontBlitter.drawString(quality + "   #" + (int)id, "font_default", 0.03f*Globals.CARD_SCALE, 0.06f*Globals.CARD_SCALE, GLBitmapFontBlitter.Alignment.CENTERED);			
 			//GLGraphicRoutines.drawLineRect(1.0f, -GLValues.glWidth*0.49f, -GLValues.glHeight*0.49f, GLValues.glWidth*0.49f, GLValues.glHeight*0.49f, 0);
 
 		} else {
@@ -132,17 +129,16 @@ public class ARCard {
 				GL11.glNormal3f(0,0,1); GL11.glTexCoord2d(0.9999999,0); GL11.glVertex3d(c4x, c3y, 0);
 			GL11.glEnd();
 
-			GL11.glColor3f(1, 1, 1);
+			GL11.glColor3f(0.8f, 0.8f, 0.8f);
 			GLTextureManager.unbindTexture();
-			GLGraphicRoutines.drawCircle(0.08f, 6);
+			GLGraphicRoutines.drawLineRect(1.0f, c1x, c2y, c3x, c4y, 0);
+			GLGraphicRoutines.drawCircle(0.08f*Globals.CARD_SCALE, 10);
 			GL11.glColor3f(0, 1, 0);
 
-			GL11.glTranslatef(0, 0.48f, 0);
-			GLBitmapFontBlitter.drawString((int)id + "", "font_default", 0.08f*SCALE, 0.1f*SCALE, GLBitmapFontBlitter.Alignment.CENTERED);
-			GL11.glTranslatef(0, 0.18f, 0);
-			GLBitmapFontBlitter.drawString(quality + " " + -(int)(Math.toDegrees(angle)+70), "font_default", 0.03f*SCALE, 0.06f*SCALE, GLBitmapFontBlitter.Alignment.CENTERED);			
-			//GLGraphicRoutines.drawLineRect(1.0f, -GLValues.glWidth*0.49f, -GLValues.glHeight*0.49f, GLValues.glWidth*0.49f, GLValues.glHeight*0.49f, 0);
-
+			GL11.glTranslatef(0, 0.5f*Globals.CARD_SCALE, 0);
+			GLBitmapFontBlitter.drawString((int)id + "", "font_default", 0.15f*Globals.CARD_SCALE, 0.2f*Globals.CARD_SCALE, GLBitmapFontBlitter.Alignment.CENTERED);
+			GL11.glTranslatef(0, 0.18f*Globals.CARD_SCALE, 0);
+			GLBitmapFontBlitter.drawString(quality + " " + Math.abs((int)(Math.toDegrees(angle)+70)), "font_default", 0.06f*Globals.CARD_SCALE, 0.1f*Globals.CARD_SCALE, GLBitmapFontBlitter.Alignment.CENTERED);
 		
 		GL11.glPopMatrix();
 	}
@@ -157,7 +153,7 @@ public class ARCard {
 		this.x = x;
 		this.y = y;
 
-		this.angle = a*1.05f-0.05f;
+		this.angle = a;
 		this.qtime = System.currentTimeMillis();
 	}
 
