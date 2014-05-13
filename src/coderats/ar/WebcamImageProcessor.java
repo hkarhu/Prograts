@@ -111,7 +111,18 @@ public class WebcamImageProcessor extends JFrame implements MouseListener, Mouse
 		
 		Insets i = this.getInsets();
 		
-		JSlider slider = new JSlider(JSlider.HORIZONTAL, 1, 255, 50);
+		JSlider slider = new JSlider(JSlider.VERTICAL, 0, 5, p.dbg);
+		slider.setBounds(wDebugXShift + i.left + 640 + 16, 16 + i.top, 32, 124);
+		slider.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				p.dbg = ((JSlider)e.getSource()).getValue();
+				refreshLabel();
+			}
+		});
+		this.add(slider);
+		
+		slider = new JSlider(JSlider.HORIZONTAL, 1, 255, p.par1);
 		slider.setBounds(192 + i.left, 480 + i.top, 200, 24);
 		slider.addChangeListener(new ChangeListener() {
 			@Override
@@ -122,7 +133,7 @@ public class WebcamImageProcessor extends JFrame implements MouseListener, Mouse
 		});
 		this.add(slider);
 		
-		slider = new JSlider(JSlider.HORIZONTAL, 1, 255, 50);
+		slider = new JSlider(JSlider.HORIZONTAL, 1, 255, p.par2);
 		slider.setBounds(192 + i.left, 510 + i.top, 200, 24);
 		slider.addChangeListener(new ChangeListener() {
 			@Override
@@ -133,7 +144,7 @@ public class WebcamImageProcessor extends JFrame implements MouseListener, Mouse
 		});
 		this.add(slider);
 		
-		slider = new JSlider(JSlider.HORIZONTAL, 2, 255, 18);
+		slider = new JSlider(JSlider.HORIZONTAL, 2, 255, p.par3);
 		slider.setBounds(392 + i.left, 480 + i.top, 200, 24);
 		slider.addChangeListener(new ChangeListener() {
 			@Override
@@ -155,7 +166,7 @@ public class WebcamImageProcessor extends JFrame implements MouseListener, Mouse
 		});
 		this.add(slider);
 	
-		slider = new JSlider(JSlider.HORIZONTAL, 2, 255, 18);
+		slider = new JSlider(JSlider.HORIZONTAL, 2, 255, p.par5);
 		slider.setBounds(592 + i.left, 480 + i.top, 200, 24);
 		slider.addChangeListener(new ChangeListener() {
 			@Override
@@ -166,7 +177,7 @@ public class WebcamImageProcessor extends JFrame implements MouseListener, Mouse
 		});
 		this.add(slider);
 		
-		slider = new JSlider(JSlider.HORIZONTAL, 0, 255, 133);
+		slider = new JSlider(JSlider.HORIZONTAL, 0, 255, p.par6);
 		slider.setBounds(592 + i.left, 510 + i.top, 200, 24);
 		slider.addChangeListener(new ChangeListener() {
 			@Override
@@ -176,11 +187,11 @@ public class WebcamImageProcessor extends JFrame implements MouseListener, Mouse
 			}
 		});
 		this.add(slider);
+	
 		
 		JButton save = new JButton("Save");
 		save.setBounds(i.left, 520+i.top, 130, 24);
 		save.addActionListener(new ActionListener() {
-			
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				try {
@@ -202,14 +213,14 @@ public class WebcamImageProcessor extends JFrame implements MouseListener, Mouse
 		label.setBounds(192 + i.left, 540 + i.top, 600, 24);
 		this.add(label);
 		
-		this.setPreferredSize(new Dimension(900,600));
+		this.setPreferredSize(new Dimension(920,600));
 		this.pack();
 		this.setVisible(true);
 		
 	}
 	
 	private void refreshLabel(){
-		label.setText("BR1 : " + p.par1 + "       BR2 : " + p.par2 + "       CDT : " + p.par3 + "       LT : " + p.par4 + "       5 : " + p.par5 + "       6 : " + p.par6);
+		label.setText(" Par1: " + p.par1 + "       BR2 : " + p.par2 + "       CDT : " + p.par3 + "       LT : " + p.par4 + "       5 : " + p.par5 + "       6 : " + p.par6);
 	}
 	
 	public ConcurrentHashMap<Integer, ARCard> getKnownCards(){
@@ -221,25 +232,25 @@ public class WebcamImageProcessor extends JFrame implements MouseListener, Mouse
 		cardTrackerDebug.getGraphics().setColor(Color.black);
 		cardTrackerDebug.getGraphics().fillRect(0, 0, cardTrackerDebug.getWidth(), cardTrackerDebug.getHeight());
 		
-		Mat m = ocvt.getRGBFrame();
-		if(m != null){
-			webcamDebugG.drawImage(OpenCVUtils.matToBufferedImage(m), 0, 0, null);
+		BufferedImage dbgimg = ocvt.getDebugFrame();
+		if(dbgimg != null){
+			webcamDebugG.drawImage(dbgimg, 0, 0, null);
 			int i=0;
 			for(RawTripCircleData c : ocvt.getCircles()){
 				if(c == null) continue;
 				
 				if(knownCards.containsKey(c.getID())){
-					knownCards.get(c.getID()).updateValues(getCalibratedGLX(c.getX(),c.getY()), getCalibratedGLY(c.getX(),c.getY()), c.getAngle(), c.getQuality());
+					knownCards.get(c.getID()).updateValues(getCalibratedGLX(c.getX(),c.getY()), getCalibratedGLY(c.getX(),c.getY()), c.getAngle(), c.getRadius(), c.getQuality());
 					informListenersCardUpdated(c.getID());
 				} else {
-					knownCards.put(c.getID(), new ARCard(getCalibratedGLX(c.getX(),c.getY()), getCalibratedGLY(c.getX(),c.getY()), c.getAngle(), c.getID(), c.getQuality()));
+					knownCards.put(c.getID(), new ARCard(getCalibratedGLX(c.getX(),c.getY()), getCalibratedGLY(c.getX(),c.getY()), c.getAngle(), c.getRadius(), c.getID(), c.getQuality()));
 					informListenersCardAppeared(c.getID());
 				}
 				
 				webcamDebugG.setColor(Color.getHSBColor(c.getQuality()*0.3f, 1, 1));
-				webcamDebugG.drawOval((int)(c.getX()-25), (int) (c.getY()-25), 50, 50);
+				//webcamDebugG.drawOval((int)(c.getX()-25), (int) (c.getY()-25), 50, 50);
 				webcamDebugG.setStroke(new BasicStroke(3));
-				//webcamDebugG.fillOval(c.getX()-c.getRadius(), c.getY()-c.getRadius(), c.getRadius()*2, c.getRadius()*2);
+				webcamDebugG.drawOval((int)(c.getX()-c.getRadius()), (int)(c.getY()-c.getRadius()), (int)(c.getRadius()*2), (int)(c.getRadius()*2));
 				
 				webcamDebugG.setColor(Color.cyan);
 				webcamDebugG.drawLine(p.CPs[0][0],p.CPs[0][1], p.CPs[1][0], p.CPs[1][1]);
@@ -259,7 +270,6 @@ public class WebcamImageProcessor extends JFrame implements MouseListener, Mouse
 				i++;
 			}
 			repaint();
-			m.release();
 		}
 		
 	}

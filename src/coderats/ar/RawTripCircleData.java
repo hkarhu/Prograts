@@ -7,17 +7,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.xml.crypto.dsig.spec.XSLTTransformParameterSpec;
-
-import org.omg.IOP.CodecOperations;
-import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.RotatedRect;
-import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
@@ -37,42 +32,22 @@ public class RawTripCircleData {
 
 	private volatile double lastX = 0;
 	private volatile double lastY = 0;
-	private volatile double lastR = 0;
+	private volatile float lastR = 0;
 	private volatile float lastAngle = 0;
-	private boolean xRecalc = true;
-	private boolean yRecalc = true;
-
-	private float[] x;
-	private float[] y;
-	private float[] r;
-
-	private float a;
 	
 	private long timestamp;
 
 	private BufferedImage processedTripcode;
-	private int code;
 	private int[] code_confirms;
-	private int max_code_index;
 
 	public RawTripCircleData() {
-		x = new float[BUFFER_SIZE];
-		y = new float[BUFFER_SIZE];
-		r = new float[BUFFER_SIZE];
 		code_confirms = new int[BUFFER_SIZE];
-		code = 0;
 		processedTripcode = new BufferedImage(SAMPLE_FRAME_SIZE, SAMPLE_FRAME_SIZE, BufferedImage.TYPE_3BYTE_BGR);
 	}
 
 	public RawTripCircleData(double[] coords, Mat m) {
 		this();
-		for(int i=0; i < BUFFER_SIZE; i++){
-			x[i] = (float) coords[0];
-			y[i] = (float) coords[1];
-			r[i] = (float) coords[2];
-		}
-		updateImage(m);
-		timestamp = System.currentTimeMillis();
+		processNewCoordinates(coords, m);
 	}
 
 	private void updateImage(Mat m){
@@ -278,7 +253,6 @@ public class RawTripCircleData {
 		xShift = SAMPLE_FRAME_SIZE/2.0f - ellipse.center.x;
 		yShift = SAMPLE_FRAME_SIZE/2.0f - ellipse.center.y;
 		
-		
 		lastX -= xShift;
 		lastY -= yShift;
 		
@@ -315,6 +289,8 @@ public class RawTripCircleData {
 		
 		//Take size with average of W and H
 		float size = (float) (ellipse.size.width+ellipse.size.height)/(float)SAMPLE_FRAME_SIZE;
+		
+		this.lastR = size/2.0f;
 		
 		M = Imgproc.getRotationMatrix2D(new Point(SAMPLE_FRAME_SIZE/2, SAMPLE_FRAME_SIZE/2), Math.toDegrees(-refinedAngle), 1/(size*0.5f)); //1+(ellipse.size.height/SAMPLE_FRAME_SIZE)*0.5f);
 		Imgproc.warpAffine(frame, frame, M, new Size(SAMPLE_FRAME_SIZE, SAMPLE_FRAME_SIZE));
@@ -525,66 +501,22 @@ public class RawTripCircleData {
 	public void processNewCoordinates(double[] coordinates, Mat m){
 		last_index++;
 		if(last_index >= BUFFER_SIZE) last_index = 0;
-		x[last_index] = (float) coordinates[0];
-		y[last_index] = (float) coordinates[1];
-		r[last_index] = (float) coordinates[2];
-		xRecalc = true;
-		yRecalc = true;
 
 		lastX = coordinates[0];
 		lastY = coordinates[1];
-		lastR = coordinates[2];
+		lastR = (float)coordinates[2];
 		
 		updateImage(m);
 		timestamp = System.currentTimeMillis();
-
-	}
-	
-	private void applyShiftCorrectionForLastCoordinates(float xShift, float yShift){
-		//x[last_index] -= xShift;
-		lastX -= xShift;
-		//y[last_index] -= yShift;
-		lastY -= yShift;
-		
-		xRecalc = false;
-		yRecalc = false;
 	}
 
 	public boolean isCloseTo(double[] coordinates){
-		if(Math.abs(x[0] - coordinates[0]) <= PROXIMITY && Math.abs(y[0] - coordinates[1]) <= PROXIMITY) return true;
+		if(Math.abs(getX() - coordinates[0]) <= PROXIMITY && Math.abs(getY() - coordinates[1]) <= PROXIMITY) return true;
 		return false;
 	}
 
-//	public int getSmoothX() {
-//		if(xRecalc){
-//			lastX = 0;
-//			for(int i=0; i < BUFFER_SIZE; i++){
-//				lastX += x[i];
-//			}
-//			lastX /= BUFFER_SIZE;
-//			xRecalc = false;
-//		}
-//		return lastX;
-//	}
-//
-//	public int getSmoothY() {
-//		if(yRecalc){
-//			lastY = 0;
-//			for(int i=0; i < BUFFER_SIZE; i++){
-//				lastY += y[i];
-//			}
-//			lastY /= BUFFER_SIZE;
-//			yRecalc = false;
-//		}
-//		return lastY;
-//	}
-
-	public int getRadius() {
-		int tr = 0;
-		for(int i=0; i < BUFFER_SIZE; i++){
-			tr += r[i];
-		}
-		return tr/BUFFER_SIZE;
+	public float getRadius() {
+		return lastR;
 	}
 
 	public BufferedImage getTripcode() {
@@ -673,34 +605,6 @@ public class RawTripCircleData {
 		
 		return new int[] {modeNum, maxCount};
 		
-	}
-	
-	private float getMostFrequent(float[] a){
-		Arrays.sort(a);
-		
-		float modeNum = a[0];
-		float testNum = a[0];
-		float curCount = 0;
-		float maxCount = 0;
-		
-		for(int i=1; i < a.length; i++){
-			
-			if(a[i] == testNum){
-				curCount++;
-			} else {
-				if(curCount > maxCount){
-					modeNum = testNum;
-					maxCount = curCount;
-				}
-				testNum = a[i];
-				curCount = 0;
-			}
-			
-			if(maxCount >= a.length-i) break;
-			
-		}
-		
-		return modeNum;
 	}
 	
 	public float getAngle(){

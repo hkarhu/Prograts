@@ -18,6 +18,8 @@ public class ARCard {
 
 	boolean broken = false;
 
+	float radius;
+	
 	float c1x;
 	float c1y;
 	float c2x;
@@ -27,10 +29,11 @@ public class ARCard {
 	float c4x;
 	float c4y;
 
-	public ARCard(float x, float y, float angle, int id, float quality) {
+	public ARCard(float x, float y, float angle, float radius, int id, float quality) {
 		
 		cmd = null;
 
+		this.radius = radius;
 		this.x = x;
 		this.y = y;
 		this.angle = angle;
@@ -39,13 +42,13 @@ public class ARCard {
 
 		c1x = c2x = -Globals.CARD_WIDTH*0.5f;
 		c3x = c4x = Globals.CARD_WIDTH*0.5f;
-		c2y = c3y = -0.3448f*Globals.CARD_HEIGTH;
+		c2y = c3y = -0.3448f*Globals.CARD_HEIGTH*2;
 		c1y = c4y = 0.6555f*Globals.CARD_HEIGTH;
 
 	}
 
 	public void glDraw(long time) {
-
+		
 		GL11.glPushMatrix();
 		
 		GL11.glTranslatef(getX(), getY(), 0);
@@ -113,6 +116,11 @@ public class ARCard {
 	
 	public void glDrawDebug(long time) {
 
+		c1x = c2x = -Globals.CARD_WIDTH;
+		c3x = c4x = Globals.CARD_WIDTH;
+		c2y = c3y = -0.3448f*Globals.CARD_HEIGTH*2;
+		c1y = c4y = 0.6555f*Globals.CARD_HEIGTH*2;
+		
 		GL11.glPushMatrix();
 		
 		GL11.glTranslatef(getX(), getY(), 0);
@@ -144,7 +152,7 @@ public class ARCard {
 	}
 
 
-	public void updateValues(float x, float y, float a, float quality) {
+	public void updateValues(float x, float y, float a, float radius, float quality) {
 		this.quality = quality;
 
 //		if(Math.abs(this.getX()-x) > 0.01f) this.x = ((this.getX() + x)/2);
@@ -152,6 +160,7 @@ public class ARCard {
 		
 		this.x = x;
 		this.y = y;
+		this.radius = radius;
 
 		this.angle = a;
 		this.qtime = System.currentTimeMillis();

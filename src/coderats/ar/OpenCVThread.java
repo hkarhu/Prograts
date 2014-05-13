@@ -1,4 +1,5 @@
 package coderats.ar;
+import java.awt.image.BufferedImage;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 import org.opencv.core.Core;
@@ -39,11 +40,14 @@ public class OpenCVThread {
 		
 		Mat in = new Mat();
 		
+		int vi = 0;
+		
 		//Init
 		while(inputVideo == null){
 			try {
 				inputVideo = new VideoCapture();
-				inputVideo.open(0);
+				System.out.println("Trying input " + vi);
+				inputVideo.open(vi);
 				Thread.sleep(1000);
 				inputVideo.set(OpenCVUtils.CAP_PROP_FRAME_WIDTH, 640);
 				inputVideo.set(OpenCVUtils.CAP_PROP_FRAME_HEIGHT, 480);
@@ -54,52 +58,42 @@ public class OpenCVThread {
 			} catch (Exception e) {
 				e.printStackTrace();
 				inputVideo = null;
+				vi++;
+				if(vi > 5) vi = 0;
 			}
 		}
 
 		//Loop
 		while(running){
-			
+			try {
 			if (inputVideo.read(in)){
 				Mat out = new Mat();
+				Mat dbg = null;
 				Mat tres = new Mat();
 				Mat circ = new Mat();
 				
 				Imgproc.cvtColor(in, in, Imgproc.COLOR_BGR2GRAY);
-				in.convertTo(in, -1, p.par2*0.1f, -p.par1);
-				
-				//Imgproc.equalizeHist(in, in);
+				in.convertTo(in, -1, p.par2*0.05f, -p.par1);
+				if(p.dbg == 0) dbg = in.clone();
 				
 				Imgproc.erode(in, out, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(3,3)));
+				Imgproc.threshold(out, out, p.par3, 255, Imgproc.THRESH_BINARY);
+				if(p.dbg == 1) dbg = out.clone();
 				
-				//Imgproc.GaussianBlur(hc, hc, new Size(3,3), 51);
-				
-				//Imgproc.threshold(hc, hc, 90, 255, Imgproc.THRESH_BINARY);
-								///tres
-				Imgproc.blur(out, tres, new Size(3,3));
-				out.convertTo(tres, -1, p.par5*0.1f, -p.par6);
+				Imgproc.blur(out, tres, new Size(7,7));
+				//out.convertTo(tres, -1, p.par5*0.1f, -p.par6);
 				Imgproc.erode(tres, tres, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(5,5)));
-				//
+				if(p.dbg == 2) dbg = tres.clone();
+				Imgproc.threshold(tres, tres, 128, 255, Imgproc.THRESH_BINARY);
 				
+				//Imgproc.GaussianBlur(tres, tres, new Size(3,3), p.par3);
 				//Imgproc.dilate(out, out, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(5,5)));
-				
-				Imgproc.threshold(tres, tres, p.par3, 255, Imgproc.THRESH_BINARY);
-				//Imgproc.adaptiveThreshold(tres, tres, 254, Imgproc.THRESH_BINARY, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, 7, 9);
-				
-				//
-				
 				//Imgproc.erode(gc, hc, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(3,3)));		
-			
-				//List<MatOfPoint> contours = new LinkedList<MatOfPoint>();
-				//Mat hierarchy = new Mat();
-				//Imgproc.findContours(hc, contours, hierarchy, Imgproc.RETR_CCOMP, Imgproc.CHAIN_APPROX_SIMPLE);
-
-				//Imgproc.Canny(gc, hc, 80, 40);
+				//Imgproc.adaptiveThreshold(tres, tres, 254, Imgproc.THRESH_BINARY, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, 7, p.par5);
 				
-				Imgproc.HoughCircles(tres, circ, Imgproc.CV_HOUGH_GRADIENT, 1, tres.height()/16, 80, p.par4, 5, 30);
+				if(p.dbg == 3) dbg = tres.clone();
+				Imgproc.HoughCircles(tres, circ, Imgproc.CV_HOUGH_GRADIENT, 1, tres.height()/16, 80, 1+p.par4, 3, 120);
 				
-				//Core.drawContours(m, contours, 4, new Scalar(40, 233, 45,0 ));
-
 				for (int i = 0; i < circ.cols(); i++){
 					
 					double[] coords = circ.get(0,i);
@@ -120,7 +114,7 @@ public class OpenCVThread {
 					
 				}
 				
-				matrixQueue.addLast(out);
+				if(dbg != null) matrixQueue.addLast(dbg);
 
 				tres.release();
 				circ.release();
@@ -130,7 +124,12 @@ public class OpenCVThread {
 			}
 
 			if(matrixQueue.size() > 10) matrixQueue.removeFirst();
-			if(circleQueue.size() > 200) matrixQueue.removeFirst();
+			if(circleQueue.size() > 200) circleQueue.removeFirst();
+			
+			} catch(Exception e){
+				e.printStackTrace();
+				running = false;
+			}
 			
 		}
 
@@ -152,11 +151,16 @@ public class OpenCVThread {
 		System.out.println("OK!");
 	}
 
-	public Mat getRGBFrame(){
+	public BufferedImage getDebugFrame(){
+		Mat dbg = null;
+		BufferedImage bi = null;
 		if(!matrixQueue.isEmpty()){
-			return matrixQueue.removeFirst();
-		}
-		else return null;
+			dbg = matrixQueue.removeFirst();
+			bi = OpenCVUtils.matToBufferedImage(dbg);
+			dbg.release();
+		} 
+		
+		return bi;
 	}
 
 	public RawTripCircleData[] getCircles(){
@@ -168,6 +172,10 @@ public class OpenCVThread {
 
 	public void setParams(SavedParams p) {
 		this.p = p;
+	}
+	
+	public void setDebugMode(int i){
+		p.dbg = i;
 	}
 
 }
