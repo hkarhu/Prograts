@@ -4,3 +4,5 @@ bin/
 /testimgs/*
 *.kate-swp
 /CARDIMAGES/
+calibration.ser
+.directory
