@@ -47,11 +47,15 @@ public class OpenCVThread {
 			try {
 				inputVideo = new VideoCapture();
 				System.out.println("Trying input " + vi);
-				inputVideo.open(vi);
-				Thread.sleep(1000);
+				inputVideo.set(OpenCVUtils.CAP_PROP_AUTO_EXPOSURE, 1);
+				//inputVideo.set(OpenCVUtils.CAP_PROP_EXPOSURE, 0);
 				inputVideo.set(OpenCVUtils.CAP_PROP_FRAME_WIDTH, 640);
 				inputVideo.set(OpenCVUtils.CAP_PROP_FRAME_HEIGHT, 480);
 				inputVideo.set(OpenCVUtils.CAP_PROP_FPS, 60);
+				
+				inputVideo.open(vi);
+				Thread.sleep(1000);
+
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 				break;
@@ -62,7 +66,7 @@ public class OpenCVThread {
 				if(vi > 5) vi = 0;
 			}
 		}
-
+		
 		//Loop
 		while(running){
 			try {
@@ -73,26 +77,35 @@ public class OpenCVThread {
 				Mat circ = new Mat();
 				
 				Imgproc.cvtColor(in, in, Imgproc.COLOR_BGR2GRAY);
+				if(p.dbg == 1) dbg = in.clone();
+				
 				in.convertTo(in, -1, p.par2*0.05f, -p.par1);
-				if(p.dbg == 0) dbg = in.clone();
+				if(p.dbg == 2) dbg = in.clone();
 				
-				Imgproc.erode(in, out, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(3,3)));
-				Imgproc.threshold(out, out, p.par3, 255, Imgproc.THRESH_BINARY);
-				if(p.dbg == 1) dbg = out.clone();
 				
-				Imgproc.blur(out, tres, new Size(7,7));
+				Imgproc.threshold(in, out, 128, 255, Imgproc.THRESH_BINARY);
+				Imgproc.erode(out, out, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(3,3)));
+				
+				//Imgproc.adaptiveThreshold(out, out, 254, Imgproc.THRESH_BINARY, Imgproc.ADAPTIVE_THRESH_MEAN_C, 5, 2);
+				if(p.dbg == 3) dbg = out.clone();
+				
+				
 				//out.convertTo(tres, -1, p.par5*0.1f, -p.par6);
-				Imgproc.erode(tres, tres, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(5,5)));
-				if(p.dbg == 2) dbg = tres.clone();
-				Imgproc.threshold(tres, tres, 128, 255, Imgproc.THRESH_BINARY);
+				//Imgproc.erode(out, tres, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(11,11)));
 				
-				//Imgproc.GaussianBlur(tres, tres, new Size(3,3), p.par3);
-				//Imgproc.dilate(out, out, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(5,5)));
-				//Imgproc.erode(gc, hc, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(3,3)));		
-				//Imgproc.adaptiveThreshold(tres, tres, 254, Imgproc.THRESH_BINARY, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, 7, p.par5);
+				//Blur to reduce noise
+				//Imgproc.GaussianBlur(out, out, new Size(3, 3), 2);
+				Imgproc.GaussianBlur(out, tres, new Size(9, 9), 2);
+				//Imgproc.blur(tres, tres, new Size(9,9));
+				//Imgproc.erode(tres, tres, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(5,5)));	
 				
-				if(p.dbg == 3) dbg = tres.clone();
-				Imgproc.HoughCircles(tres, circ, Imgproc.CV_HOUGH_GRADIENT, 1, tres.height()/16, 80, 1+p.par4, 3, 120);
+				//
+				//Imgproc.dilate(tres, tres, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(9,9)));	
+				
+				if(p.dbg == 4) dbg = tres.clone();
+				Imgproc.HoughCircles(tres, circ, Imgproc.CV_HOUGH_GRADIENT, 1, tres.height()/9.0f, 250, 18, p.par5, p.par6);
+				
+				if(p.dbg == 5) dbg = tres.clone();
 				
 				for (int i = 0; i < circ.cols(); i++){
 					
@@ -118,12 +131,13 @@ public class OpenCVThread {
 
 				tres.release();
 				circ.release();
+				out.release();
 				
 			} else {
 				S.debug("frame/cam failiure!!1!1");
 			}
 
-			if(matrixQueue.size() > 10) matrixQueue.removeFirst();
+			if(matrixQueue.size() > 5) matrixQueue.removeFirst();
 			if(circleQueue.size() > 200) circleQueue.removeFirst();
 			
 			} catch(Exception e){

@@ -248,12 +248,12 @@ public class OpenGLTableAugment extends GLCore implements GLKeyboardListener, AR
 
 	@Override
 	public void cardAppeared(int id) {
-		gameScenes.getFirst().cardAppeared(id);
+		if(gameScenes.size() > 0) gameScenes.getFirst().cardAppeared(id);
 	}
 	
 	@Override
 	public void cardDataUpdated(int id) {
-		gameScenes.getFirst().cardDataUpdated(id);
+		if(gameScenes.size() > 0) gameScenes.getFirst().cardDataUpdated(id);
 	}
 	
 

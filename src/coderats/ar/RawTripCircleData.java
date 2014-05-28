@@ -1,6 +1,7 @@
 package coderats.ar;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -19,26 +20,27 @@ import org.opencv.imgproc.Imgproc;
 public class RawTripCircleData {
 
 	private static final int BUFFER_SIZE = 5;
-	private static final int PROXIMITY = 52;
+	private static final int PROXIMITY = 24;
 	private static final int TIMEOUT = 250;
 	private static final int SAMPLE_FRAME_SIZE = 64;
 	private static final int THRESHOLD = 127;
-	private static final float ROUGH_STEP = 0.7f;
-	private static final float FINE_STEP = 0.18f;
+	private static final double ROUGH_STEP = Math.PI*0.25f;
+	private static final double FINE_STEP = ROUGH_STEP*0.25f;
 	private static final int SCAN_DIVISIONS = 30;
 	private static final int DATA_LENGTH = 6;
 	
 	private int last_index;
 
-	private volatile double lastX = 0;
-	private volatile double lastY = 0;
-	private volatile float lastR = 0;
-	private volatile float lastAngle = 0;
+	private volatile double lastX = -1;
+	private volatile double lastY = -1;
+	private volatile double lastR = 1;
+	private volatile double lastAngle = 0;
 	
 	private long timestamp;
 
 	private BufferedImage processedTripcode;
 	private int[] code_confirms;
+	private Mat accumFrame;
 
 	public RawTripCircleData() {
 		code_confirms = new int[BUFFER_SIZE];
@@ -104,16 +106,16 @@ public class RawTripCircleData {
 	//		}
 	//	}
 
-	private float findAngleByMaximum(float from, float to, float step, Mat m){
+	private double findAngleByMaximum(double from, double to, double step, Mat m){
 		int lim = 0;
 		float target = Integer.MAX_VALUE;
-		float angle = from;
+		double angle = from;
 		
 		//Rough find the starting segment
-		for(float i=from; i < to; i += step){
+		for(double i=from; i < to; i += step){
 
-			float xi = (float) (Math.sin(i));
-			float yi = (float) (Math.cos(i));
+			double xi = Math.sin(i);
+			double yi = Math.cos(i);
 			lim = 0;
 
 			for(int d = 5; d <= 30; d++){
@@ -132,29 +134,34 @@ public class RawTripCircleData {
 		return angle;
 	}
 	
-	private float findAngleBySweep(float from, float step, Mat m){
-	
-		float angle = from;
+	private double findAngleBySweep(double from, double step, Mat m){
+		
+		double angle = from;
 		float value;
 		int interrupt = 0;
-		
+
 		do {
 			float xi = (float) (Math.sin(angle));
 			float yi = (float) (Math.cos(angle));
 			
 			value = 0;
 			
-			//g.setColor(Color.green);
+			//g.setColor(Color.red);
 			
-			for(int r = 15; r <= 20; r++){
+			int rad = (int)getRadius();
+			
+			for(int r = rad - 10; r < rad - 5; r++){
 				int x = (int)(xi*r + SAMPLE_FRAME_SIZE/2.0f);				
 				int y = (int)(yi*r + SAMPLE_FRAME_SIZE/2.0f);
+				
+				if(x >= SAMPLE_FRAME_SIZE || y >= SAMPLE_FRAME_SIZE) return lastAngle;
+				
 				value += (float) m.get(y, x)[0];
 				//g.drawLine(x, y, x, y);
 			}
 			
 			value /= 5;
-			
+		
 			if(value > THRESHOLD){
 				angle += step;
 				step *= 0.5f;
@@ -248,63 +255,75 @@ public class RawTripCircleData {
 		edgels.release();
 		
 		//Correct shift
-//		xShift = ((innerRight-innerLeft)+(outerRight-outerLeft) + 2*(SAMPLE_FRAME_SIZE/2 - ellipse.center.x))/6.0f;
-//		yShift = ((innerBottom-innerTop)+(outerBottom-outerTop) + 2*(SAMPLE_FRAME_SIZE/2 - ellipse.center.y))/6.0f;
+//		xShift = ((innerRight-innerLeft)+(outerRight-outerLeft))/4.0f;
+//		yShift = ((innerBottom-innerTop)+(outerBottom-outerTop))/4.0f;
 		xShift = SAMPLE_FRAME_SIZE/2.0f - ellipse.center.x;
 		yShift = SAMPLE_FRAME_SIZE/2.0f - ellipse.center.y;
 		
 		lastX -= xShift;
 		lastY -= yShift;
 		
-//		ArrayList<Edgel> edgels = new ArrayList<Edgel>();
-//		AlgoTrackEdgels.trackEdgels(frame, edgels, outerTop, SAMPLE_FRAME_SIZE/2);
-//		if(!edgels.isEmpty()){
-//			EllipseParams p = AlgoEllipseFitting.ellipseFitting(edgels);
-//			System.out.println(p.getX());
-//		}
-		
 		//Transform image 
 		//TODO: optimize transformation matrices into one before applying the transformation
+		
+		double theta = Math.toRadians(ellipse.angle);
+		double yshear = 0*Math.tan(-theta);
+		double xshear = (1-(ellipse.size.height/ellipse.size.width))*0;
+		
+		double xscale = 1 + 0*(ellipse.size.height/ellipse.size.width);
+		double yscale = 8;
+		
+		double a = Math.cos(theta);
+		double b = Math.sin(theta);
+		
 		Mat M = Mat.zeros(2, 3, CvType.CV_32F);
+		
+		M.put(0, 0, new double[] {a,b,(1-a)*(SAMPLE_FRAME_SIZE*0.5f-xShift*0.5f)-b*(SAMPLE_FRAME_SIZE*0.5f-yShift*0.5f),
+								 -b,a,b*(SAMPLE_FRAME_SIZE*0.5f-xShift*0.5f) + (1-a)*(SAMPLE_FRAME_SIZE*0.5f-yShift*0.5f)});
+
 		M.put(0, 0, new double[] {1,0,xShift,
-								  0,1,yShift});
+				  				  0,1,yShift});
+		
 		Imgproc.warpAffine(frame, frame, M, new Size(SAMPLE_FRAME_SIZE, SAMPLE_FRAME_SIZE));
+	
+
+		processedTripcode = OpenCVUtils.matToBufferedImage(frame);
+		Graphics2D g =  (Graphics2D) processedTripcode.getGraphics();
+		
 		M.release();
 		
-//		M = Imgproc.getRotationMatrix2D(new Point(SAMPLE_FRAME_SIZE/2, SAMPLE_FRAME_SIZE/2), -ellipse.angle, 1);
-//		Imgproc.warpAffine(frame, frame, M, new Size(SAMPLE_FRAME_SIZE, SAMPLE_FRAME_SIZE));
-//		M.release();
-
 		Imgproc.threshold(frame, frame, THRESHOLD, 255, Imgproc.THRESH_BINARY);
 		
-		float roughAngle = 0;
-		float refinedAngle = 0;
+		double roughAngle = 0;
+		double refinedAngle = 0;
 		
-		roughAngle = findAngleByMaximum(0, (float) (2*Math.PI), ROUGH_STEP, frame);
+		roughAngle = findAngleByMaximum(0, 2*Math.PI, ROUGH_STEP, frame);
 		refinedAngle = findAngleBySweep(roughAngle, FINE_STEP, frame);
 		
 		updateAngle(refinedAngle);
 		
 		//float size = (2*SAMPLE_FRAME_SIZE-outerBottom-outerTop-outerLeft-outerRight)/(float)SAMPLE_FRAME_SIZE;
 		
-		//Take size with average of W and H
-		float size = (float) (ellipse.size.width+ellipse.size.height)/(float)SAMPLE_FRAME_SIZE;
+		//Take size with average of W and H		
+		this.lastR = (float) ((2*lastR + ellipse.size.height*0.5f)/3f);
 		
-		this.lastR = size/2.0f;
+		float size = (float) (ellipse.size.height)/(float)SAMPLE_FRAME_SIZE;
 		
-		M = Imgproc.getRotationMatrix2D(new Point(SAMPLE_FRAME_SIZE/2, SAMPLE_FRAME_SIZE/2), Math.toDegrees(-refinedAngle), 1/(size*0.5f)); //1+(ellipse.size.height/SAMPLE_FRAME_SIZE)*0.5f);
+		M = Imgproc.getRotationMatrix2D(new Point(SAMPLE_FRAME_SIZE/2, SAMPLE_FRAME_SIZE/2), Math.toDegrees(-refinedAngle), 1/size); //1+(ellipse.size.height/SAMPLE_FRAME_SIZE)*0.5f);
 		Imgproc.warpAffine(frame, frame, M, new Size(SAMPLE_FRAME_SIZE, SAMPLE_FRAME_SIZE));
 		M.release();
 		
-//		//Accumulate data
+		//Accumulate data
 //		if(accumFrame == null) accumFrame = Mat.zeros(SAMPLE_FRAME_SIZE, SAMPLE_FRAME_SIZE, CvType.CV_32FC1);
 //		Imgproc.accumulateWeighted(frame, accumFrame, 0.2f);
 //		accumFrame.convertTo(frame, CvType.CV_8UC1);
 		
-		processedTripcode = OpenCVUtils.matToBufferedImage(frame);
-		Graphics2D g =  (Graphics2D) processedTripcode.getGraphics();
-		
 		//int newCode = parseCodeBySweep(frame);
+	
+		
+		g.setColor(Color.black);
+		
+		g.drawLine((int)(SAMPLE_FRAME_SIZE*0.5f), (int)(SAMPLE_FRAME_SIZE*0.5f), (int)(SAMPLE_FRAME_SIZE*0.5f + Math.sin(-theta)*32),  (int)(SAMPLE_FRAME_SIZE*0.5f + Math.cos(-theta)*32));
 		
 		int newCode = parseCodeByRays(frame, g);
 		
@@ -489,8 +508,8 @@ public class RawTripCircleData {
 		return dataCorrect;
 	}
 
-	private void updateAngle(float b){
-		lastAngle = b;
+	private void updateAngle(double b){
+		lastAngle = (lastAngle*2 + b)/3;
 	}
 	
 	public boolean isDead(){
@@ -504,7 +523,7 @@ public class RawTripCircleData {
 
 		lastX = coordinates[0];
 		lastY = coordinates[1];
-		lastR = (float)coordinates[2];
+		lastR = (lastR*9 + (float)coordinates[2])/10.0f;
 		
 		updateImage(m);
 		timestamp = System.currentTimeMillis();
@@ -515,7 +534,7 @@ public class RawTripCircleData {
 		return false;
 	}
 
-	public float getRadius() {
+	public double getRadius() {
 		return lastR;
 	}
 
@@ -525,7 +544,7 @@ public class RawTripCircleData {
 		g.setColor(Color.white);
 		g.fillRect(0, 0, 64, 8);
 		g.setColor(Color.blue);
-		g.drawString("  "+getID(), 2, 8);
+		g.drawString("  "+getID() + " r:" + getRadius(), 2, 8);
 		return processedTripcode;
 	}
 
@@ -607,7 +626,7 @@ public class RawTripCircleData {
 		
 	}
 	
-	public float getAngle(){
+	public double getAngle(){
 		return lastAngle;
 	}
 

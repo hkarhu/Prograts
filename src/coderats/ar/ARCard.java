@@ -36,7 +36,7 @@ public class ARCard {
 		this.radius = radius;
 		this.x = x;
 		this.y = y;
-		this.angle = angle;
+		this.angle = angle+10;
 		this.id = id;
 		this.quality = quality;
 
@@ -162,7 +162,7 @@ public class ARCard {
 		this.y = y;
 		this.radius = radius;
 
-		this.angle = a;
+		this.angle = a+0.1f;
 		this.qtime = System.currentTimeMillis();
 	}
 

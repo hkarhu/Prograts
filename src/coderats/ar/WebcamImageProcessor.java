@@ -228,50 +228,55 @@ public class WebcamImageProcessor extends JFrame implements MouseListener, Mouse
 	}
 
 	protected void processFrame() {
-		
-		cardTrackerDebug.getGraphics().setColor(Color.black);
-		cardTrackerDebug.getGraphics().fillRect(0, 0, cardTrackerDebug.getWidth(), cardTrackerDebug.getHeight());
-		
-		BufferedImage dbgimg = ocvt.getDebugFrame();
-		if(dbgimg != null){
-			webcamDebugG.drawImage(dbgimg, 0, 0, null);
-			int i=0;
-			for(RawTripCircleData c : ocvt.getCircles()){
-				if(c == null) continue;
-				
-				if(knownCards.containsKey(c.getID())){
-					knownCards.get(c.getID()).updateValues(getCalibratedGLX(c.getX(),c.getY()), getCalibratedGLY(c.getX(),c.getY()), c.getAngle(), c.getRadius(), c.getQuality());
-					informListenersCardUpdated(c.getID());
-				} else {
-					knownCards.put(c.getID(), new ARCard(getCalibratedGLX(c.getX(),c.getY()), getCalibratedGLY(c.getX(),c.getY()), c.getAngle(), c.getRadius(), c.getID(), c.getQuality()));
-					informListenersCardAppeared(c.getID());
-				}
-				
-				webcamDebugG.setColor(Color.getHSBColor(c.getQuality()*0.3f, 1, 1));
-				//webcamDebugG.drawOval((int)(c.getX()-25), (int) (c.getY()-25), 50, 50);
-				webcamDebugG.setStroke(new BasicStroke(3));
-				webcamDebugG.drawOval((int)(c.getX()-c.getRadius()), (int)(c.getY()-c.getRadius()), (int)(c.getRadius()*2), (int)(c.getRadius()*2));
-				
-				webcamDebugG.setColor(Color.cyan);
-				webcamDebugG.drawLine(p.CPs[0][0],p.CPs[0][1], p.CPs[1][0], p.CPs[1][1]);
-				webcamDebugG.drawLine(p.CPs[1][0],p.CPs[1][1], p.CPs[2][0], p.CPs[2][1]);
-				webcamDebugG.drawLine(p.CPs[2][0],p.CPs[2][1], p.CPs[3][0], p.CPs[3][1]);
-				webcamDebugG.drawLine(p.CPs[3][0],p.CPs[3][1], p.CPs[0][0], p.CPs[0][1]);
-				
-				int dbgx = (i/8)*64;
-				int dbgy = (i%8)*64+24;
-				
-				cardTrackerDebugG.drawImage(c.getTripcode(),dbgx,dbgy,null);
 
-				if(c.getQuality() >= 0.75f){
-					cardTrackerDebugG.setColor(Color.green);
-					cardTrackerDebugG.fillOval(dbgx+26, dbgy+26, 12, 12);
-				} 
-				i++;
-			}
-			repaint();
+
+		BufferedImage dbgimg = ocvt.getDebugFrame();
+		if(dbgimg  != null){
+			webcamDebugG.drawImage(dbgimg, 0, 0, null);
+		} else {
+			webcamDebugG.setColor(Color.darkGray);
+			webcamDebugG.fillRect(0, 0, webcamDebug.getWidth(), webcamDebug.getHeight());
 		}
 		
+		int i=0;
+		
+		for(RawTripCircleData c : ocvt.getCircles()){
+			if(c == null) continue;
+
+			if(knownCards.containsKey(c.getID())){
+				knownCards.get(c.getID()).updateValues(getCalibratedGLX(c.getX(),c.getY()), getCalibratedGLY(c.getX(),c.getY()), (float)c.getAngle(), (float)c.getRadius(), c.getQuality());
+				informListenersCardUpdated(c.getID());
+			} else {
+				knownCards.put(c.getID(), new ARCard(getCalibratedGLX(c.getX(),c.getY()), getCalibratedGLY(c.getX(),c.getY()), (float)c.getAngle(), (float)c.getRadius(), c.getID(), c.getQuality()));
+				informListenersCardAppeared(c.getID());
+			}
+
+			
+			webcamDebugG.setColor(Color.getHSBColor(c.getQuality()*0.3f, 1, 1));
+			//webcamDebugG.drawOval((int)(c.getX()-25), (int) (c.getY()-25), 50, 50);
+			webcamDebugG.setStroke(new BasicStroke(3));
+			webcamDebugG.drawOval((int)(c.getX()-c.getRadius()), (int)(c.getY()-c.getRadius()), (int)(c.getRadius()*2), (int)(c.getRadius()*2));
+
+			webcamDebugG.setColor(Color.cyan);
+			webcamDebugG.drawLine(p.CPs[0][0],p.CPs[0][1], p.CPs[1][0], p.CPs[1][1]);
+			webcamDebugG.drawLine(p.CPs[1][0],p.CPs[1][1], p.CPs[2][0], p.CPs[2][1]);
+			webcamDebugG.drawLine(p.CPs[2][0],p.CPs[2][1], p.CPs[3][0], p.CPs[3][1]);
+			webcamDebugG.drawLine(p.CPs[3][0],p.CPs[3][1], p.CPs[0][0], p.CPs[0][1]);
+
+			int dbgx = (i/8)*64;
+			int dbgy = (i%8)*64+24;
+
+			cardTrackerDebugG.drawImage(c.getTripcode(),dbgx,dbgy,null);
+
+			if(c.getQuality() >= 0.75f){
+				cardTrackerDebugG.setColor(Color.green);
+				cardTrackerDebugG.fillOval(dbgx+26, dbgy+26, 12, 12);
+			}
+			
+			i++;
+		}
+		repaint();
+
 	}
 
 	@Override
