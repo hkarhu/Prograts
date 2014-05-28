@@ -89,7 +89,7 @@ public class WebcamImageProcessor extends JFrame implements MouseListener, Mouse
 		
 		ocvt = new OpenCVThread(p);
 		
-		Timer t = new Timer(20, new ActionListener() {
+		Timer t = new Timer(25, new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				processFrame();
@@ -155,7 +155,7 @@ public class WebcamImageProcessor extends JFrame implements MouseListener, Mouse
 		});
 		this.add(slider);
 		
-		slider = new JSlider(JSlider.HORIZONTAL, 0, 255, 133);
+		slider = new JSlider(JSlider.HORIZONTAL, 0, 255, p.par4);
 		slider.setBounds(392 + i.left, 510 + i.top, 200, 24);
 		slider.addChangeListener(new ChangeListener() {
 			@Override

@@ -3,17 +3,13 @@ package coderats.ar;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class RatsAR {
-
-	public static final int WINDOW_WIDTH = 1280;
-	public static final int WINDOW_HEIGHT = 800;
-	public static final boolean FAKE_AR = false;
 	
 	static OpenGLTableAugment table;
 	static WebcamImageProcessor input;
 	
 	public static void main(String[] args) {
 
-		if(FAKE_AR){
+		if(Globals.FAKE_AR){
 			table = new OpenGLTableAugment(new ConcurrentHashMap<Integer, ARCard>());
 		} else {
 			input = new WebcamImageProcessor();
@@ -26,7 +22,7 @@ public class RatsAR {
 	}
 
 	public static void requestShutdown() {
-		if(!FAKE_AR) input.shutdown();
+		if(!Globals.FAKE_AR) input.shutdown();
 		table.requestClose();
 	}
 

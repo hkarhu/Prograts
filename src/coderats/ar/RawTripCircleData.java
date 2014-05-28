@@ -571,7 +571,6 @@ public class RawTripCircleData {
 		quality -= 0.5f*(c[1]/(float)BUFFER_SIZE);
 		
 		//quality = 0.5f*(1-separation(r));
-		
 		//quality -= (separation(x)/30 + separation(y)/30);
 		
 		quality -= (System.currentTimeMillis() - timestamp)/TIMEOUT;

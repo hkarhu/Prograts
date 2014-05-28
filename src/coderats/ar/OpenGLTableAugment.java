@@ -50,7 +50,7 @@ public class OpenGLTableAugment extends GLCore implements GLKeyboardListener, AR
 		
 		keyboardListeners.add(this);
 		
-		GLValues.setScreenSize(RatsAR.WINDOW_WIDTH, RatsAR.WINDOW_HEIGHT);
+		GLValues.setScreenSize(Globals.WINDOW_WIDTH, Globals.WINDOW_HEIGHT);
 		GLValues.calculateRatios();
 		
 		intro = new IntroScene(knownCards);
@@ -152,7 +152,7 @@ public class OpenGLTableAugment extends GLCore implements GLKeyboardListener, AR
 			e.printStackTrace();
 		}
 		
-		Display.setLocation(1280, 0);
+		//Display.setLocation(1280, 0);
 		try {
 			Display.setFullscreen(true);
 		} catch (LWJGLException e) {
@@ -253,7 +253,7 @@ public class OpenGLTableAugment extends GLCore implements GLKeyboardListener, AR
 	
 	@Override
 	public void cardDataUpdated(int id) {
-		if(gameScenes.size() > 0) gameScenes.getFirst().cardDataUpdated(id);
+		if(!gameScenes.isEmpty())gameScenes.getFirst().cardDataUpdated(id);
 	}
 	
 

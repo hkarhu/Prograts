@@ -70,3 +70,4 @@ public class Command {
 		return type;
 	}
 }
+	
