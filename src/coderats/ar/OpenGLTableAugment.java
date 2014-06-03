@@ -13,18 +13,19 @@ import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.PixelFormat;
 
-import ae.AE;
-import ae.gl.GLGraphicRoutines;
-import ae.gl.GLValues;
-import ae.gl.core.DisplayModePack;
-import ae.gl.core.GLCore;
-import ae.gl.core.GLKeyboardListener;
-import ae.gl.texture.GLTextureManager;
-import ae.routines.S;
 import coderats.ar.gameScenes.AllocateScene;
 import coderats.ar.gameScenes.AssembleScene;
 import coderats.ar.gameScenes.GameScene;
 import coderats.ar.gameScenes.IntroScene;
+import coderats.ar.gl.DisplayModePack;
+import coderats.ar.gl.GLCore;
+import coderats.ar.gl.GLGraphicRoutines;
+import coderats.ar.gl.GLKeyboardListener;
+import coderats.ar.gl.GLTextureManager;
+import coderats.ar.gl.GLValues;
+import coderats.ar.gl.Globals;
+import coderats.ar.gl.S;
+import coderats.ar.objects.ARCard;
 
 
 public class OpenGLTableAugment extends GLCore implements GLKeyboardListener, ARCardListener {
@@ -144,7 +145,7 @@ public class OpenGLTableAugment extends GLCore implements GLKeyboardListener, AR
 			for (Path path : stream) {
 				String identifier = path.getFileName().toString();
 				identifier = identifier.substring(0,identifier.length()-4);
-				if (AE.isDebug()) S.debugFunc("Loading texture '%s' to identifier '%s'", path.toString(), identifier);
+				S.debugFunc("Loading texture '%s' to identifier '%s'", path.toString(), identifier);
 				GLTextureManager.getInstance().blockingLoad(path, identifier);
 			}
 		}

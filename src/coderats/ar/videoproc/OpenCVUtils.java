@@ -1,9 +1,9 @@
-package coderats.ar;
+package coderats.ar.videoproc;
 import java.awt.image.BufferedImage;
 
 import org.opencv.core.Mat;
 
-import ae.routines.S;
+import coderats.ar.gl.S;
 
 
 public class OpenCVUtils {

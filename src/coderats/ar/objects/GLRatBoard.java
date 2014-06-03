@@ -1,13 +1,13 @@
-package coderats.ar;
+package coderats.ar.objects;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.lwjgl.opengl.GL11;
 
-import ae.gl.GLGraphicRoutines;
-import ae.gl.GLValues;
 import coderats.ar.gameScenes.AssembleScene;
+import coderats.ar.gl.GLGraphicRoutines;
+import coderats.ar.gl.GLValues;
 
 public class GLRatBoard {
 

@@ -5,13 +5,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.lwjgl.opengl.GL11;
 
-import coderats.ar.ARCard;
-import coderats.ar.ARCardListener;
-import coderats.ar.Command;
-import ae.gl.GLGraphicRoutines;
-import ae.gl.GLValues;
-import ae.gl.text.GLBitmapFontBlitter;
-import ae.gl.texture.GLTextureManager;
+import coderats.ar.gl.GLBitmapFontBlitter;
+import coderats.ar.gl.GLGraphicRoutines;
+import coderats.ar.gl.GLTextureManager;
+import coderats.ar.gl.GLValues;
+import coderats.ar.objects.ARCard;
+import coderats.ar.objects.Command;
 
 public class AllocateScene extends GameScene {
 

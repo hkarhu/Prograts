@@ -2,16 +2,13 @@ package coderats.ar.gameScenes;
 
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedDeque;
-
-import javax.swing.text.html.parser.Entity;
 
 import org.lwjgl.opengl.GL11;
 
-import coderats.ar.ARCard;
-import ae.gl.GLGraphicRoutines;
-import ae.gl.GLValues;
-import ae.gl.text.GLBitmapFontBlitter;
+import coderats.ar.gl.GLBitmapFontBlitter;
+import coderats.ar.gl.GLGraphicRoutines;
+import coderats.ar.gl.GLValues;
+import coderats.ar.objects.ARCard;
 
 public class IntroScene extends GameScene {
 

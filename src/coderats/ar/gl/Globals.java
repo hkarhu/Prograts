@@ -1,4 +1,4 @@
-package coderats.ar;
+package coderats.ar.gl;
 
 public class Globals {
 

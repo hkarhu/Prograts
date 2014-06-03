@@ -1,4 +1,4 @@
-package coderats.ar;
+package coderats.ar.videoproc;
 import java.awt.image.BufferedImage;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
@@ -8,7 +8,8 @@ import org.opencv.core.Size;
 import org.opencv.highgui.VideoCapture;
 import org.opencv.imgproc.Imgproc;
 
-import ae.routines.S;
+import coderats.ar.SavedParams;
+import coderats.ar.gl.S;
 
 public class OpenCVThread {
 

@@ -1,4 +1,4 @@
-package coderats.ar;
+package coderats.ar.videoproc;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -30,9 +30,10 @@ import javax.swing.Timer;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.opencv.core.Mat;
-
-import ae.gl.GLValues;
+import coderats.ar.ARCardListener;
+import coderats.ar.SavedParams;
+import coderats.ar.gl.GLValues;
+import coderats.ar.objects.ARCard;
 
 public class WebcamImageProcessor extends JFrame implements MouseListener, MouseMotionListener {
 

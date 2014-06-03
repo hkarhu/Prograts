@@ -1,4 +1,4 @@
-package coderats.ar;
+package coderats.ar.objects;
 import java.awt.Color;
 
 import org.lwjgl.opengl.GL11;

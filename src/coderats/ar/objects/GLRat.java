@@ -1,12 +1,12 @@
-package coderats.ar;
+package coderats.ar.objects;
 
 import org.lwjgl.opengl.GL11;
 
-import ae.gl.GLGraphicRoutines;
-import ae.gl.text.GLBitmapFontBlitter;
-import ae.gl.text.GLBitmapFontBlitter.Alignment;
-import ae.gl.texture.GLTextureManager;
-import coderats.ar.Command.Type;
+import coderats.ar.gl.GLBitmapFontBlitter;
+import coderats.ar.gl.GLGraphicRoutines;
+import coderats.ar.gl.GLTextureManager;
+import coderats.ar.gl.GLBitmapFontBlitter.Alignment;
+import coderats.ar.objects.Command.Type;
 
 public class GLRat {
 

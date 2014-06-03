@@ -4,18 +4,16 @@ import java.util.ArrayList;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.xml.bind.annotation.XmlElementDecl.GLOBAL;
-
 import org.lwjgl.opengl.GL11;
 
-import ae.gl.GLGraphicRoutines;
-import ae.gl.GLValues;
-import ae.gl.text.GLBitmapFontBlitter;
-import ae.gl.texture.GLTextureManager;
-import coderats.ar.ARCard;
-import coderats.ar.ARCardSlot;
-import coderats.ar.GLRatBoard;
-import coderats.ar.Globals;
+import coderats.ar.gl.GLBitmapFontBlitter;
+import coderats.ar.gl.GLGraphicRoutines;
+import coderats.ar.gl.GLTextureManager;
+import coderats.ar.gl.GLValues;
+import coderats.ar.gl.Globals;
+import coderats.ar.objects.ARCard;
+import coderats.ar.objects.ARCardSlot;
+import coderats.ar.objects.GLRatBoard;
 
 public class AssembleScene extends GameScene {
 	

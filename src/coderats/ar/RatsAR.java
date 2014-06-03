@@ -2,6 +2,10 @@ package coderats.ar;
 
 import java.util.concurrent.ConcurrentHashMap;
 
+import coderats.ar.gl.Globals;
+import coderats.ar.objects.ARCard;
+import coderats.ar.videoproc.WebcamImageProcessor;
+
 public class RatsAR {
 	
 	static OpenGLTableAugment table;

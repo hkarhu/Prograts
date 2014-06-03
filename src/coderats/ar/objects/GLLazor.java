@@ -1,4 +1,4 @@
-package coderats.ar;
+package coderats.ar.objects;
 
 import org.lwjgl.opengl.GL11;
 

@@ -1,4 +1,4 @@
-package coderats.ar;
+package coderats.ar.videoproc;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;

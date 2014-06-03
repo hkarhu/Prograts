@@ -1,10 +1,10 @@
 package coderats.ar.gameScenes;
 import org.lwjgl.opengl.GL11;
 
-import ae.gl.GLGraphicRoutines;
-import ae.gl.GLValues;
-import ae.gl.text.GLBitmapFontBlitter;
-import ae.gl.texture.GLTextureManager;
+import coderats.ar.gl.GLBitmapFontBlitter;
+import coderats.ar.gl.GLGraphicRoutines;
+import coderats.ar.gl.GLTextureManager;
+import coderats.ar.gl.GLValues;
 
 
 public class AllocateHalf {
