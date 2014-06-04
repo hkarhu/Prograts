@@ -1,4 +1,4 @@
-package coderat.ar.tripcardgenarator;
+package coderats.ar.tripcardgenarator;
 
 public class TRIPCodesContainer {
 	
