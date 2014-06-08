@@ -48,9 +48,9 @@ public class GLRat {
 		GL11.glRotatef(-270, 0, 0, 1);
 		
 		if(name == "B"){
-			GL11.glColor4f(0.5f,0.5f,0.5f,1);
+			GL11.glColor4f(0,1,1,1);
 		} else {
-			GL11.glColor4f(1,1,1,1);
+			GL11.glColor4f(0,1,0,1);
 		}
 		GLTextureManager.getInstance().bindTexture("rat");
 		if(damage && at < 0.5f && anitime > time){
@@ -69,6 +69,17 @@ public class GLRat {
 				GL11.glRotatef(-90*at, 0,0,1);
 				break;
 			case QQQ:
+				GL11.glPushMatrix();
+					GL11.glColor4f((float)(Math.random()*1.0f),(float)(Math.random()*1.0f),(float)(Math.random()*1.0f),at);
+					GLTextureManager.unbindTexture();
+					GL11.glTranslatef(0, 0, 5);
+					GLGraphicRoutines.drawCircle((float) (Math.sin((1-at)*Math.PI)*8), 32);
+					GL11.glTranslatef(0, 0, -6);
+					GLGraphicRoutines.drawCircle(0.6f*(1-at), 10);
+					GL11.glColor4f(1, 1, 1, 1);
+					GLGraphicRoutines.drawLineCircle(5*(1-at), 10, 2f);
+				GL11.glPopMatrix();
+				
 				GL11.glRotatef((float) Math.sin(at*50)*20, 0, 0, 1);
 			case PEW:  
 				if(time%2 == 0){

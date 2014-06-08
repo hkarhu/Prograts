@@ -90,7 +90,7 @@ public class WebcamImageProcessor extends JFrame implements MouseListener, Mouse
 		
 		ocvt = new OpenCVThread(p);
 		
-		Timer t = new Timer(25, new ActionListener() {
+		Timer t = new Timer(8, new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				processFrame();
@@ -232,12 +232,10 @@ public class WebcamImageProcessor extends JFrame implements MouseListener, Mouse
 
 
 		BufferedImage dbgimg = ocvt.getDebugFrame();
+		
 		if(dbgimg  != null){
 			webcamDebugG.drawImage(dbgimg, 0, 0, null);
-		} else {
-			webcamDebugG.setColor(Color.darkGray);
-			webcamDebugG.fillRect(0, 0, webcamDebug.getWidth(), webcamDebug.getHeight());
-		}
+		} else return;
 		
 		int i=0;
 		
@@ -251,7 +249,6 @@ public class WebcamImageProcessor extends JFrame implements MouseListener, Mouse
 				knownCards.put(c.getID(), new ARCard(getCalibratedGLX(c.getX(),c.getY()), getCalibratedGLY(c.getX(),c.getY()), (float)c.getAngle(), (float)c.getRadius(), c.getID(), c.getQuality()));
 				informListenersCardAppeared(c.getID());
 			}
-
 			
 			webcamDebugG.setColor(Color.getHSBColor(c.getQuality()*0.3f, 1, 1));
 			//webcamDebugG.drawOval((int)(c.getX()-25), (int) (c.getY()-25), 50, 50);

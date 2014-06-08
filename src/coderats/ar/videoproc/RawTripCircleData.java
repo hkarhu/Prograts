@@ -285,10 +285,6 @@ public class RawTripCircleData {
 				  				  0,1,yShift});
 		
 		Imgproc.warpAffine(frame, frame, M, new Size(SAMPLE_FRAME_SIZE, SAMPLE_FRAME_SIZE));
-	
-
-		processedTripcode = OpenCVUtils.matToBufferedImage(frame);
-		Graphics2D g =  (Graphics2D) processedTripcode.getGraphics();
 		
 		M.release();
 		
@@ -320,7 +316,9 @@ public class RawTripCircleData {
 		
 		//int newCode = parseCodeBySweep(frame);
 	
-		
+
+		processedTripcode = OpenCVUtils.matToBufferedImage(frame);
+		Graphics2D g =  (Graphics2D) processedTripcode.getGraphics();
 		g.setColor(Color.black);
 		
 		g.drawLine((int)(SAMPLE_FRAME_SIZE*0.5f), (int)(SAMPLE_FRAME_SIZE*0.5f), (int)(SAMPLE_FRAME_SIZE*0.5f + Math.sin(-theta)*32),  (int)(SAMPLE_FRAME_SIZE*0.5f + Math.cos(-theta)*32));
@@ -539,12 +537,12 @@ public class RawTripCircleData {
 	}
 
 	public BufferedImage getTripcode() {
-		Graphics2D g = (Graphics2D) processedTripcode.getGraphics();
-		g.setFont(new Font("Serif", Font.PLAIN, 7));
-		g.setColor(Color.white);
-		g.fillRect(0, 0, 64, 8);
-		g.setColor(Color.blue);
-		g.drawString("  "+getID() + " r:" + getRadius(), 2, 8);
+//		Graphics2D g = (Graphics2D) processedTripcode.getGraphics();
+//		g.setFont(new Font("Serif", Font.PLAIN, 7));
+//		g.setColor(Color.white);
+//		g.fillRect(0, 0, 64, 8);
+//		g.setColor(Color.blue);
+//		g.drawString("  "+getID() + " r:" + getRadius(), 2, 8);
 		return processedTripcode;
 	}
 

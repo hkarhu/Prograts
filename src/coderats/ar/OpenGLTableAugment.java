@@ -23,7 +23,6 @@ import coderats.ar.gl.GLGraphicRoutines;
 import coderats.ar.gl.GLKeyboardListener;
 import coderats.ar.gl.GLTextureManager;
 import coderats.ar.gl.GLValues;
-import coderats.ar.gl.Globals;
 import coderats.ar.gl.S;
 import coderats.ar.objects.ARCard;
 

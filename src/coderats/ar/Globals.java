@@ -1,4 +1,4 @@
-package coderats.ar.gl;
+package coderats.ar;
 
 public class Globals {
 
@@ -7,12 +7,12 @@ public class Globals {
 	public static final boolean FAKE_AR = false;
 	
 	//Parameters for all drawing. (Others elements read from here. Careful when touching)
-	public static final float CARD_SCALE = 0.7f;
+	public static final float CARD_SCALE = 0.68f;
 	
 	public static final float CARD_WIDTH = 0.4f * CARD_SCALE;
 	public static final float CARD_HEIGTH= 0.58f * CARD_SCALE;
-	public static final float CARD_ROW_ARCH = 0.3f;
+	public static final float CARD_ROW_ARCH = 0.8f;
 
-	public static final float CARD_ROW_SPACING = CARD_WIDTH + CARD_WIDTH;
+	public static final float CARD_ROW_SPACING = CARD_WIDTH*2 - 0.1f;
 	
 }

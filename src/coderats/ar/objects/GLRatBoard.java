@@ -11,7 +11,7 @@ import coderats.ar.gl.GLValues;
 
 public class GLRatBoard {
 
-	public static final int BOARD_SIZE = 5;
+	public static final int BOARD_SIZE = 7;
 	public static final float SQUARE_SIZE = 0.3f;
 	
 	private long RESET_DELAY;
@@ -25,7 +25,7 @@ public class GLRatBoard {
 	private List<GLLazor> lazors;
 	
 	public GLRatBoard() {
-		lazors = new ArrayList<>(2);
+		lazors = new ArrayList<>(4);
 		resetGameBoard();
 	}
 	
@@ -60,8 +60,10 @@ public class GLRatBoard {
 				GL11.glPushMatrix();
 				GL11.glTranslatef(SQUARE_SIZE*x + SQUARE_SIZE*0.5f, SQUARE_SIZE*0.5f, 0);
 				for(int y=0; y < BOARD_SIZE; y++){
-					GL11.glColor3f(0.1f, 0.4f, 0.1f);
+					GL11.glColor3f(0.0f, 0.4f, 0);
 					GLGraphicRoutines.drawLineRect(1.0f, -SQUARE_SIZE*0.5f, -SQUARE_SIZE*0.5f, SQUARE_SIZE*0.5f, SQUARE_SIZE*0.5f, 0);
+					GL11.glColor3f(0.0f, 0.1f, 0.0f);
+					GLGraphicRoutines.draw2DRect(-SQUARE_SIZE*0.5f, -SQUARE_SIZE*0.5f, SQUARE_SIZE*0.5f, SQUARE_SIZE*0.5f, 1);
 					GL11.glTranslatef(0, SQUARE_SIZE, 0);
 				}
 				GL11.glPopMatrix();
@@ -94,7 +96,7 @@ public class GLRatBoard {
 		return p1rat.isAlive() && p2rat.isAlive();
 	}
 	
-	public void advanceLogic(ARCardSlot p1Slot, ARCardSlot p2Slot, ARCardSlot p1CSlot, ARCardSlot p2CSlot, long time){
+	public void advanceLogic(ARCardProgramSlot p1Slot, ARCardProgramSlot p2Slot, long time){
 		
 		lazors.clear();
 		
@@ -105,16 +107,6 @@ public class GLRatBoard {
 				p1Lazor.setTime(time);
 				lazors.add(p1Lazor);
 				p1rat.setLazor(null);
-			}
-			//TODO complex
-			if(AssembleScene.COMPLEX && p1CSlot != null){
-				p1rat.execute(p1Slot.getSlottedCommandType(), time);
-				p1Lazor = p1rat.getLazor();
-				if(p1Lazor != null){
-					p1Lazor.setTime(time);
-					lazors.add(p1Lazor);
-					p1rat.setLazor(null);
-				}
 			}
 			
 		}
@@ -128,16 +120,6 @@ public class GLRatBoard {
 				p2rat.setLazor(null);
 			}
 			
-			//TODO complex
-			if(AssembleScene.COMPLEX && p2CSlot != null){
-				p2rat.execute(p2CSlot.getSlottedCommandType(), time);
-				p2Lazor = p2rat.getLazor();
-				if(p2Lazor != null){
-					p2Lazor.setTime(time);
-					lazors.add(p2Lazor);
-					p2rat.setLazor(null);
-				}
-			}
 		}
 		
 		for(GLLazor l : lazors){
