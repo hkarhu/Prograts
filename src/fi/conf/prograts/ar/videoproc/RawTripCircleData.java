@@ -106,75 +106,7 @@ public class RawTripCircleData {
 	//		}
 	//	}
 
-	private double findAngleByMaximum(double from, double to, double step, Mat m){
-		int lim = 0;
-		float target = Integer.MAX_VALUE;
-		double angle = from;
-		
-		//Rough find the starting segment
-		for(double i=from; i < to; i += step){
 
-			double xi = Math.sin(i);
-			double yi = Math.cos(i);
-			lim = 0;
-
-			for(int d = 5; d <= 30; d++){
-				int x = (int)(xi*d + SAMPLE_FRAME_SIZE/2.0f);				
-				int y = (int)(yi*d + SAMPLE_FRAME_SIZE/2.0f);
-				lim += m.get(y, x)[0];
-				//g.drawLine(x, y, x, y);
-			}
-			
-			if(lim < target){
-				target = lim;
-				angle = i;
-			}
-			
-		}
-		return angle;
-	}
-	
-	private double findAngleBySweep(double from, double step, Mat m){
-		
-		double angle = from;
-		float value;
-		int interrupt = 0;
-
-		do {
-			float xi = (float) (Math.sin(angle));
-			float yi = (float) (Math.cos(angle));
-			
-			value = 0;
-			
-			//g.setColor(Color.red);
-			
-			int rad = (int)getRadius();
-			
-			for(int r = rad - 10; r < rad - 5; r++){
-				int x = (int)(xi*r + SAMPLE_FRAME_SIZE/2.0f);				
-				int y = (int)(yi*r + SAMPLE_FRAME_SIZE/2.0f);
-				
-				if(x >= SAMPLE_FRAME_SIZE || y >= SAMPLE_FRAME_SIZE) return lastAngle;
-				
-				value += (float) m.get(y, x)[0];
-				//g.drawLine(x, y, x, y);
-			}
-			
-			value /= 5;
-		
-			if(value > THRESHOLD){
-				angle += step;
-				step *= 0.5f;
-			}
-		
-			angle -= step;
-			
-			interrupt ++;
-		
-		} while (interrupt < 10);
-		
-		return angle;
-	}
 	
 	private void processNewFrame(Mat frame){
 	
@@ -292,10 +224,7 @@ public class RawTripCircleData {
 		
 		double roughAngle = 0;
 		double refinedAngle = 0;
-		
-		roughAngle = findAngleByMaximum(0, 2*Math.PI, ROUGH_STEP, frame);
-		refinedAngle = findAngleBySweep(roughAngle, FINE_STEP, frame);
-		
+
 		updateAngle(refinedAngle);
 		
 		//float size = (2*SAMPLE_FRAME_SIZE-outerBottom-outerTop-outerLeft-outerRight)/(float)SAMPLE_FRAME_SIZE;
