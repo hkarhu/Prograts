@@ -171,7 +171,7 @@ public class RawTripCircleData {
 			
 			interrupt ++;
 		
-		} while (interrupt < 10);
+		} while (interrupt < 12);
 		
 		return angle;
 	}
