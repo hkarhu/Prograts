@@ -17,9 +17,6 @@ public class GLRatBoard {
 	private long RESET_DELAY;
 	private long resetTime = 0;
 
-	private int p1Lives = AssembleScene.NUM_LIVES;
-	private int p2Lives = AssembleScene.NUM_LIVES;
-	
 	private GLRat p1rat;
 	private GLRat p2rat;
 	private List<GLLazor> lazors;
@@ -30,20 +27,11 @@ public class GLRatBoard {
 	}
 	
 	public void resetGameBoard(){
-		p1Lives = AssembleScene.NUM_LIVES;
-		p2Lives = AssembleScene.NUM_LIVES;
 		lazors.clear();
 		resetRats();
 	}
 	
 	public void resetRats(){
-		
-		if(p1rat != null && !p1rat.isAlive()){
-			p1Lives--;
-		}
-		if(p2rat != null && !p2rat.isAlive()){
-			p2Lives--;
-		}
 		p1rat = new GLRat(1,1,1,"A");
 		p2rat = new GLRat(BOARD_SIZE-2,BOARD_SIZE-2,3,"B");
 	}
@@ -145,14 +133,6 @@ public class GLRatBoard {
 	
 	private boolean ratOutsideBoard(GLRat glRat) {
 		return glRat.getX() >= BOARD_SIZE || glRat.getX() < 0 || glRat.getY() >= BOARD_SIZE || glRat.getY() < 0;
-	}
-
-	public boolean returnToAllocate() {
-		return p1Lives <= 0 || p2Lives <= 0;
-	}
-
-	public int getLives(int p) {
-		if(p == 1) return p1Lives; else return p2Lives;
 	}
 
 	public GLRat getRat(int i) {

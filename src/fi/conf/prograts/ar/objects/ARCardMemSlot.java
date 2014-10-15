@@ -24,10 +24,34 @@ public class ARCardMemSlot extends ARCardSlot {
 		float at = (activateTime - time)/ACTIVATE_TIME;
 
 		GL11.glPushMatrix();
-		GL11.glColor4f(1,1,1,1);
-		GL11.glScalef(1,1,1);
-		GL11.glTranslatef(x, y, 3);
-		GL11.glRotatef(a, 0, 0, 1);
+			
+			GL11.glColor4f(1,1,1,1);
+			GL11.glScalef(1,1,1);
+			GL11.glTranslatef(x, y, 0);
+			GL11.glRotatef(a, 0, 0, 1);
+			
+			GLTextureManager.getInstance().bindTexture("card");
+			
+			if(command == null){
+				GL11.glColor4f(0.3f,0.3f,0.3f, 1);
+				GLGraphicRoutines.draw2DRect(-slot_width, -slot_heigth, slot_width, slot_heigth, 0);
+				GLTextureManager.unbindTexture();
+				GLGraphicRoutines.drawLineRect(1.0f*Globals.CARD_SCALE, -slot_width, -slot_heigth, slot_width, slot_heigth, 0);
+			
+				GL11.glTranslatef(0, 0.42f*Globals.CARD_SCALE, -0.2f);
+				GLBitmapFontBlitter.drawString("NOP", "font_default", 0.2f*Globals.CARD_SCALE, 0.4f*Globals.CARD_SCALE, GLBitmapFontBlitter.Alignment.CENTERED);
+			} else {
+				GL11.glTranslatef(0, 0, -5);
+				GLTextureManager.getInstance().bindTexture("card_"+command.getCommandString().toLowerCase());
+				command.GLColorizeLight();
+				GLGraphicRoutines.draw2DRect(-slot_width, -slot_heigth, slot_width, slot_heigth, 0);
+				GLTextureManager.unbindTexture();
+				GLGraphicRoutines.drawLineRect(1.0f, -slot_width, -slot_heigth, slot_width, slot_heigth, 0);
+				
+//				GL11.glTranslatef(0, 0.42f, -0.2f);
+//				GLBitmapFontBlitter.drawString(command.getCommandString(), "font_default", 0.2f, 0.4f, GLBitmapFontBlitter.Alignment.CENTERED);
+			}
+		GL11.glPopMatrix();
 		
 	}
 
@@ -63,11 +87,9 @@ public class ARCardMemSlot extends ARCardSlot {
 	}
 
 	public void bindCard(ARCard c) {
-		Command tmp = this.command;
 		this.card = c;
 		if(c != null){
 			this.command = c.getCommand();
-			c.setCommand(tmp);
 		} else {
 			this.command = null;
 		}

@@ -15,12 +15,10 @@ import fi.conf.prograts.ar.gl.S;
 public class OpenCVThread {
 
 	static {
-		//nu.pattern.OpenCV.loadShared();
-		nu.pattern.OpenCV.loadLocally();
+		nu.pattern.OpenCV.loadShared();
+		//nu.pattern.OpenCV.loadLocally();
 		System.loadLibrary(org.opencv.core.Core.NATIVE_LIBRARY_NAME);
 	}
-	
-	
 	
 	private SavedParams p;
 	private ConcurrentLinkedDeque<Mat> matrixQueue;

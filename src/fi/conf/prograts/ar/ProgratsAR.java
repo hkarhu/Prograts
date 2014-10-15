@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import fi.conf.prograts.ar.objects.ARCard;
 import fi.conf.prograts.ar.videoproc.WebcamImageProcessor;
 
-public class RatsAR {
+public class ProgratsAR {
 	
 	static OpenGLTableAugment table;
 	static WebcamImageProcessor input;

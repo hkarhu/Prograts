@@ -64,9 +64,10 @@ public class ARCardProgramSlot extends ARCardSlot {
 				GLGraphicRoutines.draw2DRect(-slot_width, -slot_heigth, slot_width, slot_heigth, 0);
 				GLTextureManager.unbindTexture();
 				GLGraphicRoutines.drawLineRect(1.0f*Globals.CARD_SCALE, -slot_width, -slot_heigth, slot_width, slot_heigth, 0);
-			
-				GL11.glTranslatef(0, 0.42f*Globals.CARD_SCALE, -0.2f);
-				GLBitmapFontBlitter.drawString("NOP", "font_default", 0.2f*Globals.CARD_SCALE, 0.4f*Globals.CARD_SCALE, GLBitmapFontBlitter.Alignment.CENTERED);
+				GL11.glPushMatrix();
+					GL11.glTranslatef(0, 0.42f*Globals.CARD_SCALE, -0.2f);
+					GLBitmapFontBlitter.drawString("NOP", "font_default", 0.2f*Globals.CARD_SCALE, 0.4f*Globals.CARD_SCALE, GLBitmapFontBlitter.Alignment.CENTERED);
+				GL11.glPopMatrix();
 			} else {
 				GL11.glTranslatef(0, 0, -5);
 				GLTextureManager.getInstance().bindTexture("card_"+command.getCommandString().toLowerCase());
@@ -74,7 +75,6 @@ public class ARCardProgramSlot extends ARCardSlot {
 				GLGraphicRoutines.draw2DRect(-slot_width, -slot_heigth, slot_width, slot_heigth, 0);
 				GLTextureManager.unbindTexture();
 				GLGraphicRoutines.drawLineRect(1.0f, -slot_width, -slot_heigth, slot_width, slot_heigth, 0);
-				
 //				GL11.glTranslatef(0, 0.42f, -0.2f);
 //				GLBitmapFontBlitter.drawString(command.getCommandString(), "font_default", 0.2f, 0.4f, GLBitmapFontBlitter.Alignment.CENTERED);
 			}
@@ -84,26 +84,29 @@ public class ARCardProgramSlot extends ARCardSlot {
 				GL11.glColor4f(0,1,0, 1);
 				GL11.glTranslatef(0, 0, -5);
 				GLTextureManager.unbindTexture();
-				GLGraphicRoutines.drawLineRect(2.0f, -slot_width, -GLValues.glHeight*0.04f, slot_width, GLValues.glHeight*0.04f, 0);
+				//GL11.glTranslatef(0,0,0);
+				//GLGraphicRoutines.drawLineRect(1.0f*Globals.CARD_SCALE, -slot_width, -slot_heigth, slot_width, slot_heigth, 0);
+				GLGraphicRoutines.drawLineRect(2.0f, -slot_width*1.2f, -slot_heigth*1.2f, 
+													  slot_width*1.2f,  slot_heigth*1.2f, 0);
 
-				GL11.glTranslatef(0, GLValues.glHeight*0.06f*Globals.CARD_SCALE, 0);
+				GL11.glTranslatef(0, 0.8f*Globals.CARD_SCALE, 0);
 				GLBitmapFontBlitter.drawString("< RUN >", "font_default", 0.1f*Globals.CARD_SCALE, 0.2f*Globals.CARD_SCALE, GLBitmapFontBlitter.Alignment.CENTERED);
 				
 				//Loading circle
-				GL11.glPushMatrix();
-					GL11.glColor4f(1, 1, 1, 0.5f);
-					GL11.glTranslatef(0, -GLValues.glHeight*0.1825f*Globals.CARD_SCALE, 0);
-					GL11.glRotatef(time*0.3f, 0, 0, 1);
-					GLGraphicRoutines.drawLineCircle(0.4f*Globals.CARD_SCALE, 20*Globals.CARD_SCALE, 2.0f*Globals.CARD_SCALE);
-				
-						for(float i=0; i < Math.PI*2; i += Math.PI*0.5f){
-							GL11.glBegin( GL11.GL_LINE_STRIP );			
-								GL11.glVertex3d((float)Math.sin(i)*0.15f*Globals.CARD_SCALE, (float)Math.cos(i)*0.15f*Globals.CARD_SCALE, 0);
-								GL11.glVertex3d((float)Math.sin(i)*0.25f*Globals.CARD_SCALE, (float)Math.cos(i)*0.25f*Globals.CARD_SCALE, 0);
-								
-							GL11.glEnd();
-						}
-				GL11.glPopMatrix();
+//				GL11.glPushMatrix();
+//					GL11.glColor4f(1, 1, 1, 0.5f);
+//					GL11.glTranslatef(0, -Globals.CARD_HEIGTH*1.5f, 0);
+//					GL11.glRotatef(time*0.3f, 0, 0, 1);
+//					GLGraphicRoutines.drawLineCircle(0.4f*Globals.CARD_SCALE, 20*Globals.CARD_SCALE, 2.0f*Globals.CARD_SCALE);
+//				
+//						for(float i=0; i < Math.PI*2; i += Math.PI*0.5f){
+//							GL11.glBegin( GL11.GL_LINE_STRIP );			
+//								GL11.glVertex3d((float)Math.sin(i)*0.15f*Globals.CARD_SCALE, (float)Math.cos(i)*0.15f*Globals.CARD_SCALE, 0);
+//								GL11.glVertex3d((float)Math.sin(i)*0.25f*Globals.CARD_SCALE, (float)Math.cos(i)*0.25f*Globals.CARD_SCALE, 0);
+//								
+//							GL11.glEnd();
+//						}
+//				GL11.glPopMatrix();
 
 			}
 			

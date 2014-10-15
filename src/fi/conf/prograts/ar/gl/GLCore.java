@@ -208,7 +208,7 @@ public abstract class GLCore {
 	private boolean internalLoop() {
 		
 		handleKeyboardEvents();
-		handleFocusChange();
+		//handleFocusChange();
 		
 //		switch(stereoMode){
 //		
@@ -218,7 +218,7 @@ public abstract class GLCore {
 //			default: glLoop(); swapBuffers(); break;
 //		}
 		
-		 glLoop(); swapBuffers();
+		 glLoop(); //swapBuffers();
 		
 		Display.processMessages();
 

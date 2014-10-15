@@ -11,8 +11,9 @@ public class Globals {
 	
 	public static final float CARD_WIDTH = 0.4f * CARD_SCALE;
 	public static final float CARD_HEIGTH= 0.58f * CARD_SCALE;
-	public static final float CARD_ROW_ARCH = 0.8f;
+	public static final float CARD_ROW_ARCH = 0.7f;
 
-	public static final float CARD_ROW_SPACING = CARD_WIDTH*2 - 0.1f;
+	public static final float CARD_ROW_SPACING = 0.3f;
+	public static final int NUM_SLOTS = 5;
 	
 }
