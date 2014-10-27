@@ -1,5 +1,6 @@
 package fi.conf.prograts.ar.videoproc;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
 
 import org.opencv.core.Mat;
 
@@ -55,37 +56,43 @@ public class OpenCVUtils {
 	public static BufferedImage matToBufferedImage(Mat matrix) {
 		int cols = matrix.cols();  
 		int rows = matrix.rows();
-		
+
 		if(cols <= 0 || rows <= 0){
-			S.eprintfn("Tried to convert weird frame to debug...");
+			System.out.println("Tried to convert weird frame to debug...");
 			return null;
 		}
-		
-		int elemSize = (int)matrix.elemSize();  
-		byte[] data = new byte[cols * rows * elemSize];  
+		BufferedImage image = null;
+
+		byte[] data;  
 		int type;  
-		matrix.get(0, 0, data);
+
 		switch (matrix.channels()) {  
-		case 1:  
+		case 1:
+			int elemSize = (int)matrix.elemSize();  
+			data = new byte[cols * rows * elemSize];
+			matrix.get(0, 0, data);
 			type = BufferedImage.TYPE_BYTE_GRAY;
-			break;  
-		case 3:  
-			type = BufferedImage.TYPE_INT_BGR;  
-			// bgr to rgb
-			byte b;  
-			for(int i=0; i<data.length; i=i+3) {  
-				b = data[i];  
-				data[i] = data[i+2];  
-				data[i+2] = b;  
-			}  
-			break;  
+			image = new BufferedImage(cols, rows, type);
+			image.getRaster().setDataElements(0, 0, cols, rows, data);
+			break;
+
+		case 3:
+			int width = matrix.width(), height = matrix.height(), channels = matrix.channels() ;  
+			data = new byte[width * height * channels];  
+			matrix.get(0, 0, data);  
+			// create new image and get reference to backing data  
+			image = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);  
+			final byte[] targetPixels = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();  
+			System.arraycopy(data, 0, targetPixels, 0, data.length);
+			break;
+
 		default:  
-			S.debug("Unknown mat type.");
+			System.out.println("Unknown mat type.");
 			return null;  
-		}  
-		BufferedImage image = new BufferedImage(cols, rows, type);
-		image.getRaster().setDataElements(0, 0, cols, rows, data);
+		} 
+
 		return image;
-	}  
+
+	}
 
 }

@@ -44,11 +44,12 @@ public class OpenCVThread {
 		
 		Mat in = new Mat();
 		
-		int vi = 0;
+		int vi = 5;
 		
 		//Init
 		while(inputVideo == null){
 			try {
+				if(vi < 0) System.exit(1);
 				inputVideo = new VideoCapture();
 				System.out.println("Trying input " + vi);
 				inputVideo.open(vi);
@@ -56,11 +57,16 @@ public class OpenCVThread {
 				inputVideo.set(OpenCVUtils.CAP_PROP_FRAME_WIDTH, 640);
 				inputVideo.set(OpenCVUtils.CAP_PROP_FRAME_HEIGHT, 480);
 				inputVideo.set(OpenCVUtils.CAP_PROP_FPS, 60);
-			} catch (Exception e) {
-				e.printStackTrace();
-				inputVideo = null;
-				vi--;
-				if(vi < 0) vi = 5;
+				inputVideo.set(OpenCVUtils.CAP_PROP_AUTO_EXPOSURE, 0);
+				inputVideo.set(OpenCVUtils.CAP_PROP_GAIN, 0);
+				if(!inputVideo.read(in)){
+					inputVideo.release();
+					inputVideo = null;
+					vi--;
+				}
+			} catch (Exception ex){
+				ex.printStackTrace();
+	
 			}
 		}
 
@@ -78,7 +84,7 @@ public class OpenCVThread {
 				if(p.dbg == 0) dbg = in.clone();
 				
 				Imgproc.erode(in, out, Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(3,3)));
-				Imgproc.threshold(out, out, p.par3, 255, Imgproc.THRESH_BINARY);
+				//Imgproc.threshold(out, out, p.par3, 255, Imgproc.THRESH_BINARY);
 				if(p.dbg == 1) dbg = out.clone();
 				
 				Imgproc.blur(out, tres, new Size(3,3));
@@ -121,7 +127,7 @@ public class OpenCVThread {
 				circ.release();
 				
 			} else {
-				S.debug("frame/cam failiure!!1!1");
+				S.debug("frame/cam failiure!");
 			}
 
 			if(matrixQueue.size() > 5) matrixQueue.removeFirst();
