@@ -2,11 +2,11 @@ package fi.conf.prograts.ar.objects;
 
 import org.lwjgl.opengl.GL11;
 
-public class GLLazor {
+import fi.conf.prograts.ar.Globals;
+
+public class GLLazor extends GLBoardObject {
 	
 	public final static float ANIM_LENGTH = 200.0f;
-	protected int x = 0;
-	protected int y = 0;
 	protected int d = 0;
 	protected boolean active = false;
 	protected long startTime = 0;
@@ -70,19 +70,19 @@ public class GLLazor {
 				switch (d) {
 				case 0: 
 					GL11.glVertex3d(-0.05f, 0, 0);
-					GL11.glVertex3d(-0.05f, -getY()*GLRatBoard.SQUARE_SIZE, 0);
+					GL11.glVertex3d(-0.05f, -getY()*Globals.BOARD_TILE_SIZE, 0);
 					break;
 				case 1: 
 					GL11.glVertex3d(0, -0.05f, 0);
-					GL11.glVertex3d((GLRatBoard.BOARD_SIZE-1)*GLRatBoard.SQUARE_SIZE - getX()*GLRatBoard.SQUARE_SIZE, -0.05f, 0);
+					GL11.glVertex3d((GLRatBoard.BOARD_SIZE-1)*Globals.BOARD_TILE_SIZE - getX()*Globals.BOARD_TILE_SIZE, -0.05f, 0);
 					break;
 				case 2: 
 					GL11.glVertex3d(0.05f, 0, 0);
-					GL11.glVertex3d(0.05f, (GLRatBoard.BOARD_SIZE-1)*GLRatBoard.SQUARE_SIZE - getY()*GLRatBoard.SQUARE_SIZE, 0);
+					GL11.glVertex3d(0.05f, (GLRatBoard.BOARD_SIZE-1)*Globals.BOARD_TILE_SIZE - getY()*Globals.BOARD_TILE_SIZE, 0);
 					break;
 				case 3:
 					GL11.glVertex3d(0, 0.05f, 0);
-					GL11.glVertex3d(-getX()*GLRatBoard.SQUARE_SIZE, 0.05f, 0);
+					GL11.glVertex3d(-getX()*Globals.BOARD_TILE_SIZE, 0.05f, 0);
 					break;
 				default: break;
 				}

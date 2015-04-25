@@ -1,27 +1,36 @@
 package fi.conf.prograts.ar.objects;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.lwjgl.opengl.GL11;
 
+import fi.conf.prograts.ar.Globals;
 import fi.conf.prograts.ar.gameScenes.AssembleScene;
 import fi.conf.prograts.ar.gl.GLGraphicRoutines;
 import fi.conf.prograts.ar.gl.GLValues;
 
 public class GLRatBoard {
 
-	public static final int BOARD_SIZE = 7;
-	public static final float SQUARE_SIZE = 0.3f;
+	public static final int BOARD_SIZE = 6;
 	
 	private long RESET_DELAY;
 	private long resetTime = 0;
 
 	private GLRat p1rat;
 	private GLRat p2rat;
+	
+	private List<GLBoardTile> tiles;
+	private List<GLPowerup> powerups;
 	private List<GLLazor> lazors;
 	
+	private int boardWidth = 6;
+	private int boardHeight = 6;
+	
 	public GLRatBoard() {
+		tiles = new LinkedList<>();
+		powerups = new LinkedList<>();
 		lazors = new ArrayList<>(4);
 		resetGameBoard();
 	}
@@ -29,6 +38,19 @@ public class GLRatBoard {
 	public void resetGameBoard(){
 		lazors.clear();
 		resetRats();
+		
+		tiles.clear();
+		
+		for(int x=0; x < BOARD_SIZE; x++){
+			for(int y=0; y < BOARD_SIZE; y++){
+				tiles.add(new GLBoardTile(x, y));
+			}
+		}
+		
+	}
+	
+	public void generatePowerups(){
+		
 	}
 	
 	public void resetRats(){
@@ -41,37 +63,28 @@ public class GLRatBoard {
 		GL11.glPushMatrix();
 
 			GL11.glTranslatef(GLValues.glWidth/2, GLValues.glHeight/2, -5f);
-			GL11.glTranslatef(-BOARD_SIZE*0.5f*SQUARE_SIZE, -BOARD_SIZE*0.5f*SQUARE_SIZE, 0);
+			GL11.glTranslatef(-boardWidth*0.5f*Globals.BOARD_TILE_SIZE, -boardHeight*0.5f*Globals.BOARD_TILE_SIZE, 0);
 			GL11.glColor4f(1, 1, 1, 1);
 			
-			for(int x=0; x < BOARD_SIZE; x++){
-				GL11.glPushMatrix();
-				GL11.glTranslatef(SQUARE_SIZE*x + SQUARE_SIZE*0.5f, SQUARE_SIZE*0.5f, 0);
-				for(int y=0; y < BOARD_SIZE; y++){
-					GL11.glColor3f(0.0f, 0.4f, 0);
-					GLGraphicRoutines.drawLineRect(1.0f, -SQUARE_SIZE*0.5f, -SQUARE_SIZE*0.5f, SQUARE_SIZE*0.5f, SQUARE_SIZE*0.5f, 0);
-					GL11.glColor3f(0.0f, 0.1f, 0.0f);
-					GLGraphicRoutines.draw2DRect(-SQUARE_SIZE*0.5f, -SQUARE_SIZE*0.5f, SQUARE_SIZE*0.5f, SQUARE_SIZE*0.5f, 1);
-					GL11.glTranslatef(0, SQUARE_SIZE, 0);
-				}
-				GL11.glPopMatrix();
+			for(GLBoardTile t : tiles){
+				t.glDraw(time);
 			}
 			
 			for(GLLazor l : lazors){
 				GL11.glPushMatrix();
-					GL11.glTranslatef(l.getX()*SQUARE_SIZE+0.5f*SQUARE_SIZE, l.getY()*SQUARE_SIZE+0.5f*SQUARE_SIZE, 0);
+					GL11.glTranslatef(l.getX()*Globals.BOARD_TILE_SIZE+0.5f*Globals.BOARD_TILE_SIZE, l.getY()*Globals.BOARD_TILE_SIZE+0.5f*Globals.BOARD_TILE_SIZE, 0);
 					l.glDraw(time);
 				GL11.glPopMatrix();
 			}
 			
 			
 			GL11.glPushMatrix();
-				GL11.glTranslatef(p1rat.getX()*SQUARE_SIZE+0.5f*SQUARE_SIZE, p1rat.getY()*SQUARE_SIZE+0.5f*SQUARE_SIZE, 0);
+				GL11.glTranslatef(p1rat.getX()*Globals.BOARD_TILE_SIZE+0.5f*Globals.BOARD_TILE_SIZE, p1rat.getY()*Globals.BOARD_TILE_SIZE+0.5f*Globals.BOARD_TILE_SIZE, 0);
 				p1rat.glDraw(time);
 			GL11.glPopMatrix();
 			
 			GL11.glPushMatrix();
-				GL11.glTranslatef(p2rat.getX()*SQUARE_SIZE+0.5f*SQUARE_SIZE, p2rat.getY()*SQUARE_SIZE+0.5f*SQUARE_SIZE, 0);
+				GL11.glTranslatef(p2rat.getX()*Globals.BOARD_TILE_SIZE+0.5f*Globals.BOARD_TILE_SIZE, p2rat.getY()*Globals.BOARD_TILE_SIZE+0.5f*Globals.BOARD_TILE_SIZE, 0);
 				p2rat.glDraw(time);
 			GL11.glPopMatrix();
 			

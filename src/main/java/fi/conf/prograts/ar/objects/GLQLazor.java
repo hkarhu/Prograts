@@ -4,6 +4,8 @@ import java.awt.Color;
 
 import org.lwjgl.opengl.GL11;
 
+import fi.conf.prograts.ar.Globals;
+
 public class GLQLazor extends GLLazor {
 
 	public GLQLazor(int x, int y, int d) {
@@ -30,19 +32,19 @@ public class GLQLazor extends GLLazor {
 				switch (d) {
 				case 0: 
 					GL11.glVertex3d(-0.05f, -0.05f, 0);
-					GL11.glVertex3d(-0.05f+(float)(0.5f-Math.random())*0.2f, -getY()*GLRatBoard.SQUARE_SIZE - GLRatBoard.SQUARE_SIZE , 0);
+					GL11.glVertex3d(-0.05f+(float)(0.5f-Math.random())*0.2f, -getY()*Globals.BOARD_TILE_SIZE - Globals.BOARD_TILE_SIZE , 0);
 					break;
 				case 1: 
 					GL11.glVertex3d(0.05f, -0.05f, 0);
-					GL11.glVertex3d((GLRatBoard.BOARD_SIZE-1)*GLRatBoard.SQUARE_SIZE - getX()*GLRatBoard.SQUARE_SIZE + GLRatBoard.SQUARE_SIZE, -0.05f+(float)(0.5f-Math.random())*0.2f, 0);
+					GL11.glVertex3d((GLRatBoard.BOARD_SIZE-1)*Globals.BOARD_TILE_SIZE - getX()*Globals.BOARD_TILE_SIZE + Globals.BOARD_TILE_SIZE, -0.05f+(float)(0.5f-Math.random())*0.2f, 0);
 					break;
 				case 2: 
 					GL11.glVertex3d(0.05f, 0.05f, 0);
-					GL11.glVertex3d(0.05f+(float)(0.5f-Math.random())*0.2f, (GLRatBoard.BOARD_SIZE-1)*GLRatBoard.SQUARE_SIZE - getY()*GLRatBoard.SQUARE_SIZE + GLRatBoard.SQUARE_SIZE , 0);
+					GL11.glVertex3d(0.05f+(float)(0.5f-Math.random())*0.2f, (GLRatBoard.BOARD_SIZE-1)*Globals.BOARD_TILE_SIZE - getY()*Globals.BOARD_TILE_SIZE + Globals.BOARD_TILE_SIZE , 0);
 					break;
 				case 3:
 					GL11.glVertex3d(-0.05f, 0.05f, 0);
-					GL11.glVertex3d(-getX()*GLRatBoard.SQUARE_SIZE - GLRatBoard.SQUARE_SIZE, 0.05f+(float)(0.5f-Math.random())*0.2f, 0);
+					GL11.glVertex3d(-getX()*Globals.BOARD_TILE_SIZE - Globals.BOARD_TILE_SIZE, 0.05f+(float)(0.5f-Math.random())*0.2f, 0);
 					break;
 				default: break;
 				}

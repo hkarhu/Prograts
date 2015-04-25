@@ -8,14 +8,12 @@ import fi.conf.prograts.ar.gl.GLTextureManager;
 import fi.conf.prograts.ar.gl.GLBitmapFontBlitter.Alignment;
 import fi.conf.prograts.ar.objects.Command.Type;
 
-public class GLRat {
+public class GLRat extends GLBoardObject {
 
 	private static final float RAT_SIZE = 0.3f;
 	private static final int ANIM_LENGTH = 500;
 
 	private String name;
-	private int x;
-	private int y;
 	private int r;
 	private Type lastCMD;
 	long anitime = -1;
@@ -139,22 +137,6 @@ public class GLRat {
 
 	private void nop(){
 
-	}
-
-	public int getX() {
-		return x;
-	}
-
-	public void setX(int x) {
-		this.x = x;
-	}
-
-	public int getY() {
-		return y;
-	}
-
-	public void setY(int y) {
-		this.y = y;
 	}
 
 	public int getRotation() {
