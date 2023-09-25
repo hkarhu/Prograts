@@ -15,3 +15,5 @@
 ## Building info
 Eclipse - Add to VM arguments: -Djava.library.path=target/natives
 
+TEST!!!
+
